@@ -190,7 +190,6 @@ svg .muted{fill:var(--muted)}
   'use strict';
   var M = window.LocusModel, TS = window.LocusTests;
   var P = M.PARAMS, C = P.common, ARCHS = M.ARCHS;
-  var KEY = 'locus-sim9-v2';
   var VIEWS = [['proyecto', 'Proyecto'], ['alternativas', 'Alternativas'], ['escenarios', 'Escenarios'], ['resultados', 'Resultados'], ['pruebas', 'Pruebas'], ['documentacion', 'Documentación']];
   var WLABEL = { lat: 'Latencia', av: 'Disponibilidad', cost: 'Costo', scal: 'Escalabilidad', simp: 'Simplicidad para el equipo' };
   var state = { pdfScope: 'one', proj: M.defaultProject(), scenarios: M.defaultScenarios(), active: 'ref', runs: {}, runView: 'ref', sweepVar: 'users', sweepMetric: 'p95', view: 'proyecto' };
@@ -202,12 +201,6 @@ svg .muted{fill:var(--muted)}
   function ms(x) { return x > 60000 ? '> 60 s' : nf(x, 0) + ' ms'; }
   function tag(k) { return '<span class="tag t' + k + '" title="' + esc(P[k].label) + '">' + k + '</span>'; }
   function save() { if ($('#badge-resultados')) updateNav(); }
-  function load() {
-    try {
-      var s = JSON.parse(localStorage.getItem(KEY) || 'null');
-      if (s && s.proj && s.scenarios && s.scenarios.length) { state.proj = Object.assign(M.defaultProject(), s.proj); state.scenarios = s.scenarios; state.active = s.active || s.scenarios[0].id; state.ranIds = s.ran || []; }
-    } catch (e) {}
-  }
   function scen(id) { return state.scenarios.filter(function (s) { return s.id === id; })[0]; }
   function sig() { return JSON.stringify(state.proj); }
   function runScenario(id) {
@@ -372,11 +365,11 @@ svg .muted{fill:var(--muted)}
       '<div class="vcard"><label for="selfHost" style="flex-direction:row;align-items:center;gap:10px"><input id="selfHost" type="checkbox"' + (s.vars.selfHost ? ' checked' : '') + ' style="width:20px;height:20px"> Usar un servidor propio de OpenStreetMap (Overpass autoalojado)</label><p class="why">Sustituye la API pública, que se satura. Consulta en ' + C.selfHostTExtBaseMs + ' ms base, atiende ' + C.selfHostCapRps + ' solicitudes por segundo, quita el límite 429 y suma ' + C.selfHostUsd + ' USD al mes a cualquier alternativa.</p></div>' +
       '<p class="small" id="modNote"></p>' +
       '<p class="small" id="derived"></p><div id="sErr"></div><p class="small" id="pdfMsgE" role="status"></p>' +
-      '<div class="row"><button class="btn primary" id="runOne" type="button">Ejecutar este escenario</button><button class="btn" id="runAll" type="button">Ejecutar todos los escenarios</button><button class="btn" id="runPdf" type="button">Ejecutar y exportar PDF</button><button class="btn" id="resetScen" type="button">Restaurar escenarios iniciales</button>' + '<button class="btn" id="resetScen" type="button" hidden>Restaurar valores iniciales</button><button class="btn" id="resetAll" type="button">Restaurar los 4 escenarios de ejemplo</button>' + (s.base ? '' : '<button class="btn" id="delScen" type="button">Eliminar</button>') + '</div></div>';
+      '<div class="row"><button class="btn primary" id="runOne" type="button">Ejecutar este escenario</button><button class="btn" id="resetScen" type="button">Restablecer valores iniciales</button>' + (s.base ? '' : '<button class="btn" id="delScen" type="button">Eliminar</button>') + '</div></div>';
     var upd = function () {
       var errs = M.validate(s.vars, state.proj);
       $('#sErr').innerHTML = errs.length ? '<div class="errors" role="alert"><ul>' + errs.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>' : '';
-      $('#runOne').disabled = errs.length > 0; $('#runPdf').disabled = errs.length > 0;
+      $('#runOne').disabled = errs.length > 0;
       var lam = s.vars.users * s.vars.reqPerMin / 60;
       $('#derived').textContent = isFinite(lam) ? 'Demanda derivada: λ = ' + nf(lam, 2) + ' solicitudes por segundo.' : '';
       Object.keys(M.VARS).forEach(function (k) {
@@ -403,21 +396,9 @@ svg .muted{fill:var(--muted)}
     var def0 = M.defaultScenarios().filter(function (x) { return x.id === s.id; })[0];
     var modified = !!def0 && JSON.stringify(def0.vars) !== JSON.stringify(s.vars);
     if (modified) { $('#modNote').textContent = 'Este escenario tiene valores distintos a los iniciales (' + Object.keys(def0.vars).filter(function (k) { return k !== 'selfHost'; }).map(function (k) { return M.VARS[k].label.toLowerCase() + ' ' + def0.vars[k]; }).join(', ') + (def0.vars.selfHost ? ', Overpass propio' : '') + ').'; $('#resetScen').hidden = false; }
-    $('#resetScen').onclick = function () { s.vars = JSON.parse(JSON.stringify(def0.vars)); delete state.runs[s.id]; save(); renderEscenarios(); };
-    var ra = $('#resetAll'), armed = false;
-    ra.onclick = function () {
-      if (!armed) { armed = true; ra.textContent = 'Confirmar: se pierden tus cambios y escenarios nuevos'; setTimeout(function () { armed = false; ra.textContent = 'Restaurar los 4 escenarios de ejemplo'; }, 5000); return; }
-      state.scenarios = M.defaultScenarios(); state.active = state.scenarios[0].id; state.runs = {}; save(); renderEscenarios();
-    };
     $('#resetScen').onclick = function () { state.scenarios = M.defaultScenarios(); state.runs = {}; state.active = 'ref'; state.runView = 'ref'; updateNav(); renderEscenarios(); };
-    $('#runPdf').onclick = function () { var r = runScenario(s.id); if (r && r.ok) { state.runView = s.id; exportPdf('one', s.id, $('#pdfMsgE')); } };
     $('#selfHost').onchange = function (e) { s.vars.selfHost = e.target.checked; upd(); };
     $('#runOne').onclick = function () { runScenario(s.id); state.runView = s.id; go('resultados'); };
-    $('#runAll').onclick = function () {
-      var bad = state.scenarios.filter(function (x) { return M.validate(x.vars, state.proj).length; });
-      if (bad.length) { $('#sErr').innerHTML = '<div class="errors" role="alert">Corrige los valores inválidos de: ' + bad.map(function (x) { return esc(x.name); }).join(', ') + '.</div>'; return; }
-      state.scenarios.forEach(function (x) { runScenario(x.id); }); state.runView = state.scenarios[0].id; go('resultados');
-    };
     var d = $('#delScen'); if (d) d.onclick = function () { state.scenarios = state.scenarios.filter(function (x) { return x.id !== s.id; }); delete state.runs[s.id]; state.active = state.scenarios[0].id; save(); renderEscenarios(); };
     upd();
   }
@@ -622,7 +603,7 @@ svg .muted{fill:var(--muted)}
     html += globalVerdict(ran.map(function (s) { return s.id; }));
     html += '<div class="chips" id="rchips" role="group" aria-label="Escenario mostrado">' + ran.map(function (s) { return '<button class="chip" type="button" data-id="' + s.id + '" aria-pressed="' + (s.id === id) + '">' + esc(s.name) + (isStale(s.id) ? ' <span class="pill warn stale">desactualizado</span>' : '') + '</button>'; }).join('') + '</div>';
     if (stale) html += '<div class="banner none" role="status"><p>Este resultado corresponde a valores anteriores. Vuelve a ejecutar el escenario para actualizarlo.</p><div class="row"><button class="btn primary" id="rerun" type="button">Ejecutar de nuevo</button></div></div>';
-    html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button><span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
+    html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button><button class="btn" id="runAllRes" type="button">Ejecutar todos los escenarios</button><span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
     // recomendación
     html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + recTitle(rec, true) + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
     var sens = M.sensitivity(JSON.parse(entry.vars), proj);
@@ -681,6 +662,11 @@ svg .muted{fill:var(--muted)}
       var pr = rec.proposal, sc = scen(id);
       Object.keys(pr.vars).forEach(function (k) { sc.vars[k] = pr.vars[k]; });
       state.proj = pr.proj; save(); runScenario(id); renderResultados();
+    };
+    $('#runAllRes').onclick = function () {
+      var bad = state.scenarios.filter(function (x) { return M.validate(x.vars, state.proj).length; });
+      if (bad.length) { $('#pdfHint').textContent = 'Corrige los valores inválidos de: ' + bad.map(function (x) { return x.name; }).join(', ') + '.'; return; }
+      state.scenarios.forEach(function (x) { runScenario(x.id); }); renderResultados();
     };
     $('#pdfScope').onchange = function (e) { state.pdfScope = e.target.value; };
     $('#pdfBtn').onclick = function () { exportPdf($('#pdfScope').value, id, $('#pdfHint')); };
@@ -821,7 +807,6 @@ svg .muted{fill:var(--muted)}
   }
   buildTabs(); initTheme();
   $('#pager').addEventListener('click', function (e) { var b = e.target.closest('button[data-v]'); if (b) go(b.dataset.v); });
-  (state.ranIds || []).slice().forEach(function (id) { var sc = scen(id); if (sc && !M.validate(sc.vars, state.proj).length) runScenario(id); });
   var h = (location.hash || '').replace('#', '');
   var start = VIEWS.some(function (v) { return v[0] === h; }) ? h : 'proyecto';
   go(start, true);

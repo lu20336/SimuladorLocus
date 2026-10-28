@@ -33,20 +33,38 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-text-size-adjust:100%}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
-.wrap{max-width:1080px;margin:0 auto}
+.wrap{max-width:1280px;margin:0 auto}
 h1,h2,h3{font-family:var(--f-display);color:var(--navy);text-wrap:balance;margin:0;line-height:1.2}
 h1{font-size:26px} h2{font-size:21px} h3{font-size:16px;font-family:var(--f-body);font-weight:600;color:var(--ink)}
 p{margin:0;max-width:68ch} a{color:var(--teal)}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px 10px}
-.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
-.brand small{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;white-space:nowrap}
-.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;margin-inline:-2px;padding:6px 2px}
-.tab{border:0;background:transparent;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;white-space:nowrap;min-height:44px}
+.app{display:grid;grid-template-columns:260px minmax(0,1fr);gap:32px;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:flex;flex-direction:column;gap:20px;padding-block:20px}
+.brand{display:flex;flex-direction:column;gap:6px;min-width:0}
+.brand small{color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+.brand h1{font-size:21px}
+.navgroup{display:flex;flex-direction:column;gap:4px}
+.navgroup+.navgroup{margin-top:14px}
+.navlabel{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:0 12px 4px}
+.tab{display:flex;align-items:center;gap:12px;border:0;background:transparent;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--ink);font-weight:500;text-align:left;min-height:46px;width:100%}
+.tab:hover{background:var(--surface2)}
+.tab .ic{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:600;color:var(--muted);background:var(--surface)}
+.tab .ic svg{width:16px;height:16px}
+.tab .lbl{flex:1;min-width:0}
+.tab .lbl .short{display:none}
+.tab .badge{flex:none;font-size:12px;font-weight:600;border-radius:999px;padding:1px 9px;background:var(--surface2);color:var(--muted)}
+.tab .badge.warn{background:var(--warn-bg);color:var(--warn)}
 .tab[aria-selected="true"]{background:var(--navy);color:var(--bg)}
-.view{display:none;padding-top:22px;gap:20px;flex-direction:column}
+.tab[aria-selected="true"] .ic{background:var(--bg);border-color:var(--bg);color:var(--navy)}
+.tab[aria-selected="true"] .badge{background:rgba(255,255,255,.22);color:inherit}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;white-space:nowrap;min-height:44px;width:100%}
+.content{min-width:0;padding-block:20px 8px;display:flex;flex-direction:column;gap:24px}
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px}
+.pager .btn{display:flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1.3;min-width:150px}
+.pager .btn small{font-weight:400;color:var(--muted);font-size:12px}
+.pager .next{align-items:flex-end;margin-left:auto}
+.view{display:none;gap:20px;flex-direction:column}
 .view.on{display:flex}
 .lead{color:var(--muted)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
@@ -123,22 +141,44 @@ svg .muted{fill:var(--muted)}
   .tablewrap{overflow:visible;border-radius:0}
   .banner{break-inside:avoid} svg{max-width:100%!important;min-width:0!important;height:auto}
 }
+@media (max-width:900px){
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .app{grid-template-columns:minmax(0,1fr);gap:0}
+  .side{position:static;padding-block:14px 0;gap:12px}
+  .brand h1{font-size:20px}
+  .side .iconbtn{width:auto;align-self:flex-start;padding:8px 14px;min-height:40px}
+  .navlabel{display:none}
+  #tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;background:var(--surface);border-top:1px solid var(--line);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  #tabs .navgroup{display:contents}
+  .navgroup+.navgroup{margin-top:0}
+  .tab{flex-direction:column;gap:3px;padding:6px 2px;text-align:center;font-size:11px;min-height:56px;justify-content:center;border-radius:8px}
+  .tab .lbl .long{display:none} .tab .lbl .short{display:inline}
+  .tab .lbl{flex:none}
+  .tab .ic{width:26px;height:26px}
+  .tab .badge{position:absolute;top:2px;right:6px;font-size:10px;padding:0 6px}
+  .tab{position:relative}
+  .content{padding-top:12px}
+}
 @media (max-width:520px){h1{font-size:22px}.card{padding:14px}.vcard .ctrl{grid-template-columns:1fr}}
 </style>
 
 <div class="wrap">
-  <header class="top">
-    <div class="brand"><small>Ingeniería Aplicada · Actividad 9</small><h1>Simulador de arquitectura de Locus</h1></div>
-    <button class="iconbtn" id="themeBtn" type="button" aria-label="Cambiar tema claro u oscuro">Tema</button>
-  </header>
-  <nav class="tabs" role="tablist" aria-label="Secciones del simulador" id="tabs"></nav>
-
-  <section class="view" id="v-proyecto" aria-label="Proyecto"></section>
-  <section class="view" id="v-alternativas" aria-label="Alternativas"></section>
-  <section class="view" id="v-escenarios" aria-label="Escenarios"></section>
-  <section class="view" id="v-resultados" aria-label="Resultados"></section>
-  <section class="view" id="v-pruebas" aria-label="Pruebas"></section>
-  <section class="view" id="v-documentacion" aria-label="Documentación"></section>
+  <div class="app">
+    <aside class="side">
+      <div class="brand"><small>Ingeniería Aplicada · Actividad 9</small><h1>Simulador de arquitectura de Locus</h1></div>
+      <nav id="tabs" role="tablist" aria-label="Secciones del simulador"></nav>
+      <button class="iconbtn" id="themeBtn" type="button" aria-label="Cambiar tema claro u oscuro">Tema</button>
+    </aside>
+    <main class="content">
+      <section class="view" id="v-proyecto" aria-label="Proyecto"></section>
+      <section class="view" id="v-alternativas" aria-label="Alternativas"></section>
+      <section class="view" id="v-escenarios" aria-label="Escenarios"></section>
+      <section class="view" id="v-resultados" aria-label="Resultados"></section>
+      <section class="view" id="v-pruebas" aria-label="Pruebas"></section>
+      <section class="view" id="v-documentacion" aria-label="Documentación"></section>
+      <nav class="pager" id="pager" aria-label="Navegación entre pasos"></nav>
+    </main>
+  </div>
   <div id="printReport" aria-hidden="true"></div>
 </div>
 
@@ -774,7 +814,7 @@ svg .muted{fill:var(--muted)}
   function nf(x, d) { if (!isFinite(x)) return '∞'; return Number(x).toLocaleString('es-CO', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
   function ms(x) { return x > 60000 ? '> 60 s' : nf(x, 0) + ' ms'; }
   function tag(k) { return '<span class="tag t' + k + '" title="' + esc(P[k].label) + '">' + k + '</span>'; }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify({ proj: state.proj, scenarios: state.scenarios, active: state.active })); } catch (e) {} }
+  function save() { if ($('#badge-resultados')) updateNav(); try { localStorage.setItem(KEY, JSON.stringify({ proj: state.proj, scenarios: state.scenarios, active: state.active })); } catch (e) {} }
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -787,15 +827,35 @@ svg .muted{fill:var(--muted)}
     var s = scen(id); if (!s) return;
     var r = M.runScenario(s.vars, state.proj);
     if (r.ok) state.runs[id] = { run: r, vars: JSON.stringify(s.vars), proj: sig(), name: s.name };
+    if ($('#badge-resultados')) updateNav();
     return r;
   }
   function isStale(id) { var r = state.runs[id], s = scen(id); return !r || !s || r.vars !== JSON.stringify(s.vars) || r.proj !== sig(); }
 
   /* ---------- navegación ---------- */
+  var NAV = {
+    proyecto: { n: 1, short: 'Proyecto' }, alternativas: { n: 2, short: 'Opciones' }, escenarios: { n: 3, short: 'Escenarios' }, resultados: { n: 4, short: 'Resultados' },
+    pruebas: { short: 'Pruebas', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.8"/></svg>' },
+    documentacion: { short: 'Docs', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/></svg>' }
+  };
+  function tabHtml(v) {
+    var d = NAV[v[0]];
+    return '<button class="tab" role="tab" data-v="' + v[0] + '" id="tab-' + v[0] + '"><span class="ic">' + (d.n || d.svg) + '</span><span class="lbl"><span class="long">' + v[1] + '</span><span class="short">' + d.short + '</span></span><span class="badge" id="badge-' + v[0] + '" hidden></span></button>';
+  }
   function buildTabs() {
     var t = $('#tabs');
-    t.innerHTML = VIEWS.map(function (v) { return '<button class="tab" role="tab" data-v="' + v[0] + '" id="tab-' + v[0] + '">' + v[1] + '</button>'; }).join('');
+    t.innerHTML = '<div class="navgroup"><div class="navlabel">Flujo de trabajo</div>' + VIEWS.slice(0, 4).map(tabHtml).join('') + '</div><div class="navgroup"><div class="navlabel">Consulta</div>' + VIEWS.slice(4).map(tabHtml).join('') + '</div>';
     t.addEventListener('click', function (e) { var b = e.target.closest('.tab'); if (b) go(b.dataset.v); });
+  }
+  function updateNav() {
+    var ran = state.scenarios.filter(function (s) { return state.runs[s.id]; }), stale = ran.some(function (s) { return isStale(s.id); });
+    var set = function (id, txt, warn) { var b = $('#badge-' + id); if (!b) return; b.hidden = !txt; b.textContent = txt || ''; b.className = 'badge' + (warn ? ' warn' : ''); b.title = warn ? 'Hay resultados desactualizados' : ''; };
+    set('escenarios', String(state.scenarios.length), false);
+    set('resultados', ran.length ? (stale ? '!' : String(ran.length)) : '', stale);
+  }
+  function renderPager(v) {
+    var idx = VIEWS.map(function (x) { return x[0]; }).indexOf(v), p = idx > 0 ? VIEWS[idx - 1] : null, n = idx < VIEWS.length - 1 ? VIEWS[idx + 1] : null;
+    $('#pager').innerHTML = (p ? '<button class="btn prev" type="button" data-v="' + p[0] + '"><small>Anterior</small>← ' + p[1] + '</button>' : '<span></span>') + (n ? '<button class="btn primary next" type="button" data-v="' + n[0] + '"><small style="color:inherit;opacity:.85">Siguiente</small>' + n[1] + ' →</button>' : '');
   }
   function go(v, noHash) {
     state.view = v;
@@ -803,10 +863,11 @@ svg .muted{fill:var(--muted)}
       var on = x[0] === v;
       $('#v-' + x[0]).classList.toggle('on', on);
       $('#tab-' + x[0]).setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on) $('#tab-' + x[0]).setAttribute('aria-current', 'page'); else $('#tab-' + x[0]).removeAttribute('aria-current');
     });
     if (!noHash) { try { history.replaceState(null, '', '#' + v); } catch (e) { location.hash = v; } }
     render(v);
-    var tb = $('#tab-' + v); if (tb && tb.scrollIntoView) tb.scrollIntoView({ block: 'nearest', inline: 'center' });
+    renderPager(v); updateNav();
     window.scrollTo(0, 0);
   }
   function render(v) {
@@ -1268,6 +1329,7 @@ svg .muted{fill:var(--muted)}
     label();
   }
   load(); buildTabs(); initTheme();
+  $('#pager').addEventListener('click', function (e) { var b = e.target.closest('button[data-v]'); if (b) go(b.dataset.v); });
   var h = (location.hash || '').replace('#', '');
   var start = VIEWS.some(function (v) { return v[0] === h; }) ? h : 'proyecto';
   go(start, true);

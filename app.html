@@ -157,21 +157,48 @@ svg .muted{fill:var(--muted)}
   .content{padding-top:12px}
 }
 @media (max-width:520px){h1{font-size:22px}.card{padding:14px}.vcard .ctrl{grid-template-columns:1fr}}
+
+/* ---- mejoras UI/UX ---- */
+.skip{position:absolute;left:-9999px;top:8px;background:var(--navy);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:100;font-weight:600}
+.skip:focus{left:12px}
+.sidefoot{margin-top:auto;padding:14px 12px 4px;font-size:12px;line-height:1.5;color:var(--muted);border-top:1px solid var(--line)}
+.sidefoot b{color:var(--ink);font-weight:600}
+.hero{border-color:var(--teal);border-width:1.5px;gap:12px}
+.eyebrow{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:700}
+.hero-main{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hero-main .tag{width:38px;height:38px;font-size:19px;border-radius:9px}
+.hero-name{font-family:var(--f-display);font-size:28px;font-weight:700;color:var(--navy);line-height:1.15}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--surface2);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi b{font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--ink)}
+.kpi span{font-size:12px;color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fact{background:var(--surface2);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;min-width:0}
+.fact b{font-size:16px;font-variant-numeric:tabular-nums}
+.fact span{font-size:11px;line-height:1.3;color:var(--muted)}
+details.svc>summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--navy);padding:4px 0}
+details.svc .tablewrap{margin-top:8px}
+details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9px}
+.wpill{display:inline-block;align-self:flex-start;padding:1px 8px;border-radius:99px;background:var(--surface2);color:var(--teal);font-weight:700;font-size:12.5px}
+@media (max-width:899px){.sidefoot{display:none}}
+@media (max-width:600px){th{white-space:normal;font-size:11px;letter-spacing:.02em} th,td{padding:8px 8px} .hero-name{font-size:23px}}
 </style>
 
 <div class="wrap">
+  <a class="skip" href="#main">Saltar al contenido</a>
   <div class="app">
     <aside class="side">
       <div class="brand"><small>Ingeniería Aplicada · Actividad 9</small><h1>Simulador de arquitectura de Locus</h1></div>
       <nav id="tabs" role="tablist" aria-label="Secciones del simulador"></nav>
+      <div class="sidefoot"><b>Tres Felices Tigres</b><br>Universidad Libre · Ingeniería de Sistemas<br>Resultados: estimaciones del modelo, no mediciones reales.</div>
     </aside>
-    <main class="content">
-      <section class="view" id="v-proyecto" aria-label="Proyecto"></section>
-      <section class="view" id="v-alternativas" aria-label="Alternativas"></section>
-      <section class="view" id="v-escenarios" aria-label="Escenarios"></section>
-      <section class="view" id="v-resultados" aria-label="Resultados"></section>
-      <section class="view" id="v-pruebas" aria-label="Pruebas"></section>
-      <section class="view" id="v-documentacion" aria-label="Documentación"></section>
+    <main class="content" id="main" tabindex="-1">
+      <section class="view" id="v-proyecto" role="tabpanel" aria-labelledby="tab-proyecto"></section>
+      <section class="view" id="v-alternativas" role="tabpanel" aria-labelledby="tab-alternativas"></section>
+      <section class="view" id="v-escenarios" role="tabpanel" aria-labelledby="tab-escenarios"></section>
+      <section class="view" id="v-resultados" role="tabpanel" aria-labelledby="tab-resultados"></section>
+      <section class="view" id="v-pruebas" role="tabpanel" aria-labelledby="tab-pruebas"></section>
+      <section class="view" id="v-documentacion" role="tabpanel" aria-labelledby="tab-documentacion"></section>
       <nav class="pager" id="pager" aria-label="Navegación entre pasos"></nav>
     </main>
   </div>
@@ -219,7 +246,7 @@ svg .muted{fill:var(--muted)}
   };
   function tabHtml(v) {
     var d = NAV[v[0]];
-    return '<button class="tab" role="tab" data-v="' + v[0] + '" id="tab-' + v[0] + '"><span class="ic">' + (d.n || d.svg) + '</span><span class="lbl"><span class="long">' + v[1] + '</span><span class="short">' + d.short + '</span></span><span class="badge" id="badge-' + v[0] + '" hidden></span></button>';
+    return '<button class="tab" role="tab" data-v="' + v[0] + '" id="tab-' + v[0] + '" aria-controls="v-' + v[0] + '"><span class="ic">' + (d.n || d.svg) + '</span><span class="lbl"><span class="long">' + v[1] + '</span><span class="short">' + d.short + '</span></span><span class="badge" id="badge-' + v[0] + '" hidden></span></button>';
   }
   function buildTabs() {
     var t = $('#tabs');
@@ -278,13 +305,13 @@ svg .muted{fill:var(--muted)}
       '<p class="small" id="teamCap"></p></div></div>' +
       '<div class="card"><h3>Pesos para decidir</h3><p class="small">El equipo define cuánto vale cada criterio. Se normalizan para sumar 100 %. Solo compiten las alternativas que cumplen los requisitos obligatorios.</p><div class="grid" id="weights">' +
       M.WEIGHT_KEYS.map(function (k) {
-        return '<label for="w-' + k + '">' + WLABEL[k] + ' <span id="wp-' + k + '" class="hint"></span><input id="w-' + k + '" type="range" min="0" max="1" step="0.05" value="' + p.weights[k] + '"></label>';
+        return '<label for="w-' + k + '">' + WLABEL[k] + ' <span id="wp-' + k + '" class="wpill"></span><input id="w-' + k + '" type="range" min="0" max="1" step="0.05" value="' + p.weights[k] + '"></label>';
       }).join('') + '</div></div>' +
       '<div id="projErr"></div>' +
       '<div class="row"><button class="btn primary" id="toScen" type="button">Seguir a los escenarios</button><button class="btn" id="resetProj" type="button">Restaurar valores iniciales</button></div>';
     var upd = function () {
       var p = state.proj, ws = M.WEIGHT_KEYS.reduce(function (a, k) { return a + (+p.weights[k] || 0); }, 0);
-      M.WEIGHT_KEYS.forEach(function (k) { $('#wp-' + k).textContent = ws > 0 ? '· ' + Math.round(100 * p.weights[k] / ws) + ' %' : ''; });
+      M.WEIGHT_KEYS.forEach(function (k) { $('#wp-' + k).textContent = ws > 0 ? Math.round(100 * p.weights[k] / ws) + ' %' : ''; });
       $('#teamCap').textContent = 'Capacidad del equipo: ' + nf(p.teamSize * p.weeksAvail * p.dedication, 1) + ' persona-semanas. Esfuerzo estimado: A ' + P.A.effortPw + ', B ' + P.B.effortPw + ', C ' + P.C.effortPw + '.';
       var errs = M.validate(null, p);
       $('#projErr').innerHTML = errs.length ? '<div class="errors" role="alert"><ul>' + errs.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>' : '';
@@ -330,11 +357,12 @@ svg .muted{fill:var(--muted)}
       '<div class="grid">' + ARCHS.map(function (k) {
         var a = ALT[k];
         return '<article class="card"><div class="row">' + tag(k) + '<h3>' + P[k].label + '</h3></div>' +
+                    '<div class="facts"><div class="fact"><b>' + nf(P[k].fixedUsd, 0) + ' USD</b><span>costo fijo al mes</span></div><div class="fact"><b>' + P[k].effortPw + '</b><span>persona-semanas</span></div><div class="fact"><b>' + (P[k].services.length || 'Sin') + '</b><span>' + (P[k].services.length === 1 ? 'servicio propio' : P[k].services.length ? 'servicios propios' : 'servidor propio') + '</span></div></div>' +
           '<p>' + a.what + '</p>' +
           '<div class="flow">' + a.flow.map(function (n, i) { return (i ? '<span class="arrow" aria-hidden="true">→</span>' : '') + '<span class="node">' + esc(n) + '</span>'; }).join('') + '</div>' +
           '<div><h3>Ventajas</h3><ul class="plain">' + a.pros.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>' +
           '<div><h3>Limitaciones</h3><ul class="plain">' + a.cons.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>' +
-          '<div class="tablewrap"><table><thead><tr><th>Servicio</th><th class="num">D (ms)</th><th class="num">USD/inst.</th><th class="num">Máx.</th><th>Sale a OSM</th></tr></thead><tbody>' + rows(k) + '</tbody></table></div></article>';
+          (P[k].services.length ? '<details class="svc"><summary>Ver servicios y fórmulas de demanda</summary><div class="tablewrap"><table><thead><tr><th>Servicio</th><th class="num">D (ms)</th><th class="num">USD/inst.</th><th class="num">Máx.</th><th>Sale a OSM</th></tr></thead><tbody>' + rows(k) + '</tbody></table></div></details>' : '') + '</article>';
       }).join('') + '</div>' +
       '<div class="row"><button class="btn primary" id="toScen2" type="button">Ir a los escenarios</button></div>';
     $('#toScen2').onclick = function () { go('escenarios'); };
@@ -416,10 +444,11 @@ svg .muted{fill:var(--muted)}
     rtt: [20, 50, 100, 200, 300, 500, 700, 1000],
     pois: [5, 10, 15, 20, 25, 30, 35, 40]
   };
-  function recTitle(rec, html) {
+  function dc(t) { return String(t).replace(/(\d)\.(\d)/g, '$1,$2'); }
+  function recTitle(rec, html, name) {
     var t = rec.status === 'ok' ? 'Recomendación' : rec.status === 'adjusted' ? 'Recomendación con ajustes' : rec.status === 'throttle' ? 'Recomendación con límite de usuarios' : null;
     if (!t) return 'Ninguna alternativa cumple';
-    return t + ': ' + (html ? tag(rec.best) + ' ' : rec.best + ' · ') + P[rec.best].label;
+    return t + (name ? ' para «' + esc(name) + '»' : '') + ': ' + (html ? tag(rec.best) + ' ' : rec.best + ' · ') + P[rec.best].label;
   }
 
   function lineChart(series, xs, mdef, proj, xlabel, logx) {
@@ -443,6 +472,9 @@ svg .muted{fill:var(--muted)}
     var ly = fy(mdef.line(proj));
     out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + ly + '" y2="' + ly + '" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="' + (W - R) + '" y="' + (ly - 5) + '" font-size="11" text-anchor="end" style="fill:var(--bad)">' + mdef.lineLabel + ' ' + nf(mdef.line(proj), mdef.line(proj) < 10 ? 1 : 0) + '</text>';
     var dash = { A: '0', B: '7 4', C: '2 4' };
+    var ends = series.map(function (s) { return { k: s.k, y: fy(s.pts[s.pts.length - 1].y) + 4 }; }).sort(function (a, b) { return a.y - b.y; });
+    for (var ei = 1; ei < ends.length; ei++) if (ends[ei].y - ends[ei - 1].y < 15) ends[ei].y = ends[ei - 1].y + 15;
+    var endY = {}; ends.forEach(function (e) { endY[e.k] = e.y; });
     series.forEach(function (s) {
       var d = s.pts.map(function (p, j) { return (j ? 'L' : 'M') + fx(p.x).toFixed(1) + ' ' + fy(p.y).toFixed(1); }).join(' ');
       out += '<path d="' + d + '" fill="none" stroke="var(--c' + s.k + ')" stroke-width="2.4" stroke-dasharray="' + dash[s.k] + '" stroke-linejoin="round"/>';
@@ -450,7 +482,7 @@ svg .muted{fill:var(--muted)}
         out += '<circle cx="' + fx(p.x).toFixed(1) + '" cy="' + fy(p.y).toFixed(1) + '" r="4.2" stroke="var(--c' + s.k + ')" stroke-width="2" fill="' + (p.ok ? 'var(--c' + s.k + ')' : 'var(--surface)') + '"/>';
       });
       var last = s.pts[s.pts.length - 1];
-      out += '<text x="' + (fx(last.x) + 9) + '" y="' + (fy(last.y) + 4) + '" font-size="13" font-weight="700" style="fill:var(--c' + s.k + ')">' + s.k + '</text>';
+      out += '<text x="' + (fx(last.x) + 9) + '" y="' + endY[s.k] + '" font-size="13" font-weight="700" style="fill:var(--c' + s.k + ')">' + s.k + '</text>';
     });
     return out + '</svg>';
   }
@@ -578,13 +610,23 @@ svg .muted{fill:var(--muted)}
       return { k: k, ok: ok, avg: sum / ran.length };
     }).sort(function (x, y) { return (y.ok - x.ok) || (y.avg - x.avg); });
     var b = stat[0], n = ran.length, msg;
-    if (b.ok === n) msg = 'La mejor opción global es ' + tag(b.k) + ' <b>' + P[b.k].label + '</b>: cumple los 5 requisitos en los ' + n + ' escenarios y tiene el mayor puntaje promedio (' + nf(b.avg, 3) + ').';
+    if (b.ok === n) msg = 'Es la mejor opción global: cumple los 5 requisitos en los ' + n + ' escenarios y tiene el mayor puntaje promedio.';
     else if (b.ok > 0) msg = 'Ninguna opción cumple en todos los escenarios. La que cumple en más es ' + tag(b.k) + ' <b>' + P[b.k].label + '</b> (' + b.ok + ' de ' + n + '). En los demás escenarios hace falta aplicar los ajustes propuestos.';
     else msg = 'Ninguna opción cumple los requisitos en estos escenarios. Revisa los ajustes propuestos en cada uno.';
-    return '<div class="card"><h3>Veredicto de los ' + n + ' escenarios</h3><p>' + msg + '</p>' +
+    var rs = ran.map(function (x) { return state.runs[x.id].run.results[b.k]; });
+    var mn = function (f) { return Math.min.apply(null, rs.map(f)); }, mx = function (f) { return Math.max.apply(null, rs.map(f)); };
+    var c0 = mn(function (r) { return r.cost; }), c1 = mx(function (r) { return r.cost; }), pj = state.proj;
+    var kpis = '<div class="kpis">' +
+      '<div class="kpi"><b>' + b.ok + ' de ' + n + '</b><span>escenarios donde cumple todo</span></div>' +
+      '<div class="kpi"><b>' + (c0 === c1 ? nf(c1, 0) : nf(c0, 0) + '–' + nf(c1, 0)) + ' USD</b><span>costo mensual (tope ' + nf(pj.budgetUsd, 0) + ')</span></div>' +
+      '<div class="kpi"><b>' + nf(mx(function (r) { return r.latencyP95; }) / 1000, 1) + ' s</b><span>latencia p95 en el peor caso (tope ' + nf(pj.latMaxMs / 1000, 1) + ' s)</span></div>' +
+      '<div class="kpi"><b>' + nf(mn(function (r) { return r.availability; }) * 100, 2) + ' %</b><span>disponibilidad mínima (piso ' + pj.availMinPct + ' %)</span></div>' +
+      '<div class="kpi"><b>' + nf(b.avg, 3) + '</b><span>puntaje promedio (máx. 1)</span></div></div>';
+    return '<div class="card hero"><span class="eyebrow">Resumen ejecutivo</span><h3>Veredicto de los ' + n + ' escenarios</h3>' +
+      (b.ok > 0 ? '<div class="hero-main">' + tag(b.k) + '<span class="hero-name">' + P[b.k].label + '</span></div>' : '') + '<p>' + msg + '</p>' + (b.ok > 0 ? kpis : '') +
       '<div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Mejor opción</th></tr></thead><tbody>' +
       ran.map(function (s) { var rc = state.runs[s.id].run.recommendation; return '<tr><td>' + esc(s.name) + '</td><td>' + (rc.best ? tag(rc.best) + ' ' + P[rc.best].label + (rc.status === 'ok' ? '' : ' <span class="pill warn">con ajustes</span>') : '<span class="pill warn">ninguna</span>') + '</td></tr>'; }).join('') + '</tbody></table></div>' +
-      '<div class="tablewrap"><table><thead><tr><th>Alternativa</th><th class="num">Escenarios en que cumple</th><th class="num">Puntaje promedio</th></tr></thead><tbody>' +
+      '<div class="tablewrap"><table><thead><tr><th>Alternativa</th><th class="num">Cumple en</th><th class="num">Puntaje promedio</th></tr></thead><tbody>' +
       stat.map(function (x) { return '<tr><td>' + tag(x.k) + ' ' + P[x.k].label + (x.k === b.k && b.ok > 0 ? ' <span class="pill ok">mejor global</span>' : '') + '</td><td class="num">' + x.ok + ' de ' + n + '</td><td class="num">' + nf(x.avg, 3) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
       '<p class="small">El puntaje promedio cuenta 0 en los escenarios donde la alternativa no cumple los requisitos.</p></div>';
   }
@@ -605,7 +647,7 @@ svg .muted{fill:var(--muted)}
     html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button>' + (allDone ? '' : '<button class="btn" id="runAllRes" type="button">Ejecutar todos los escenarios</button>') + '<span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
     html += globalVerdict(ran.map(function (s) { return s.id; }));
     // recomendación
-    html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + recTitle(rec, true) + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + recTitle(rec, true, scen(id) && scen(id).name) + '</h2>' + rec.text.map(function (t) { return '<p>' + dc(esc(t)) + '</p>'; }).join('') + '</div>';
     var sens = M.sensitivity(JSON.parse(entry.vars), proj);
     html += explainEasy(run, entry, sens);
     if (rec.proposal) html += proposalCard(rec.proposal, id);
@@ -697,7 +739,7 @@ svg .muted{fill:var(--muted)}
       var e = state.runs[s.id], run = e.run, res = run.results, rec = run.recommendation, v = JSON.parse(e.vars);
       h += '<div class="rep-sc"><h2>Escenario: ' + esc(s.name) + (s.base ? ' (referencia)' : '') + '</h2>' +
         '<p><b>Entradas:</b> ' + Object.keys(M.VARS).map(function (k) { return M.VARS[k].label + ' ' + nf(v[k], v[k] < 1 ? 2 : 1) + ' ' + M.VARS[k].unit; }).join('; ') + (v.selfHost ? '; Overpass propio activado' : '') + '.</p>' +
-        '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h3>' + recTitle(rec, false) + '</h3>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>' +
+        '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h3>' + recTitle(rec, false) + '</h3>' + rec.text.map(function (t) { return '<p>' + dc(esc(t)) + '</p>'; }).join('') + '</div>' +
         explainEasy(run, e, M.sensitivity(v, p)) +
         (rec.proposal ? '<h3>Ajustes propuestos</h3><ul class="plain">' + rec.proposal.changes.map(function (c) { return '<li>' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '.</li>'; }).join('') + '</ul>' : '') +
         '<h3>Requisitos obligatorios</h3><div class="tablewrap"><table><thead><tr><th>Requisito</th>' + ARCHS.map(function (k) { return '<th>' + k + ' · ' + P[k].label + '</th>'; }).join('') + '</tr></thead><tbody>' +

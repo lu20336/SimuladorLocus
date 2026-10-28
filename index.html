@@ -1,0 +1,1228 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador Locus</title>
+</head>
+<body>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Concepto: herramienta de análisis sobria con la identidad de Locus (azul marino, verde azulado, coral solo para la acción principal). */
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --surface2:#EEF2F6; --ink:#12263F; --muted:#56687F; --line:#D5DDE6;
+  --navy:#003366; --teal:#00796F; --cta:#E8484E; --cta-ink:#FFFFFF;
+  --cA:#C85A14; --cB:#00796F; --cC:#5256C8;
+  --ok:#17794A; --ok-bg:#DDF3E7; --bad:#B42331; --bad-bg:#FBE1E3; --warn:#8A5A00; --warn-bg:#FCEFCC;
+  --focus:#1E6FD9;
+  --f-display:'Fraunces',Georgia,serif; --f-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1828; --surface:#13243A; --surface2:#1A2E48; --ink:#E7EDF5; --muted:#9DB0C6; --line:#27405F;
+  --navy:#7FB2E8; --teal:#34C3B4; --cta:#FF6A6F; --cta-ink:#1A0A0B;
+  --cA:#F09A5C; --cB:#34C3B4; --cC:#A3A7FF;
+  --ok:#5FD392; --ok-bg:#173B2B; --bad:#FF8791; --bad-bg:#47202A; --warn:#F2C25B; --warn-bg:#40330F; --focus:#7DB4FF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1828; --surface:#13243A; --surface2:#1A2E48; --ink:#E7EDF5; --muted:#9DB0C6; --line:#27405F;
+  --navy:#7FB2E8; --teal:#34C3B4; --cta:#FF6A6F; --cta-ink:#1A0A0B;
+  --cA:#F09A5C; --cB:#34C3B4; --cC:#A3A7FF;
+  --ok:#5FD392; --ok-bg:#173B2B; --bad:#FF8791; --bad-bg:#47202A; --warn:#F2C25B; --warn-bg:#40330F; --focus:#7DB4FF; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);color:var(--navy);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:26px} h2{font-size:21px} h3{font-size:16px;font-family:var(--f-body);font-weight:600;color:var(--ink)}
+p{margin:0;max-width:68ch} a{color:var(--teal)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px 10px}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.brand small{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;white-space:nowrap}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;margin-inline:-2px;padding:6px 2px}
+.tab{border:0;background:transparent;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;white-space:nowrap;min-height:44px}
+.tab[aria-selected="true"]{background:var(--navy);color:var(--bg)}
+.view{display:none;padding-top:22px;gap:20px;flex-direction:column}
+.view.on{display:flex}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.grid>*{min-width:0}
+label{font-size:13px;font-weight:600;display:flex;flex-direction:column;gap:6px}
+label .hint{font-weight:400;color:var(--muted)}
+input[type=text],input[type=number],textarea,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-height:44px}
+textarea{resize:vertical;min-height:84px}
+input[type=range]{width:100%;accent-color:var(--teal);min-height:32px}
+.btn{border:1px solid var(--navy);background:transparent;color:var(--navy);border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:600;min-height:44px}
+.btn.primary{background:var(--cta);border-color:var(--cta);color:var(--cta-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
+.chip[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:var(--bg)}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.warn{background:var(--warn-bg);color:var(--warn)}
+.errors{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:10px 14px;font-size:13px}
+.errors ul{margin:0;padding-left:18px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface2);font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+.best{font-weight:700;color:var(--ok)}
+.tag{font-family:var(--f-mono);font-weight:500;display:inline-grid;place-items:center;width:26px;height:26px;border-radius:6px;color:var(--bg);font-size:13px}
+.tA{background:var(--cA)} .tB{background:var(--cB)} .tC{background:var(--cC)}
+.banner{border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);background:var(--surface)}
+.banner.ok{border-color:var(--ok);background:var(--ok-bg)} .banner.none{border-color:var(--warn);background:var(--warn-bg)}
+.banner h2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.flow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+.flow span.node{background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:4px 9px}
+.flow span.arrow{color:var(--muted)}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.cols2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.small{font-size:13px;color:var(--muted)}
+.stale{margin-left:6px}
+pre{font-family:var(--f-mono);font-size:12.5px;background:var(--surface2);border-radius:8px;padding:12px;overflow-x:auto;margin:0;line-height:1.6}
+code{font-family:var(--f-mono);font-size:.92em;background:var(--surface2);padding:1px 5px;border-radius:4px}
+details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--surface)}
+summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center}
+svg text{fill:var(--ink);font-family:var(--f-body)}
+svg .muted{fill:var(--muted)}
+.chartbox{overflow-x:auto}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.vcard{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.vcard .why{font-size:13px;color:var(--muted)}
+.vcard .ctrl{display:grid;grid-template-columns:minmax(0,110px) minmax(0,1fr);gap:12px;align-items:center}
+.delta{font-size:12px;color:var(--muted)}
+.copy{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.copy code{overflow-wrap:anywhere}
+.step{display:flex;gap:12px}
+.step b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--bg);display:grid;place-items:center;font-size:13px}
+@media print{
+  body{background:#fff!important;color:#12263F!important;padding:0!important}
+  body::before{display:none!important}
+  .top,.tabs,.view{display:none!important}
+  #report{display:block!important}
+  .card,.banner,details{break-inside:avoid}
+  .rpt-sec{break-before:page}
+  .tablewrap{overflow:visible}
+  body{font-size:12px!important}
+  table{font-size:11px!important}
+  th,td{padding:6px 8px!important}
+  th{white-space:normal!important}
+  .chartbox{overflow:visible}
+  @page{size:A4;margin:14mm}
+}
+#report{display:none}
+.rpt-head{display:flex;flex-direction:column;gap:6px;border-bottom:2px solid var(--navy);padding-bottom:10px}
+#printReport{display:none}
+.hint-pdf{font-size:13px}
+@media print{
+  @page{size:A4;margin:14mm}
+  body{padding:0!important;background:#fff!important;color:#111!important;font-size:11.5px}
+  body::before{display:none!important}
+  .wrap>*:not(#printReport){display:none!important}
+  #printReport{display:block}
+  #printReport h1{font-size:20px} #printReport h2{font-size:15px;margin-top:6px} #printReport h3{font-size:12.5px}
+  .rep-sc{break-before:page;display:flex;flex-direction:column;gap:10px}
+  .rep-head+.rep-sc{break-before:auto}
+  #printReport h2,#printReport h3{break-after:avoid}
+  .rep-chart{break-inside:avoid}
+  .rep-head{display:flex;flex-direction:column;gap:8px}
+  #printReport table{font-size:10.5px} #printReport th,#printReport td{padding:5px 8px}
+  .tablewrap{overflow:visible;border-radius:0}
+  .banner{break-inside:avoid} svg{max-width:100%!important;min-width:0!important;height:auto}
+}
+@media (max-width:520px){h1{font-size:22px}.card{padding:14px}.vcard .ctrl{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><small>Ingeniería Aplicada · Actividad 9</small><h1>Simulador de arquitectura de Locus</h1></div>
+    <button class="iconbtn" id="themeBtn" type="button" aria-label="Cambiar tema claro u oscuro">Tema</button>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Secciones del simulador" id="tabs"></nav>
+
+  <section class="view" id="v-proyecto" aria-label="Proyecto"></section>
+  <section class="view" id="v-alternativas" aria-label="Alternativas"></section>
+  <section class="view" id="v-escenarios" aria-label="Escenarios"></section>
+  <section class="view" id="v-resultados" aria-label="Resultados"></section>
+  <section class="view" id="v-pruebas" aria-label="Pruebas"></section>
+  <section class="view" id="v-documentacion" aria-label="Documentación"></section>
+  <div id="printReport" aria-hidden="true"></div>
+  <div id="report" aria-hidden="true"></div>
+</div>
+
+<script>
+/* Locus · Simulador de arquitectura (Actividad 9) — modelo de simulación.
+   Funciones puras, sin DOM. Funciona en navegador (global LocusModel) y Node (module.exports). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.LocusModel = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  /* ---------- Parámetros del modelo (supuestos documentados) ---------- */
+  const PARAMS = {
+    common: {
+      rhoTarget: 0.7,          // utilización objetivo del autoescalado
+      rhoMax: 0.98,            // tope numérico para evitar división por cero
+      rhoExtTarget: 0.5,       // uso máximo cómodo de la API pública (es un servicio compartido con límites)
+      tExtBaseMs: 900,         // latencia base de Overpass/Nominatim
+      tExtPerPoiMs: 25,        // ms extra por cada lugar devuelto
+      routeUsPerN2: 2,         // µs por n² del vecino más cercano (servidor)
+      clientCpuFactor: 8,      // el teléfono es ~8 veces más lento que el servidor
+      renderMs: 120,           // pintar el itinerario en pantalla
+      cacheReadMs: 2,          // leer una respuesta del caché
+      parseMsPerPoi: 0.4,      // interpretar la respuesta del mapa por lugar
+      extAvail: 0.99,          // disponibilidad de los espejos públicos de Overpass
+      dbAvail: 0.9995,         // Firestore
+      hostingAvail: 0.9995,    // Firebase Hosting (la página)
+      instAvail: 0.995,        // una instancia de servidor
+      minReplicas: 2,          // réplicas mínimas deseadas por servicio
+      dutyHoursPerDay: 3,      // horas al día a la carga simulada
+      daysPerMonth: 30,
+      freeOpsPerMonth: 600000, // cuota gratuita de Firestore (20 000 al día)
+      usdPerMillionOps: 0.9,
+      opsPerRequest: 0.2,      // 1 de cada 10 solicitudes guarda un itinerario (2 operaciones)
+      extCapPerIpRps: 8,       // solicitudes por segundo que tolera la API pública por IP
+      extCapGlobalRps: 40,     // parte de la capacidad pública que le corresponde a Locus con clientes en IP distintas
+      rateLimitPerIpPerMin: 6, // solicitudes por minuto por usuario antes de recibir 429
+      rateLimitBackoffMs: 2000,
+      p95Queue: 3.0,           // factor de cola para el percentil 95
+      p95Ext: 1.5,             // factor de la API externa para el percentil 95
+      selfHostTExtBaseMs: 300, // Overpass propio: consulta local, sin cola pública
+      selfHostCapRps: 60,      // solicitudes por segundo que atiende el Overpass propio
+      selfHostUsd: 30,         // costo mensual de la máquina de Overpass propio
+      p95Ramp: 0.05            // proporción de fallos de caché a partir de la cual el p95 ve la API externa completa
+    },
+    A: { label: 'Cliente directo', short: 'A', localCacheFactor: 0.35, fixedUsd: 0, effortPw: 6,
+         services: [] },
+    B: { label: 'Monolito con caché', short: 'B', fixedUsd: 15, effortPw: 10, hops: 0,
+         services: [
+           { key: 'mono', name: 'Servidor monolítico', base: 6, perPoi: 0.05, route: true, cache: true,
+             costUsd: 20, maxInst: 6, egress: true }
+         ] },
+    C: { label: 'Microservicios', short: 'C', fixedUsd: 45, effortPw: 24, hops: 3, hopBaseMs: 12, hopPerPoiMs: 0.4,
+         services: [
+           { key: 'gw', name: 'Gateway', base: 3, perPoi: 0.15, route: false, cache: false, costUsd: 12, maxInst: 8, egress: false },
+           { key: 'pois', name: 'Servicio de lugares', base: 4, perPoi: 0.05, route: false, cache: true, costUsd: 12, maxInst: 8, egress: true },
+           { key: 'route', name: 'Servicio de rutas', base: 3, perPoi: 0.1, route: true, cache: false, costUsd: 12, maxInst: 8, egress: false },
+           { key: 'itin', name: 'Servicio de itinerarios', base: 4, perPoi: 0.1, route: false, cache: false, costUsd: 12, maxInst: 8, egress: false }
+         ] }
+  };
+  const ARCHS = ['A', 'B', 'C'];
+
+  /* ---------- Variables y validación ---------- */
+  const VARS = {
+    users:     { label: 'Usuarios simultáneos en el pico', unit: 'usuarios', min: 1, max: 50000, int: true, step: 1 },
+    reqPerMin: { label: 'Solicitudes por usuario',        unit: 'por minuto', min: 0.1, max: 30, step: 0.1 },
+    hit:       { label: 'Aciertos de caché',              unit: 'fracción', min: 0, max: 0.99, step: 0.01 },
+    rtt:       { label: 'Latencia de red del celular',    unit: 'ms', min: 5, max: 2000, step: 5 },
+    pois:      { label: 'Lugares por itinerario',         unit: 'lugares', min: 3, max: 60, int: true, step: 1 }
+  };
+  const PROJECT_FIELDS = {
+    latMaxMs:   { label: 'Latencia máxima (p95)', min: 200, max: 60000 },
+    availMinPct:{ label: 'Disponibilidad mínima (%)', min: 90, max: 99.999 },
+    budgetUsd:  { label: 'Presupuesto mensual (USD)', min: 0, max: 100000 },
+    teamSize:   { label: 'Integrantes del equipo', min: 1, max: 30, int: true },
+    weeksAvail: { label: 'Semanas disponibles', min: 1, max: 104 },
+    dedication: { label: 'Dedicación al proyecto', min: 0.05, max: 1 }
+  };
+  const WEIGHT_KEYS = ['lat', 'av', 'cost', 'scal', 'simp'];
+
+  function defaultProject() {
+    return {
+      name: 'Locus',
+      description: 'Plataforma web que arma itinerarios de viaje por Colombia con datos de OpenStreetMap, ordena las paradas por cercanía y guarda el plan en Firebase.',
+      users: 'Turistas que planean un viaje a un destino nuevo en Colombia, desde un celular y con conexión móvil variable.',
+      latMaxMs: 5000, availMinPct: 99, budgetUsd: 120,
+      teamSize: 3, weeksAvail: 12, dedication: 0.5,
+      weights: { lat: 0.25, av: 0.2, cost: 0.2, scal: 0.15, simp: 0.2 }
+    };
+  }
+  function defaultScenarios() {
+    return [
+      { id: 'ref', name: 'Referencia: piloto', base: true, vars: { users: 50, reqPerMin: 2, hit: 0.4, rtt: 80, pois: 20 } },
+      { id: 'alta', name: 'Temporada alta', vars: { users: 600, reqPerMin: 3, hit: 0.6, rtt: 120, pois: 25 } },
+      { id: 'viral', name: 'Se hace viral', vars: { users: 3000, reqPerMin: 3, hit: 0.9, rtt: 150, pois: 30, selfHost: true } },
+      { id: 'rural', name: 'Red móvil rural', vars: { users: 150, reqPerMin: 2, hit: 0.3, rtt: 450, pois: 20 } }
+    ];
+  }
+
+  function validate(v, proj) {
+    const errs = [];
+    const chk = (val, def, label) => {
+      if (typeof val !== 'number' || !isFinite(val)) { errs.push(label + ': escribe un número.'); return; }
+      if (val < def.min || val > def.max) errs.push(label + ': debe estar entre ' + def.min + ' y ' + def.max + '.');
+      else if (def.int && !Number.isInteger(val)) errs.push(label + ': debe ser un número entero.');
+    };
+    if (v) Object.keys(VARS).forEach(k => chk(v[k], VARS[k], VARS[k].label));
+    if (v && v.selfHost !== undefined && typeof v.selfHost !== 'boolean') errs.push('Overpass propio: debe ser sí o no.');
+    if (proj) {
+      Object.keys(PROJECT_FIELDS).forEach(k => chk(proj[k], PROJECT_FIELDS[k], PROJECT_FIELDS[k].label));
+      const w = proj.weights || {};
+      let sum = 0, ok = true;
+      WEIGHT_KEYS.forEach(k => { if (typeof w[k] !== 'number' || !isFinite(w[k]) || w[k] < 0) ok = false; else sum += w[k]; });
+      if (!ok) errs.push('Pesos de decisión: usa números mayores o iguales a 0.');
+      else if (sum <= 0) errs.push('Pesos de decisión: al menos un peso debe ser mayor que 0.');
+    }
+    return errs;
+  }
+
+  /* ---------- Utilidades ---------- */
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const fmt = (x, d) => (Math.round(x * Math.pow(10, d || 0)) / Math.pow(10, d || 0)).toString();
+  function routeMs(n, c, factor) { return n * n * c.routeUsPerN2 / 1000 * (factor || 1); }
+  function tExt(n, c) { return c.tExtBaseMs + c.tExtPerPoiMs * n; }
+  function demandMs(s, n, H, c) {
+    let d = s.base + s.perPoi * n;
+    if (s.route) d += routeMs(n, c);
+    if (s.cache) d += (1 - H) * c.parseMsPerPoi * n + H * c.cacheReadMs;
+    return d;
+  }
+  function md1(u, c) { const x = Math.min(u, c.rhoMax); return 1 + x / (2 * (1 - x)); }
+
+  /* Reparto de instancias: cubre la demanda con utilización objetivo, mantiene réplicas mínimas
+     y recorta (quitando de la que más tiene) cuando el costo supera el presupuesto. */
+  function allocate(svcs, fixedAndUsage, budget, lambda, H, n, c, sh) {
+    const inst = svcs.map(s => {
+      const dem = demandMs(s, n, H, c);
+      let needed = Math.ceil((lambda * dem / 1000) / c.rhoTarget);
+      if (s.egress && !sh) needed = Math.max(needed, Math.ceil((lambda * (1 - H)) / (c.extCapPerIpRps * c.rhoExtTarget)));
+      return Math.max(1, Math.min(s.maxInst, Math.max(needed, c.minReplicas)));
+    });
+    const cost = () => fixedAndUsage + svcs.reduce((a, s, i) => a + inst[i] * s.costUsd, 0);
+    while (cost() > budget) {
+      let idx = -1, best = 1;
+      inst.forEach((k, i) => { if (k > best) { best = k; idx = i; } });
+      if (idx < 0) break;
+      inst[idx]--;
+    }
+    return inst;
+  }
+
+  /* ---------- Cálculo de una arquitectura ---------- */
+  function computeArch(arch, v, proj, P) {
+    P = P || PARAMS;
+    const c = P.common, a = P[arch];
+    const n = v.pois, H = v.hit, rtt = v.rtt;
+    const lambda = v.users * v.reqPerMin / 60;
+    const monthlyReq = lambda * 3600 * c.dutyHoursPerDay * c.daysPerMonth;
+    const usage = Math.max(0, monthlyReq * c.opsPerRequest - c.freeOpsPerMonth) / 1e6 * c.usdPerMillionOps;
+    const hitEff = arch === 'A' ? H * a.localCacheFactor : H;
+    const lambdaExt = lambda * (1 - hitEff);
+    const sh = !!v.selfHost;
+    const tE = sh ? c.selfHostTExtBaseMs + c.tExtPerPoiMs * n : tExt(n, c);
+    const trace = [];
+    const T = (k, f, val) => trace.push({ k: k, f: f, v: val });
+    T('λ (req/s)', 'usuarios × solicitudes por minuto / 60 = ' + v.users + ' × ' + v.reqPerMin + ' / 60', fmt(lambda, 2));
+    T('Aciertos efectivos', arch === 'A' ? 'caché local = aciertos × ' + a.localCacheFactor + ' (solo el propio teléfono)' : 'caché compartido = aciertos', fmt(hitEff, 3));
+    T('λ externa (req/s)', 'λ × (1 − aciertos efectivos)', fmt(lambdaExt, 2));
+    T('T_ext (ms)', (sh ? c.selfHostTExtBaseMs + ' (Overpass propio)' : c.tExtBaseMs) + ' + ' + c.tExtPerPoiMs + ' × ' + n + ' lugares', fmt(tE, 0));
+
+    const svcs = a.services;
+    const shCost = sh ? c.selfHostUsd : 0;
+    const inst = allocate(svcs, a.fixedUsd + usage + shCost, proj.budgetUsd, lambda, H, n, c, sh);
+    const serviceRows = svcs.map((s, i) => {
+      const D = demandMs(s, n, H, c);
+      const rho = lambda * D / 1000 / inst[i];
+      const R = D / (1 - Math.min(rho, c.rhoMax));
+      return { key: s.key, name: s.name, inst: inst[i], D: D, rho: rho, R: R,
+               cap: inst[i] * c.rhoTarget * 1000 / D, capMax: s.maxInst * c.rhoTarget * 1000 / D, avail: 1 - Math.pow(1 - c.instAvail, inst[i]) };
+    });
+    serviceRows.forEach(r => {
+      T('Servicio «' + r.name + '»', 'D = ' + fmt(r.D, 2) + ' ms; ρ = λ·D/(k·1000) = ' + fmt(lambda, 2) + '×' + fmt(r.D, 2) + '/(' + r.inst + '×1000) = ' + fmt(r.rho, 3) + '; R = D/(1−ρ)', fmt(r.R, 2) + ' ms');
+    });
+
+    // capacidad de la API externa
+    let egressInst = 0, extCap, extCapMax;
+    if (sh) { extCap = c.selfHostCapRps; extCapMax = c.selfHostCapRps; egressInst = arch === 'A' ? 0 : inst[svcs.findIndex(s => s.egress)]; }
+    else if (arch === 'A') { extCap = c.extCapGlobalRps; extCapMax = c.extCapGlobalRps; }
+    else {
+      const eIdx = svcs.findIndex(s => s.egress);
+      egressInst = inst[eIdx];
+      extCap = egressInst * c.extCapPerIpRps;
+      extCapMax = svcs[eIdx].maxInst * c.extCapPerIpRps;
+    }
+    const uExt = lambdaExt / extCap;
+    const tExtEff = tE * md1(uExt, c);
+    T('Uso de la API externa', 'λ externa / capacidad = ' + fmt(lambdaExt, 2) + ' / ' + fmt(extCap, 1), fmt(uExt, 3));
+    T('T_ext efectivo (ms)', 'T_ext × (1 + u / (2(1−u)))', fmt(tExtEff, 0));
+
+    // latencia
+    let mean, p95, fixed, queue = serviceRows.reduce((s, r) => s + r.R, 0), pRL = 0;
+    const ramp = Math.min(1, (1 - hitEff) / c.p95Ramp);
+    if (arch === 'A') {
+      pRL = sh ? 0 : clamp((v.reqPerMin - c.rateLimitPerIpPerMin) / c.rateLimitPerIpPerMin, 0, 1);
+      fixed = routeMs(n, c, c.clientCpuFactor) + c.renderMs;
+      mean = fixed + hitEff * c.cacheReadMs + (1 - hitEff) * (rtt + tExtEff + pRL * c.rateLimitBackoffMs);
+      p95 = fixed + rtt + c.p95Ext * ramp * tExtEff + Math.min(1, pRL / 0.05) * c.rateLimitBackoffMs;
+      T('P(429) por IP', 'máx(0, mín(1, (r − ' + c.rateLimitPerIpPerMin + ') / ' + c.rateLimitPerIpPerMin + '))', fmt(pRL, 3));
+    } else {
+      const hops = a.hops, hopMs = (a.hopBaseMs || 0) + (a.hopPerPoiMs || 0) * n;
+      fixed = rtt + hops * hopMs + c.renderMs;
+      mean = fixed + queue + (1 - hitEff) * tExtEff;
+      p95 = fixed + c.p95Queue * queue + c.p95Ext * ramp * tExtEff;
+      if (hops) T('Saltos entre servicios', hops + ' × (' + a.hopBaseMs + ' + ' + a.hopPerPoiMs + ' × ' + n + ')', fmt(hops * hopMs, 1) + ' ms');
+    }
+    T('Latencia media (ms)', arch === 'A' ? 'ruta en el teléfono + render + (1−h)(RTT + T_ext efectivo + 429)' : 'RTT + saltos + render + Σ R + (1−h)·T_ext efectivo', fmt(mean, 0));
+    T('Latencia p95 (ms)', arch === 'A' ? 'fijo + RTT + ' + c.p95Ext + ' × rampa × T_ext efectivo + reintento' : 'fijo + ' + c.p95Queue + ' × Σ R + ' + c.p95Ext + ' × rampa × T_ext efectivo', fmt(p95, 0));
+
+    // capacidad
+    const capExtSustainable = c.rhoExtTarget * extCap / (1 - hitEff);
+    const capCpu = serviceRows.length ? Math.min.apply(null, serviceRows.map(r => r.cap)) : Infinity;
+    const capacity = Math.min(capCpu, capExtSustainable);
+    const headroom = capacity / lambda;
+    const ceilExt = c.rhoExtTarget * extCapMax / (1 - hitEff);
+    const ceilCpu = serviceRows.length ? Math.min.apply(null, serviceRows.map(r => r.capMax)) : Infinity;
+    const ceiling = Math.min(ceilCpu, ceilExt);
+    const scal = ceiling / lambda;
+    T('Capacidad sostenible (req/s)', 'mín(capacidad de servidores, ' + c.rhoExtTarget + ' × capacidad externa / (1−h))', fmt(capacity, 1));
+    T('Margen de capacidad', 'capacidad / λ', fmt(headroom, 2) + '×');
+    T('Escalabilidad', 'techo técnico (instancias máximas) / λ = ' + fmt(ceiling, 1) + ' / ' + fmt(lambda, 2), fmt(scal, 2) + '×');
+
+    // disponibilidad
+    let avSvc = 1;
+    serviceRows.forEach(r => { avSvc *= r.avail; });
+    const avBroker = arch === 'C' ? 0.999 : 1;
+    const avExt = 1 - (1 - (sh ? 0.995 : c.extAvail)) * (1 - hitEff);
+    const avail = c.hostingAvail * c.dbAvail * avSvc * avBroker * avExt;
+    T('Disponibilidad', 'hosting × base de datos × Π(1−(1−' + c.instAvail + ')^k) × ' + (arch === 'C' ? 'broker × ' : '') + '(1 − (1−' + c.extAvail + ')(1−h))', fmt(avail * 100, 3) + ' %');
+
+    // costo y esfuerzo
+    const infra = a.fixedUsd + shCost + svcs.reduce((s, x, i) => s + inst[i] * x.costUsd, 0);
+    const cost = infra + usage;
+    T('Costo mensual (USD)', 'fijo ' + a.fixedUsd + (sh ? ' + Overpass propio ' + shCost : '') + ' + Σ instancias×precio + uso de Firestore ' + fmt(usage, 2), fmt(cost, 2));
+    const effortCap = proj.teamSize * proj.weeksAvail * proj.dedication;
+    T('Esfuerzo (persona-semana)', 'requerido ' + a.effortPw + ' frente a ' + proj.teamSize + ' × ' + proj.weeksAvail + ' × ' + proj.dedication + ' disponibles', fmt(a.effortPw, 0) + ' / ' + fmt(effortCap, 1));
+
+    // requisitos obligatorios
+    const checks = [
+      { key: 'lat', label: 'Latencia p95 ≤ ' + proj.latMaxMs + ' ms', ok: p95 <= proj.latMaxMs, value: p95, limit: proj.latMaxMs },
+      { key: 'av', label: 'Disponibilidad ≥ ' + proj.availMinPct + ' %', ok: avail * 100 >= proj.availMinPct, value: avail * 100, limit: proj.availMinPct },
+      { key: 'cap', label: 'Capacidad ≥ demanda pico', ok: headroom >= 1, value: headroom, limit: 1 },
+      { key: 'cost', label: 'Costo ≤ presupuesto de ' + proj.budgetUsd + ' USD', ok: cost <= proj.budgetUsd + 1e-9, value: cost, limit: proj.budgetUsd },
+      { key: 'team', label: 'Esfuerzo ≤ capacidad del equipo', ok: a.effortPw <= effortCap + 1e-9, value: a.effortPw, limit: effortCap }
+    ];
+    const feasible = checks.every(x => x.ok);
+
+    // puntajes normalizados 0..1 para el apoyo a la decisión
+    const unav = Math.max(1 - avail, 1e-9), unavMax = 1 - proj.availMinPct / 100;
+    const scores = {
+      lat: clamp(1 - p95 / proj.latMaxMs, 0, 1),
+      av: clamp(Math.log10(unavMax / unav) / 1.5, 0, 1),
+      cost: proj.budgetUsd > 0 ? clamp(1 - cost / proj.budgetUsd, 0, 1) : 0,
+      scal: clamp(Math.log2(Math.max(scal, 1)) / 4, 0, 1),
+      simp: effortCap > 0 ? clamp(1 - a.effortPw / effortCap, 0, 1) : 0
+    };
+    const wsum = WEIGHT_KEYS.reduce((s, k) => s + proj.weights[k], 0);
+    const contrib = {};
+    let total = 0;
+    WEIGHT_KEYS.forEach(k => { contrib[k] = scores[k] * proj.weights[k] / wsum; total += contrib[k]; });
+
+    return {
+      arch: arch, label: a.label, lambda: lambda, hitEff: hitEff, lambdaExt: lambdaExt,
+      services: serviceRows, egressInst: egressInst,
+      latencyMean: mean, latencyP95: p95, capacity: capacity, headroom: headroom, ceiling: ceiling, scalability: scal,
+      availability: avail, cost: cost, infraCost: infra, usageCost: usage, effort: a.effortPw, effortCap: effortCap,
+      uExt: uExt, saturated: uExt >= 1, pRateLimit: pRL,
+      checks: checks, feasible: feasible, scores: scores, contrib: contrib, total: total, trace: trace
+    };
+  }
+
+  /* ---------- Escenario completo + recomendación explicable ---------- */
+  const CRIT = { lat: 'latencia', av: 'disponibilidad', cost: 'costo', scal: 'escalabilidad', simp: 'simplicidad para el equipo' };
+
+  function recommend(results, proj) {
+    const list = ARCHS.map(k => results[k]);
+    const feas = list.filter(r => r.feasible).sort((x, y) => y.total - x.total);
+    const ranking = list.slice().sort((x, y) => (y.feasible - x.feasible) || (y.total - x.total));
+    const rec = { ranking: ranking.map(r => r.arch), feasible: feas.map(r => r.arch), reasons: [], limitations: [], assumptions: [] };
+    const sentence = [];
+    if (feas.length) {
+      const best = feas[0];
+      rec.status = 'ok'; rec.best = best.arch;
+      const topK = WEIGHT_KEYS.slice().sort((x, y) => best.contrib[y] - best.contrib[x]).slice(0, 2);
+      sentence.push('Se recomienda «' + best.label + '» (' + best.arch + '): cumple los 5 requisitos obligatorios y suma ' + fmt(best.total, 3) + ' puntos de 1.');
+      sentence.push('Sus mayores aportes vienen de ' + CRIT[topK[0]] + ' (' + fmt(best.contrib[topK[0]], 3) + ') y ' + CRIT[topK[1]] + ' (' + fmt(best.contrib[topK[1]], 3) + ').');
+      if (feas.length > 1) {
+        const second = feas[1];
+        const diffs = WEIGHT_KEYS.map(k => ({ k: k, d: best.contrib[k] - second.contrib[k] })).sort((x, y) => Math.abs(y.d) - Math.abs(x.d))[0];
+        sentence.push('Supera a «' + second.label + '» por ' + fmt(best.total - second.total, 3) + ' puntos; la mayor diferencia está en ' + CRIT[diffs.k] + ' (' + (diffs.d >= 0 ? '+' : '') + fmt(diffs.d, 3) + ').');
+        rec.margin = best.total - second.total;
+        if (rec.margin < 0.03) rec.limitations.push('La diferencia con la segunda opción es menor a 0.03 puntos: cambios pequeños en los supuestos podrían invertir el orden.');
+      } else {
+        sentence.push('Es la única alternativa que cumple todos los requisitos obligatorios.');
+      }
+    } else {
+      rec.status = 'none';
+      const closest = list.slice().sort((x, y) => x.checks.filter(c => !c.ok).length - y.checks.filter(c => !c.ok).length || y.total - x.total)[0];
+      rec.best = null; rec.closest = closest.arch;
+      sentence.push('Ninguna alternativa cumple todos los requisitos obligatorios con estas entradas.');
+      sentence.push('La más cercana es «' + closest.label + '» (' + closest.arch + '), que incumple: ' + closest.checks.filter(c => !c.ok).map(c => c.label).join('; ') + '.');
+      sentence.push('Para continuar hay que relajar un requisito (presupuesto, equipo, plazo o latencia) o reducir la demanda simulada.');
+    }
+    rec.text = sentence;
+    list.forEach(r => {
+      if (!r.feasible) rec.reasons.push('«' + r.label + '» queda fuera: ' + r.checks.filter(c => !c.ok).map(c => c.label + ' (resultado ' + fmt(c.value, c.key === 'av' ? 3 : 2) + ')').join('; ') + '.');
+    });
+    rec.assumptions.push('Los valores son estimaciones del modelo, no mediciones de rendimiento real.');
+    rec.assumptions.push('La API pública de OpenStreetMap responde con ' + PARAMS.common.tExtBaseMs + ' ms más ' + PARAMS.common.tExtPerPoiMs + ' ms por lugar y tolera ' + PARAMS.common.extCapPerIpRps + ' solicitudes por segundo por dirección IP.');
+    rec.assumptions.push('Los pesos de decisión definidos por el equipo: ' + WEIGHT_KEYS.map(k => CRIT[k] + ' ' + fmt(proj.weights[k], 2)).join(', ') + '.');
+    rec.limitations.push('El modelo no considera fallas correlacionadas, picos súbitos dentro del minuto ni diferencias entre proveedores de nube.');
+    return rec;
+  }
+
+  function runScenario(v, proj, P) {
+    const errs = validate(v, proj);
+    if (errs.length) return { ok: false, errors: errs };
+    const results = {};
+    ARCHS.forEach(k => { results[k] = computeArch(k, v, proj, P); });
+    return { ok: true, vars: JSON.parse(JSON.stringify(v)), results: results, recommendation: recommend(results, proj) };
+  }
+
+  /* ---------- Barrido y sensibilidad ---------- */
+  function sweep(v, proj, key, values) {
+    return values.map(x => {
+      const w = Object.assign({}, v); w[key] = x;
+      const r = runScenario(w, proj);
+      return { x: x, run: r };
+    });
+  }
+  function sensitivity(v, proj) {
+    const base = runScenario(v, proj);
+    const out = [];
+    Object.keys(VARS).forEach(k => {
+      const def = VARS[k];
+      const mk = f => {
+        let x = v[k] * f;
+        x = clamp(x, def.min, def.max);
+        if (def.int) x = Math.round(x);
+        const w = Object.assign({}, v); w[k] = x;
+        const r = runScenario(w, proj);
+        return { value: x, best: r.ok ? r.recommendation.best : null, changed: r.ok ? r.recommendation.best !== base.recommendation.best : false };
+      };
+      out.push({ key: k, label: def.label, low: mk(0.5), high: mk(2) });
+    });
+    return { base: base.recommendation.best, rows: out };
+  }
+
+  function compareToBase(scenarioRun, baseRun) {
+    const out = {};
+    ARCHS.forEach(k => {
+      const a = scenarioRun.results[k], b = baseRun.results[k];
+      out[k] = {
+        latency: (a.latencyP95 - b.latencyP95) / b.latencyP95,
+        cost: b.cost > 0 ? (a.cost - b.cost) / b.cost : 0,
+        availability: a.availability - b.availability
+      };
+    });
+    return out;
+  }
+
+  return { PARAMS: PARAMS, ARCHS: ARCHS, VARS: VARS, PROJECT_FIELDS: PROJECT_FIELDS, WEIGHT_KEYS: WEIGHT_KEYS, CRIT: CRIT,
+           defaultProject: defaultProject, defaultScenarios: defaultScenarios, validate: validate,
+           computeArch: computeArch, runScenario: runScenario, recommend: recommend,
+           sweep: sweep, sensitivity: sensitivity, compareToBase: compareToBase,
+           demandMs: demandMs, routeMs: routeMs, tExt: tExt };
+});
+
+</script>
+<script>
+/* Pruebas del modelo de Locus. Se ejecutan en Node (node run_tests.js) y dentro del simulador (pestaña Pruebas). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.LocusTests = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  const near = (a, b, tol) => Math.abs(a - b) <= (tol === undefined ? 1e-6 : tol);
+  const f = (x, d) => (typeof x === 'number' ? Number(x.toFixed(d === undefined ? 3 : d)) : x);
+
+  function suite(M) {
+    const P = M.PARAMS, c = P.common;
+    const proj = () => M.defaultProject();
+    const ref = () => Object.assign({}, M.defaultScenarios()[0].vars);
+    const T = [];
+    const add = (id, name, desc, run) => T.push({ id: id, name: name, desc: desc, run: run });
+
+    add('P1', 'Cálculo manual del monolito',
+      'Recalcula a mano λ, la demanda D, la utilización ρ y el tiempo de respuesta R del monolito y los compara con el modelo.',
+      () => {
+        const v = { users: 120, reqPerMin: 3, hit: 0.5, rtt: 100, pois: 20 };
+        const r = M.computeArch('B', v, proj());
+        const lambda = 120 * 3 / 60;
+        const D = 6 + 0.05 * 20 + 20 * 20 * 2 / 1000 + (1 - 0.5) * 0.4 * 20 + 0.5 * 2;
+        const k = r.services[0].inst;
+        const rho = lambda * D / 1000 / k;
+        const R = D / (1 - rho);
+        return { expected: 'D=' + f(D) + ' ms, ρ=' + f(rho, 5) + ', R=' + f(R), obtained: 'D=' + f(r.services[0].D) + ' ms, ρ=' + f(r.services[0].rho, 5) + ', R=' + f(r.services[0].R),
+                 pass: near(r.services[0].D, D) && near(r.services[0].rho, rho) && near(r.services[0].R, R) };
+      });
+
+    add('P2', 'Más latencia de red, más latencia total',
+      'Si solo aumenta el RTT del celular, la latencia p95 de cada alternativa debe subir.',
+      () => {
+        const lo = M.runScenario(Object.assign(ref(), { rtt: 50 }), proj()), hi = M.runScenario(Object.assign(ref(), { rtt: 400 }), proj());
+        const ok = M.ARCHS.every(k => hi.results[k].latencyP95 > lo.results[k].latencyP95);
+        return { expected: 'p95(400 ms) > p95(50 ms) en A, B y C', obtained: M.ARCHS.map(k => k + ': ' + f(lo.results[k].latencyP95, 0) + ' → ' + f(hi.results[k].latencyP95, 0)).join(' | '), pass: ok };
+      });
+
+    add('P3', 'Más caché, menos latencia y más disponibilidad',
+      'Al subir los aciertos de caché de 0.1 a 0.9, el p95 no sube y la disponibilidad no baja en ninguna alternativa.',
+      () => {
+        const lo = M.runScenario(Object.assign(ref(), { hit: 0.1 }), proj()), hi = M.runScenario(Object.assign(ref(), { hit: 0.9 }), proj());
+        const ok = M.ARCHS.every(k => hi.results[k].latencyP95 <= lo.results[k].latencyP95 && hi.results[k].availability >= lo.results[k].availability);
+        return { expected: 'p95 baja y disponibilidad sube o se mantiene', obtained: M.ARCHS.map(k => k + ': ' + f(lo.results[k].latencyP95, 0) + ' → ' + f(hi.results[k].latencyP95, 0) + ' ms; ' + f(lo.results[k].availability * 100, 3) + ' → ' + f(hi.results[k].availability * 100, 3) + ' %').join(' | '), pass: ok };
+      });
+
+    add('P4', 'El presupuesto limita las instancias',
+      'Con un presupuesto de 1 USD el monolito y los microservicios no pueden pagar su infraestructura y deben incumplir el requisito de costo; el cliente directo no.',
+      () => {
+        const q = Object.assign(proj(), { budgetUsd: 1 });
+        const r = M.runScenario(ref(), q).results;
+        const costFail = k => !r[k].checks.find(x => x.key === 'cost').ok;
+        return { expected: 'A cumple costo; B y C lo incumplen y usan 1 instancia por servicio', obtained: 'A: ' + f(r.A.cost, 2) + ' USD; B: ' + f(r.B.cost, 2) + ' USD con ' + r.B.services.map(s => s.inst) + '; C: ' + f(r.C.cost, 2) + ' USD con ' + r.C.services.map(s => s.inst),
+                 pass: !costFail('A') && costFail('B') && costFail('C') && r.B.services.every(s => s.inst === 1) && r.C.services.every(s => s.inst === 1) };
+      });
+
+    add('P5', 'La recomendación coincide con el cálculo',
+      'En los 4 escenarios predefinidos, la alternativa recomendada es la de mayor puntaje entre las que cumplen todos los requisitos obligatorios, recalculado fuera del modelo.',
+      () => {
+        const rows = [];
+        let ok = true;
+        M.defaultScenarios().forEach(s => {
+          const p = proj(), run = M.runScenario(s.vars, p);
+          const feas = M.ARCHS.filter(k => run.results[k].feasible);
+          let best = null;
+          feas.forEach(k => { if (best === null || run.results[k].total > run.results[best].total) best = k; });
+          if (best !== run.recommendation.best) ok = false;
+          rows.push(s.id + '→' + (run.recommendation.best || 'ninguna'));
+        });
+        return { expected: 'Recomendación = máximo puntaje entre alternativas factibles (o «ninguna» si no hay)', obtained: rows.join(', '), pass: ok };
+      });
+
+    add('P6', 'Escenario imposible: ninguna alternativa',
+      'Con 20 000 usuarios, 30 solicitudes por minuto y 50 USD de presupuesto, el simulador no debe inventar una recomendación.',
+      () => {
+        const q = Object.assign(proj(), { budgetUsd: 50 });
+        const run = M.runScenario({ users: 20000, reqPerMin: 30, hit: 0.2, rtt: 100, pois: 30 }, q);
+        return { expected: 'status = none y sin alternativa recomendada', obtained: 'status = ' + run.recommendation.status + ', mejor = ' + run.recommendation.best, pass: run.recommendation.status === 'none' && run.recommendation.best === null };
+      });
+
+    add('P7', 'Validación de entradas inválidas',
+      'Rechaza usuarios negativos, caché mayor a 0.99, texto en lugar de número, lugares decimales y pesos que suman 0.',
+      () => {
+        const p = proj();
+        const cases = [
+          M.validate(Object.assign(ref(), { users: -5 }), p),
+          M.validate(Object.assign(ref(), { hit: 1.2 }), p),
+          M.validate(Object.assign(ref(), { rtt: NaN }), p),
+          M.validate(Object.assign(ref(), { pois: 7.5 }), p),
+          M.validate(ref(), Object.assign(proj(), { weights: { lat: 0, av: 0, cost: 0, scal: 0, simp: 0 } })),
+          M.validate(ref(), p)
+        ];
+        const ok = cases.slice(0, 5).every(e => e.length > 0) && cases[5].length === 0 && M.runScenario(Object.assign(ref(), { users: -5 }), p).ok === false;
+        return { expected: '5 entradas inválidas rechazadas y la entrada de referencia aceptada', obtained: cases.map(e => e.length).join(' / ') + ' errores', pass: ok };
+      });
+
+    add('P8', 'Resultados repetibles',
+      'Ejecutar dos veces el mismo escenario produce exactamente los mismos números.',
+      () => {
+        const a = JSON.stringify(M.runScenario(ref(), proj())), b = JSON.stringify(M.runScenario(ref(), proj()));
+        return { expected: 'Salidas idénticas', obtained: a === b ? 'Idénticas' : 'Distintas', pass: a === b };
+      });
+
+    add('P9', 'Los pesos cambian la decisión',
+      'En el escenario de referencia, con todo el peso en costo gana la alternativa más barata que cumple; con todo el peso en disponibilidad gana la más disponible. Las dos respuestas deben ser distintas.',
+      () => {
+        const v = ref();
+        const pc = Object.assign(proj(), { weights: { lat: 0, av: 0, cost: 1, scal: 0, simp: 0 } });
+        const pa = Object.assign(proj(), { weights: { lat: 0, av: 1, cost: 0, scal: 0, simp: 0 } });
+        const rc = M.runScenario(v, pc), ra = M.runScenario(v, pa);
+        const feas = M.ARCHS.filter(k => rc.results[k].feasible);
+        const cheapest = feas.slice().sort((x, y) => rc.results[x].cost - rc.results[y].cost)[0];
+        const mostAvail = feas.slice().sort((x, y) => ra.results[y].availability - ra.results[x].availability)[0];
+        return { expected: 'costo → ' + cheapest + '; disponibilidad → ' + mostAvail + '; distintas', obtained: 'costo → ' + rc.recommendation.best + '; disponibilidad → ' + ra.recommendation.best,
+                 pass: rc.recommendation.best === cheapest && ra.recommendation.best === mostAvail && cheapest !== mostAvail };
+      });
+
+    add('P10', 'La API externa limita al cliente directo',
+      'Al duplicar los usuarios de la temporada alta, el margen de capacidad de A debe caer a la mitad (su techo no depende de servidores propios).',
+      () => {
+        const v1 = Object.assign({}, M.defaultScenarios()[1].vars), v2 = Object.assign({}, v1, { users: v1.users * 2 });
+        const a = M.computeArch('A', v1, proj()), b = M.computeArch('A', v2, proj());
+        return { expected: 'margen(2U) = margen(U) / 2', obtained: f(a.headroom, 3) + ' → ' + f(b.headroom, 3), pass: near(b.headroom, a.headroom / 2, 1e-9) };
+      });
+
+    add('P11', 'Cada requisito obligatorio puede descartar una alternativa',
+      'Un requisito de latencia imposible (200 ms) deja fuera a las tres alternativas y la razón registrada es la latencia.',
+      () => {
+        const q = Object.assign(proj(), { latMaxMs: 200 });
+        const run = M.runScenario(ref(), q);
+        const ok = M.ARCHS.every(k => !run.results[k].feasible && run.results[k].checks.find(x => x.key === 'lat').ok === false);
+        return { expected: 'A, B y C incumplen latencia', obtained: M.ARCHS.map(k => k + ': ' + f(run.results[k].latencyP95, 0) + ' ms').join(' | '), pass: ok };
+      });
+
+    add('P12', 'Overpass propio: menos latencia y menos carga externa, a cambio de costo',
+      'En «Se hace viral», activar Overpass propio baja el p95 y el uso de la API externa del monolito, quita el límite 429 del cliente directo y deja una alternativa que cumple.',
+      () => {
+        const v = Object.assign({}, M.defaultScenarios()[2].vars);
+        const on = M.runScenario(Object.assign({}, v, { selfHost: true }), proj()), off = M.runScenario(Object.assign({}, v, { selfHost: false }), proj());
+        const b1 = on.results.B, b0 = off.results.B;
+        const ok = b1.latencyP95 < b0.latencyP95 && b1.uExt < b0.uExt && on.recommendation.status === 'ok' && on.results.A.pRateLimit === 0;
+        return { expected: 'p95(con) < p95(sin) y uso externo(con) < uso externo(sin); recomendación válida con la opción', obtained: 'B p95 ' + f(b0.latencyP95, 0) + ' → ' + f(b1.latencyP95, 0) + ' ms; uso externo ' + f(b0.uExt, 2) + ' → ' + f(b1.uExt, 2) + '; recomendada: ' + on.recommendation.best, pass: ok };
+      });
+
+    return T;
+  }
+
+  function runAll(M) {
+    return suite(M).map(t => {
+      let r;
+      try { r = t.run(); } catch (e) { r = { expected: '', obtained: 'Error: ' + e.message, pass: false }; }
+      return { id: t.id, name: t.name, desc: t.desc, expected: r.expected, obtained: r.obtained, pass: r.pass };
+    });
+  }
+  return { suite: suite, runAll: runAll };
+});
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var M = window.LocusModel, TS = window.LocusTests;
+  var P = M.PARAMS, C = P.common, ARCHS = M.ARCHS;
+  var KEY = 'locus-sim9-v2';
+  var VIEWS = [['proyecto', 'Proyecto'], ['alternativas', 'Alternativas'], ['escenarios', 'Escenarios'], ['resultados', 'Resultados'], ['pruebas', 'Pruebas'], ['documentacion', 'Documentación']];
+  var WLABEL = { lat: 'Latencia', av: 'Disponibilidad', cost: 'Costo', scal: 'Escalabilidad', simp: 'Simplicidad para el equipo' };
+  var state = { proj: M.defaultProject(), scenarios: M.defaultScenarios(), active: 'ref', runs: {}, runView: 'ref', sweepVar: 'users', sweepMetric: 'p95', view: 'proyecto' };
+
+  /* ---------- utilidades ---------- */
+  function $(s, r) { return (r || document).querySelector(s); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function nf(x, d) { if (!isFinite(x)) return '∞'; return Number(x).toLocaleString('es-CO', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
+  function ms(x) { return x > 60000 ? '> 60 s' : nf(x, 0) + ' ms'; }
+  function tag(k) { return '<span class="tag t' + k + '" title="' + esc(P[k].label) + '">' + k + '</span>'; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ proj: state.proj, scenarios: state.scenarios, active: state.active })); } catch (e) {} }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (s && s.proj && s.scenarios && s.scenarios.length) { state.proj = Object.assign(M.defaultProject(), s.proj); state.scenarios = s.scenarios; state.active = s.active || s.scenarios[0].id; }
+    } catch (e) {}
+  }
+  function scen(id) { return state.scenarios.filter(function (s) { return s.id === id; })[0]; }
+  function sig() { return JSON.stringify(state.proj); }
+  function runScenario(id) {
+    var s = scen(id); if (!s) return;
+    var r = M.runScenario(s.vars, state.proj);
+    if (r.ok) state.runs[id] = { run: r, vars: JSON.stringify(s.vars), proj: sig(), name: s.name };
+    return r;
+  }
+  function isStale(id) { var r = state.runs[id], s = scen(id); return !r || !s || r.vars !== JSON.stringify(s.vars) || r.proj !== sig(); }
+
+  /* ---------- navegación ---------- */
+  function buildTabs() {
+    var t = $('#tabs');
+    t.innerHTML = VIEWS.map(function (v) { return '<button class="tab" role="tab" data-v="' + v[0] + '" id="tab-' + v[0] + '">' + v[1] + '</button>'; }).join('');
+    t.addEventListener('click', function (e) { var b = e.target.closest('.tab'); if (b) go(b.dataset.v); });
+  }
+  function go(v, noHash) {
+    state.view = v;
+    VIEWS.forEach(function (x) {
+      var on = x[0] === v;
+      $('#v-' + x[0]).classList.toggle('on', on);
+      $('#tab-' + x[0]).setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    if (!noHash) { try { history.replaceState(null, '', '#' + v); } catch (e) { location.hash = v; } }
+    render(v);
+    var tb = $('#tab-' + v); if (tb && tb.scrollIntoView) tb.scrollIntoView({ block: 'nearest', inline: 'center' });
+    window.scrollTo(0, 0);
+  }
+  function render(v) {
+    ({ proyecto: renderProyecto, alternativas: renderAlternativas, escenarios: renderEscenarios, resultados: renderResultados, pruebas: renderPruebas, documentacion: renderDoc })[v]();
+  }
+
+  /* ---------- 1. Proyecto ---------- */
+  function numField(id, label, hint, val, min, max, step) {
+    return '<label for="' + id + '">' + label + (hint ? '<span class="hint">' + hint + '</span>' : '') + '<input id="' + id + '" type="number" inputmode="decimal" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '"></label>';
+  }
+  function renderProyecto() {
+    var p = state.proj, el = $('#v-proyecto');
+    var wsum = M.WEIGHT_KEYS.reduce(function (a, k) { return a + (+p.weights[k] || 0); }, 0);
+    el.innerHTML =
+      '<div><h2>Configuración del proyecto</h2><p class="lead">Registra qué se construye, para quién y qué límites no se pueden romper. Estos datos entran al cálculo de todas las alternativas.</p></div>' +
+      '<div class="card"><h3>Características y usuarios</h3>' +
+      '<label for="pName">Nombre del proyecto<input id="pName" type="text" value="' + esc(p.name) + '"></label>' +
+      '<label for="pDesc">Descripción<textarea id="pDesc">' + esc(p.description) + '</textarea></label>' +
+      '<label for="pUsers">Usuarios previstos<textarea id="pUsers">' + esc(p.users) + '</textarea></label></div>' +
+      '<div class="grid"><div class="card"><h3>Requisitos de calidad (obligatorios)</h3>' +
+      numField('latMaxMs', 'Latencia máxima, percentil 95 (ms)', 'La búsqueda de destinos no debe pasar de 5 s', p.latMaxMs, 200, 60000, 100) +
+      numField('availMinPct', 'Disponibilidad mínima (%)', 'Porcentaje del tiempo en que la app responde', p.availMinPct, 90, 99.999, 0.1) +
+      '<p class="small">Además, toda alternativa debe tener capacidad para la demanda pico (utilización de servidores ≤ 70 %).</p></div>' +
+      '<div class="card"><h3>Restricciones</h3>' +
+      numField('budgetUsd', 'Presupuesto mensual de infraestructura (USD)', 'Incluye servidores, caché y uso de Firestore', p.budgetUsd, 0, 100000, 10) +
+      numField('teamSize', 'Integrantes del equipo', 'Tres Felices Tigres', p.teamSize, 1, 30, 1) +
+      numField('weeksAvail', 'Semanas disponibles para construir', '', p.weeksAvail, 1, 104, 1) +
+      numField('dedication', 'Dedicación al proyecto (0.05 a 1)', 'Fracción del tiempo de cada integrante', p.dedication, 0.05, 1, 0.05) +
+      '<p class="small" id="teamCap"></p></div></div>' +
+      '<div class="card"><h3>Pesos para decidir</h3><p class="small">El equipo define cuánto vale cada criterio. Se normalizan para sumar 100 %. Solo compiten las alternativas que cumplen los requisitos obligatorios.</p><div class="grid" id="weights">' +
+      M.WEIGHT_KEYS.map(function (k) {
+        return '<label for="w-' + k + '">' + WLABEL[k] + ' <span id="wp-' + k + '" class="hint"></span><input id="w-' + k + '" type="range" min="0" max="1" step="0.05" value="' + p.weights[k] + '"></label>';
+      }).join('') + '</div></div>' +
+      '<div id="projErr"></div>' +
+      '<div class="row"><button class="btn primary" id="toScen" type="button">Seguir a los escenarios</button><button class="btn" id="resetProj" type="button">Restaurar valores iniciales</button></div>';
+    var upd = function () {
+      var p = state.proj, ws = M.WEIGHT_KEYS.reduce(function (a, k) { return a + (+p.weights[k] || 0); }, 0);
+      M.WEIGHT_KEYS.forEach(function (k) { $('#wp-' + k).textContent = ws > 0 ? '· ' + Math.round(100 * p.weights[k] / ws) + ' %' : ''; });
+      $('#teamCap').textContent = 'Capacidad del equipo: ' + nf(p.teamSize * p.weeksAvail * p.dedication, 1) + ' persona-semanas. Esfuerzo estimado: A ' + P.A.effortPw + ', B ' + P.B.effortPw + ', C ' + P.C.effortPw + '.';
+      var errs = M.validate(null, p);
+      $('#projErr').innerHTML = errs.length ? '<div class="errors" role="alert"><ul>' + errs.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>' : '';
+      $('#toScen').disabled = errs.length > 0;
+      save();
+    };
+    el.addEventListener('input', function (e) {
+      var t = e.target, id = t.id, p = state.proj;
+      if (id === 'pName') p.name = t.value; else if (id === 'pDesc') p.description = t.value; else if (id === 'pUsers') p.users = t.value;
+      else if (M.PROJECT_FIELDS[id]) p[id] = t.value === '' ? NaN : parseFloat(t.value);
+      else if (id.indexOf('w-') === 0) p.weights[id.slice(2)] = parseFloat(t.value);
+      upd();
+    });
+    $('#toScen').onclick = function () { go('escenarios'); };
+    $('#resetProj').onclick = function () { state.proj = M.defaultProject(); save(); renderProyecto(); };
+    upd();
+  }
+
+  /* ---------- 2. Alternativas ---------- */
+  var ALT = {
+    A: { flow: ['Celular (React)', 'Nominatim + Overpass + Open-Elevation', 'Ruta calculada en el teléfono', 'Firestore'],
+         what: 'Es la app tal como está hoy. El navegador consulta directamente los servicios públicos de OpenStreetMap, ordena las paradas en el teléfono y guarda el itinerario en Firestore. No hay servidor propio.',
+         pros: ['Costo casi nulo y el menor esfuerzo de desarrollo', 'Cada usuario consulta desde su propia dirección IP', 'Nada que mantener fuera de Firebase'],
+         cons: ['El caché solo existe en cada teléfono, por eso se repiten consultas', 'Depende de los límites y la disponibilidad de la API pública', 'La ruta usa la CPU del teléfono y no hay control central'] },
+    B: { flow: ['Celular', 'Balanceador', 'Servidor monolítico (1 a 6 réplicas)', 'Caché compartido', 'API de OSM / Firestore'],
+         what: 'Un servidor único recibe la solicitud, busca en un caché compartido, consulta OpenStreetMap solo si hace falta, calcula la ruta y responde. Se despliega como una sola unidad con réplicas.',
+         pros: ['Caché compartido: un lugar consultado sirve a todos', 'Sin saltos de red internos ni despliegues múltiples', 'Esfuerzo moderado para un equipo de tres personas'],
+         cons: ['Todo escala junto, aunque solo un módulo sea el cuello de botella', 'Cada réplica añade una IP de salida pero tiene un techo de 6 réplicas', 'Tiene costo fijo mensual aunque casi no haya usuarios'] },
+    C: { flow: ['Celular', 'Gateway', 'Lugares', 'Rutas', 'Itinerarios', 'Broker + caché'],
+         what: 'Cada función corre como servicio independiente: lugares, rutas e itinerarios, con un gateway al frente. Cada servicio se replica según su propia carga.',
+         pros: ['Escala cada servicio por separado y tiene el techo técnico más alto', 'Una falla queda aislada en su servicio', 'Permite que varias personas trabajen sin pisarse'],
+         cons: ['Tres saltos de red por solicitud y más trabajo repetido', 'Mayor costo fijo y esfuerzo de desarrollo y operación', 'Los servicios están en serie, así que la disponibilidad se multiplica'] }
+  };
+  function renderAlternativas() {
+    var rows = function (k) {
+      var a = P[k];
+      if (!a.services.length) return '<tr><td colspan="5">Sin servidores propios. Costo fijo ' + a.fixedUsd + ' USD. Esfuerzo ' + a.effortPw + ' persona-semanas.</td></tr>';
+      return a.services.map(function (s) { return '<tr><td>' + esc(s.name) + '</td><td class="num">' + s.base + ' + ' + s.perPoi + '·n' + (s.route ? ' + ruta' : '') + (s.cache ? ' + caché' : '') + '</td><td class="num">' + s.costUsd + '</td><td class="num">' + s.maxInst + '</td><td>' + (s.egress ? 'Sí' : 'No') + '</td></tr>'; }).join('') +
+        '<tr><td colspan="5" class="small">Costo fijo ' + a.fixedUsd + ' USD al mes. Esfuerzo ' + a.effortPw + ' persona-semanas.' + (a.hops ? ' Saltos internos: ' + a.hops + ' de ' + a.hopBaseMs + ' + ' + a.hopPerPoiMs + '·n ms.' : '') + '</td></tr>';
+    };
+    $('#v-alternativas').innerHTML =
+      '<div><h2>Alternativas de arquitectura</h2><p class="lead">Las tres reciben las mismas entradas y se evalúan con las mismas reglas. Lo que cambia es dónde corre cada tarea y cuántas piezas hay que pagar, operar y mantener.</p></div>' +
+      '<div class="grid">' + ARCHS.map(function (k) {
+        var a = ALT[k];
+        return '<article class="card"><div class="row">' + tag(k) + '<h3>' + P[k].label + '</h3></div>' +
+          '<p>' + a.what + '</p>' +
+          '<div class="flow">' + a.flow.map(function (n, i) { return (i ? '<span class="arrow" aria-hidden="true">→</span>' : '') + '<span class="node">' + esc(n) + '</span>'; }).join('') + '</div>' +
+          '<div><h3>Ventajas</h3><ul class="plain">' + a.pros.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>' +
+          '<div><h3>Limitaciones</h3><ul class="plain">' + a.cons.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>' +
+          '<div class="tablewrap"><table><thead><tr><th>Servicio</th><th class="num">D (ms)</th><th class="num">USD/inst.</th><th class="num">Máx.</th><th>Sale a OSM</th></tr></thead><tbody>' + rows(k) + '</tbody></table></div></article>';
+      }).join('') + '</div>' +
+      '<div class="row"><button class="btn primary" id="toScen2" type="button">Ir a los escenarios</button></div>';
+    $('#toScen2').onclick = function () { go('escenarios'); };
+  }
+
+  /* ---------- 3. Escenarios ---------- */
+  var WHY = {
+    users: 'Fija la demanda λ. Sube la cantidad de instancias, el costo y la cola de espera. Pone a prueba el requisito de capacidad en temporada de vacaciones.',
+    reqPerMin: 'Cada búsqueda de destino o de actividades consulta el mapa. Más solicitudes por usuario aumentan λ y, en el cliente directo, activan el límite por IP de la API pública (error 429).',
+    hit: 'Parte de las consultas que se resuelven sin ir a Overpass. Baja la latencia y la carga externa, y mejora la disponibilidad porque el caché responde aunque el mapa falle.',
+    rtt: 'Representa señal débil o zonas rurales. Se suma a cada respuesta y es lo que más acerca el p95 al límite de 5 s.',
+    pois: 'Lugares que forman un itinerario. Alargan la consulta a OSM, hacen crecer la ruta (n²) y engordan los mensajes entre servicios.'
+  };
+  function renderEscenarios() {
+    var el = $('#v-escenarios'), s = scen(state.active) || state.scenarios[0], base = state.scenarios[0];
+    state.active = s.id;
+    el.innerHTML =
+      '<div><h2>Escenarios</h2><p class="lead">El primero es el escenario de referencia. Cambia sus variables o crea otros y ejecuta al menos tres para compararlos.</p></div>' +
+      '<div class="chips" id="schips" role="group" aria-label="Escenarios">' + state.scenarios.map(function (x) { return '<button class="chip" type="button" data-id="' + x.id + '" aria-pressed="' + (x.id === s.id) + '">' + esc(x.name) + (x.base ? ' (referencia)' : '') + '</button>'; }).join('') + '<button class="chip" type="button" id="addScen">+ Nuevo escenario</button></div>' +
+      '<div class="card"><label for="sName">Nombre del escenario<input id="sName" type="text" value="' + esc(s.name) + '"></label>' +
+      '<div class="grid" id="vars">' + Object.keys(M.VARS).map(function (k) {
+        var d = M.VARS[k];
+        return '<div class="vcard"><label for="n-' + k + '">' + d.label + ' <span class="hint">(' + d.unit + ')</span></label>' +
+          '<div class="ctrl"><input id="n-' + k + '" type="number" inputmode="decimal" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '" value="' + s.vars[k] + '"><input id="r-' + k + '" type="range" aria-label="' + d.label + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '" value="' + s.vars[k] + '"></div>' +
+          '<span class="delta" id="d-' + k + '"></span><p class="why">' + WHY[k] + '</p></div>';
+      }).join('') + '</div>' +
+      '<div class="vcard"><label for="selfHost" style="flex-direction:row;align-items:center;gap:10px"><input id="selfHost" type="checkbox"' + (s.vars.selfHost ? ' checked' : '') + ' style="width:20px;height:20px"> Usar un servidor propio de OpenStreetMap (Overpass autoalojado)</label><p class="why">Sustituye la API pública, que se satura. Consulta en ' + C.selfHostTExtBaseMs + ' ms base, atiende ' + C.selfHostCapRps + ' solicitudes por segundo, quita el límite 429 y suma ' + C.selfHostUsd + ' USD al mes a cualquier alternativa.</p></div>' +
+      '<p class="small" id="derived"></p><div id="sErr"></div>' +
+      '<div class="row"><button class="btn primary" id="runOne" type="button">Ejecutar este escenario</button><button class="btn" id="runAll" type="button">Ejecutar todos los escenarios</button>' + (s.base ? '' : '<button class="btn" id="delScen" type="button">Eliminar</button>') + '</div></div>';
+    var upd = function () {
+      var errs = M.validate(s.vars, state.proj);
+      $('#sErr').innerHTML = errs.length ? '<div class="errors" role="alert"><ul>' + errs.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>' : '';
+      $('#runOne').disabled = errs.length > 0;
+      var lam = s.vars.users * s.vars.reqPerMin / 60;
+      $('#derived').textContent = isFinite(lam) ? 'Demanda derivada: λ = ' + nf(lam, 2) + ' solicitudes por segundo.' : '';
+      Object.keys(M.VARS).forEach(function (k) {
+        var b = base.vars[k], v = s.vars[k], el2 = $('#d-' + k);
+        el2.textContent = s.base || !isFinite(v) ? '' : (v === b ? 'Igual a la referencia' : (v > b ? '+' : '') + nf(100 * (v - b) / b, 0) + ' % frente a la referencia (' + nf(b, k === 'hit' ? 2 : 1) + ')');
+      });
+      save();
+    };
+    $('#schips').addEventListener('click', function (e) {
+      var b = e.target.closest('.chip'); if (!b) return;
+      if (b.id === 'addScen') {
+        var n = state.scenarios.length, id = 's' + Date.now();
+        state.scenarios.push({ id: id, name: 'Escenario ' + (n + 1), vars: Object.assign({}, s.vars) }); state.active = id; save(); renderEscenarios();
+      } else { state.active = b.dataset.id; save(); renderEscenarios(); }
+    });
+    $('#sName').oninput = function (e) { s.name = e.target.value; save(); };
+    $('#vars').addEventListener('input', function (e) {
+      var id = e.target.id; if (!id) return;
+      var k = id.slice(2), v = e.target.value === '' ? NaN : parseFloat(e.target.value);
+      s.vars[k] = v;
+      if (id[0] === 'n' && isFinite(v)) $('#r-' + k).value = v; else if (id[0] === 'r') $('#n-' + k).value = v;
+      upd();
+    });
+    $('#selfHost').onchange = function (e) { s.vars.selfHost = e.target.checked; upd(); };
+    $('#runOne').onclick = function () { runScenario(s.id); state.runView = s.id; go('resultados'); };
+    $('#runAll').onclick = function () {
+      var bad = state.scenarios.filter(function (x) { return M.validate(x.vars, state.proj).length; });
+      if (bad.length) { $('#sErr').innerHTML = '<div class="errors" role="alert">Corrige los valores inválidos de: ' + bad.map(function (x) { return esc(x.name); }).join(', ') + '.</div>'; return; }
+      state.scenarios.forEach(function (x) { runScenario(x.id); }); state.runView = s.id; go('resultados');
+    };
+    var d = $('#delScen'); if (d) d.onclick = function () { state.scenarios = state.scenarios.filter(function (x) { return x.id !== s.id; }); delete state.runs[s.id]; state.active = state.scenarios[0].id; save(); renderEscenarios(); };
+    upd();
+  }
+
+  /* ---------- 4. Resultados ---------- */
+  var METRICS = {
+    p95: { label: 'Latencia p95 (ms)', get: function (r) { return r.latencyP95; }, line: function (p) { return p.latMaxMs; }, lineLabel: 'límite', cap: function (p, mx) { return p.latMaxMs * 2; } },
+    cost: { label: 'Costo mensual (USD)', get: function (r) { return r.cost; }, line: function (p) { return p.budgetUsd; }, lineLabel: 'presupuesto' },
+    av: { label: 'Disponibilidad (%)', get: function (r) { return r.availability * 100; }, line: function (p) { return p.availMinPct; }, lineLabel: 'mínimo', ymin: function (p) { return Math.min(p.availMinPct - 1, 97); }, ymax: 100 },
+    head: { label: 'Margen de capacidad (×)', get: function (r) { return r.headroom; }, line: function () { return 1; }, lineLabel: 'demanda', cap: function () { return 6; } }
+  };
+  var SWEEP = {
+    users: [5, 10, 25, 50, 100, 200, 400, 800, 1500, 3000, 6000],
+    reqPerMin: [0.5, 1, 2, 3, 4, 6, 8, 10, 15, 20, 30],
+    hit: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95],
+    rtt: [20, 50, 100, 200, 300, 500, 800, 1200, 2000],
+    pois: [5, 10, 15, 20, 25, 30, 40, 50, 60]
+  };
+  function lineChart(series, xs, mdef, proj, xlabel, logx) {
+    var W = 640, H = 300, L = 58, R = 40, T = 16, B = 44;
+    var all = []; series.forEach(function (s) { s.pts.forEach(function (p) { all.push(p.y); }); });
+    var ymin = mdef.ymin ? mdef.ymin(proj) : 0;
+    var ymax = mdef.ymax || Math.max.apply(null, all.concat([mdef.line(proj)]));
+    if (mdef.cap) ymax = Math.min(ymax, mdef.cap(proj)); else if (!mdef.ymax) ymax = ymax * 1.08;
+    if (!(ymax > ymin)) ymax = ymin + 1;
+    var xmin = xs[0], xmax = xs[xs.length - 1];
+    var fx = function (x) { return logx ? L + (Math.log(x) - Math.log(xmin)) / (Math.log(xmax) - Math.log(xmin)) * (W - L - R) : L + (x - xmin) / (xmax - xmin) * (W - L - R); };
+    var fy = function (y) { return T + (1 - (Math.min(Math.max(y, ymin), ymax) - ymin) / (ymax - ymin)) * (H - T - B); };
+    var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="min-width:420px;max-width:760px" role="img" aria-label="Gráfico de ' + esc(mdef.label) + ' según ' + esc(xlabel) + ' para las tres alternativas">';
+    for (var i = 0; i <= 4; i++) {
+      var yv = ymin + (ymax - ymin) * i / 4, yy = fy(yv);
+      out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '" stroke="var(--line)" stroke-width="1"/><text class="muted" x="' + (L - 8) + '" y="' + (yy + 4) + '" font-size="11" text-anchor="end">' + nf(yv, ymax - ymin < 10 ? 1 : 0) + '</text>';
+    }
+    var tickIdx = xs.length > 7 ? xs.map(function (_, j) { return j; }).filter(function (j) { return j % 2 === 0 || j === xs.length - 1; }) : xs.map(function (_, j) { return j; });
+    tickIdx.forEach(function (j) { out += '<text class="muted" x="' + fx(xs[j]) + '" y="' + (H - B + 18) + '" font-size="11" text-anchor="middle">' + nf(xs[j], xs[j] < 1 || String(xs[j]).indexOf('.') > -1 ? (xs[j] < 1 ? 2 : 1) : 0) + '</text>'; });
+    out += '<text class="muted" x="' + (L + (W - L - R) / 2) + '" y="' + (H - 6) + '" font-size="12" text-anchor="middle">' + esc(xlabel) + '</text>';
+    var ly = fy(mdef.line(proj));
+    out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + ly + '" y2="' + ly + '" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="' + (W - R) + '" y="' + (ly - 5) + '" font-size="11" text-anchor="end" style="fill:var(--bad)">' + mdef.lineLabel + ' ' + nf(mdef.line(proj), mdef.line(proj) < 10 ? 1 : 0) + '</text>';
+    var dash = { A: '0', B: '7 4', C: '2 4' };
+    series.forEach(function (s) {
+      var d = s.pts.map(function (p, j) { return (j ? 'L' : 'M') + fx(p.x).toFixed(1) + ' ' + fy(p.y).toFixed(1); }).join(' ');
+      out += '<path d="' + d + '" fill="none" stroke="var(--c' + s.k + ')" stroke-width="2.4" stroke-dasharray="' + dash[s.k] + '" stroke-linejoin="round"/>';
+      s.pts.forEach(function (p) {
+        out += '<circle cx="' + fx(p.x).toFixed(1) + '" cy="' + fy(p.y).toFixed(1) + '" r="4.2" stroke="var(--c' + s.k + ')" stroke-width="2" fill="' + (p.ok ? 'var(--c' + s.k + ')' : 'var(--surface)') + '"/>';
+      });
+      var last = s.pts[s.pts.length - 1];
+      out += '<text x="' + (fx(last.x) + 9) + '" y="' + (fy(last.y) + 4) + '" font-size="13" font-weight="700" style="fill:var(--c' + s.k + ')">' + s.k + '</text>';
+    });
+    return out + '</svg>';
+  }
+  function scoreChart(res, proj) {
+    var W = 640, rowH = 46, H = 40 + rowH * 3, L = 40, R = 56, bw = W - L - R;
+    var cols = { lat: 'var(--navy)', av: 'var(--teal)', cost: 'var(--cA)', scal: 'var(--cC)', simp: 'var(--muted)' };
+    var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="min-width:420px;max-width:760px" role="img" aria-label="Puntaje de decisión por alternativa, dividido por criterio">';
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) { var x = L + bw * t; out += '<line x1="' + x + '" x2="' + x + '" y1="8" y2="' + (H - 28) + '" stroke="var(--line)"/><text class="muted" x="' + x + '" y="' + (H - 12) + '" font-size="11" text-anchor="middle">' + nf(t, 2) + '</text>'; });
+    ARCHS.forEach(function (k, i) {
+      var r = res[k], y = 14 + i * rowH, x = L;
+      out += '<text x="' + (L - 10) + '" y="' + (y + 20) + '" font-size="14" font-weight="700" text-anchor="end" style="fill:var(--c' + k + ')">' + k + '</text>';
+      M.WEIGHT_KEYS.forEach(function (c) {
+        var w = r.contrib[c] * bw; if (w <= 0) return;
+        out += '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + w.toFixed(1) + '" height="28" fill="' + cols[c] + '" opacity="' + (r.feasible ? 1 : 0.35) + '"><title>' + WLABEL[c] + ': ' + nf(r.contrib[c], 3) + '</title></rect>';
+        x += w;
+      });
+      out += '<text x="' + (x + 8) + '" y="' + (y + 19) + '" font-size="13" font-weight="600">' + nf(r.total, 3) + '</text>';
+      if (!r.feasible) out += '<text x="' + (L + 8) + '" y="' + (y + 19) + '" font-size="12" font-weight="600" style="fill:var(--bad)">no cumple</text>';
+    });
+    out += '</svg>';
+    var leg = '<div class="legend">' + M.WEIGHT_KEYS.map(function (c) { return '<span><i style="background:' + cols[c] + '"></i>' + WLABEL[c] + '</span>'; }).join('') + '</div>';
+    return out + leg;
+  }
+  function bestOf(res, get, low) {
+    var b = null; ARCHS.forEach(function (k) { if (b === null || (low ? get(res[k]) < get(res[b]) : get(res[k]) > get(res[b]))) b = k; }); return b;
+  }
+  var IND = [
+      ['Latencia p95', function (r) { return r.latencyP95; }, true, function (r) { return ms(r.latencyP95); }],
+      ['Latencia media', function (r) { return r.latencyMean; }, true, function (r) { return ms(r.latencyMean); }],
+      ['Capacidad sostenible', function (r) { return r.capacity; }, false, function (r) { return nf(r.capacity, 1) + ' req/s'; }],
+      ['Margen de capacidad', function (r) { return r.headroom; }, false, function (r) { return nf(r.headroom, 2) + '×'; }],
+      ['Disponibilidad', function (r) { return r.availability; }, false, function (r) { return nf(r.availability * 100, 3) + ' %'; }],
+      ['Costo mensual', function (r) { return r.cost; }, true, function (r) { return nf(r.cost, 2) + ' USD'; }],
+      ['Escalabilidad (techo / demanda)', function (r) { return r.scalability; }, false, function (r) { return nf(r.scalability, 2) + '×'; }],
+      ['Instancias', null, null, function (r) { return r.services.length ? r.services.map(function (s) { return s.inst; }).join(' / ') : 'ninguna'; }],
+      ['Uso de la API pública de mapas', function (r) { return r.uExt; }, true, function (r) { return nf(r.uExt * 100, 0) + ' %'; }]
+    ];
+  function renderResultados() {
+    var el = $('#v-resultados'), ran = state.scenarios.filter(function (s) { return state.runs[s.id]; });
+    if (!ran.length) {
+      el.innerHTML = '<div><h2>Resultados</h2></div><div class="card"><p>Aún no se ha ejecutado ningún escenario. Los resultados salen del cálculo con las variables que definas, no hay valores precargados.</p><div class="row"><button class="btn primary" id="goRun" type="button">Ejecutar los escenarios de ejemplo</button></div></div>';
+      $('#goRun').onclick = function () { state.scenarios.forEach(function (x) { runScenario(x.id); }); state.runView = state.scenarios[0].id; renderResultados(); };
+      return;
+    }
+    if (!state.runs[state.runView]) state.runView = ran[0].id;
+    var id = state.runView, entry = state.runs[id], run = entry.run, res = run.results, rec = run.recommendation, proj = state.proj;
+    var stale = isStale(id);
+    var anyStale = ran.some(function (s) { return isStale(s.id); });
+    var html = '<div><h2>Resultados</h2><p class="lead">Son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento.' + (JSON.parse(entry.vars).selfHost ? ' Este escenario usa Overpass propio.' : '') + '</p></div>';
+    html += '<div class="row"><button class="btn" id="exportPdf" type="button">Exportar resultados a PDF</button><span class="small" id="exportMsg" role="status"></span></div>';
+    html += '<div class="chips" id="rchips" role="group" aria-label="Escenario mostrado">' + ran.map(function (s) { return '<button class="chip" type="button" data-id="' + s.id + '" aria-pressed="' + (s.id === id) + '">' + esc(s.name) + (isStale(s.id) ? ' <span class="pill warn stale">desactualizado</span>' : '') + '</button>'; }).join('') + '</div>';
+    if (stale) html += '<div class="banner none" role="status"><p>Este resultado corresponde a valores anteriores. Vuelve a ejecutar el escenario para actualizarlo.</p><div class="row"><button class="btn primary" id="rerun" type="button">Ejecutar de nuevo</button></div></div>';
+    html += '<div class="row"><button class="btn" id="pdfBtn" type="button">Exportar informe en PDF</button><span class="small hint-pdf" id="pdfHint" role="status">' + (anyStale ? 'Hay escenarios desactualizados: se exportan con sus últimos resultados ejecutados.' : 'Incluye todos los escenarios ejecutados.') + '</span></div>';
+    // recomendación
+    html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + (rec.status === 'ok' ? 'Recomendación: ' + tag(rec.best) + ' ' + P[rec.best].label : 'Ninguna alternativa cumple') + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    // requisitos
+    html += '<div class="card"><h3>Requisitos obligatorios</h3><div class="tablewrap"><table><thead><tr><th>Requisito</th>' + ARCHS.map(function (k) { return '<th>' + k + ' · ' + P[k].label + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      res.A.checks.map(function (c, i) {
+        return '<tr><td>' + esc(c.label) + '</td>' + ARCHS.map(function (k) {
+          var x = res[k].checks[i], vtxt = x.key === 'lat' ? ms(x.value) : x.key === 'av' ? nf(x.value, 3) + ' %' : x.key === 'cap' ? nf(x.value, 2) + '×' : x.key === 'cost' ? nf(x.value, 2) + ' USD' : nf(x.value, 0) + ' de ' + nf(x.limit, 1) + ' p-s';
+          return '<td><span class="pill ' + (x.ok ? 'ok' : 'bad') + '">' + (x.ok ? 'Cumple' : 'No cumple') + '</span> <span class="small">' + vtxt + '</span></td>';
+        }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div></div>';
+    // indicadores
+    var ind = IND;
+    html += '<div class="card"><h3>Indicadores calculados</h3><div class="tablewrap"><table><thead><tr><th>Indicador</th>' + ARCHS.map(function (k) { return '<th>' + k + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      ind.map(function (r) {
+        var b = r[1] ? bestOf(res, r[1], r[2]) : null;
+        return '<tr><td>' + r[0] + '</td>' + ARCHS.map(function (k) { return '<td class="' + (b === k ? 'best' : '') + '">' + r[3](res[k]) + '</td>'; }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div><p class="small">En verde, el mejor valor de cada fila. Las instancias de C van en el orden gateway / lugares / rutas / itinerarios.</p></div>';
+    // puntaje
+    html += '<div class="card"><h3>Puntaje de decisión por criterio</h3><div class="chartbox">' + scoreChart(res, proj) + '</div><p class="small">Cada barra suma el puntaje ponderado (máximo 1). Las alternativas que no cumplen los requisitos obligatorios aparecen atenuadas y no compiten.</p></div>';
+    // barrido
+    html += '<div class="card"><h3>¿Qué pasa si cambia una variable?</h3><div class="grid"><label for="swVar">Variable que se barre<select id="swVar">' + Object.keys(M.VARS).map(function (k) { return '<option value="' + k + '"' + (k === state.sweepVar ? ' selected' : '') + '>' + M.VARS[k].label + '</option>'; }).join('') + '</select></label><label for="swMet">Indicador<select id="swMet">' + Object.keys(METRICS).map(function (k) { return '<option value="' + k + '"' + (k === state.sweepMetric ? ' selected' : '') + '>' + METRICS[k].label + '</option>'; }).join('') + '</select></label></div><div class="chartbox" id="sweepBox"></div>' +
+      '<div class="legend"><span><b style="color:var(--cA)">A</b> línea continua</span><span><b style="color:var(--cB)">B</b> línea discontinua</span><span><b style="color:var(--cC)">C</b> línea punteada</span><span>● cumple todo · ○ incumple algún requisito</span></div><p class="small">Se mantienen las demás variables del escenario seleccionado. Los valores por encima del tope del gráfico se recortan.</p></div>';
+    // matriz de escenarios
+    var baseRun = state.runs[state.scenarios[0].id];
+    html += '<div class="card"><h3>Comparación entre escenarios</h3><div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Recomendada</th>' + ARCHS.map(function (k) { return '<th class="num">p95 ' + k + '</th>'; }).join('') + ARCHS.map(function (k) { return '<th class="num">Costo ' + k + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      ran.map(function (s) {
+        var e = state.runs[s.id], r = e.run.results, rc = e.run.recommendation;
+        return '<tr><td>' + esc(s.name) + (s.base ? ' <span class="small">(referencia)</span>' : '') + '</td><td>' + (rc.best ? tag(rc.best) : '<span class="pill warn">ninguna</span>') + '</td>' +
+          ARCHS.map(function (k) { return '<td class="num">' + (r[k].feasible ? '' : '<span class="small" title="no cumple">✗ </span>') + ms(r[k].latencyP95) + '</td>'; }).join('') + ARCHS.map(function (k) { return '<td class="num">' + nf(r[k].cost, 0) + '</td>'; }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div><p class="small">✗ marca las alternativas que incumplen algún requisito obligatorio en ese escenario.' + (ran.length < 3 ? ' Ejecuta al menos tres escenarios para completar la comparación.' : '') + '</p></div>';
+    if (baseRun && id !== state.scenarios[0].id && !isStale(state.scenarios[0].id)) {
+      var cmp = M.compareToBase(run, baseRun.run);
+      html += '<div class="card"><h3>Cambio frente al escenario de referencia</h3><div class="tablewrap"><table><thead><tr><th>Alternativa</th><th class="num">Latencia p95</th><th class="num">Costo</th><th class="num">Disponibilidad</th></tr></thead><tbody>' +
+        ARCHS.map(function (k) { return '<tr><td>' + tag(k) + ' ' + P[k].label + '</td><td class="num">' + (cmp[k].latency >= 0 ? '+' : '') + nf(cmp[k].latency * 100, 0) + ' %</td><td class="num">' + (cmp[k].cost >= 0 ? '+' : '') + nf(cmp[k].cost * 100, 0) + ' %</td><td class="num">' + (cmp[k].availability >= 0 ? '+' : '') + nf(cmp[k].availability * 100, 3) + ' pp</td></tr>'; }).join('') + '</tbody></table></div></div>';
+    }
+    // explicación
+    html += '<div class="card"><h3>Por qué esta recomendación</h3>' +
+      (rec.reasons.length ? '<div><h3>Alternativas descartadas</h3><ul class="plain">' + rec.reasons.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>' : '') +
+      '<div><h3>Supuestos</h3><ul class="plain">' + rec.assumptions.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>' +
+      '<div><h3>Limitaciones</h3><ul class="plain">' + rec.limitations.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>' +
+      '</div>';
+    // sensibilidad
+    var sens = M.sensitivity(JSON.parse(entry.vars), proj);
+    html += '<div class="card"><h3>Sensibilidad de la decisión</h3><p class="small">Se repite la simulación con cada variable a la mitad y al doble. «Cambia» indica que la recomendación sería distinta a ' + (sens.base ? esc(sens.base) : 'ninguna') + '.</p><div class="tablewrap"><table><thead><tr><th>Variable</th><th>Mitad</th><th>Doble</th></tr></thead><tbody>' +
+      sens.rows.map(function (r) { var c = function (x) { return nf(x.value, x.value < 1 ? 2 : 0) + ' → ' + (x.best || 'ninguna') + (x.changed ? ' <span class="pill warn">cambia</span>' : ' <span class="pill ok">igual</span>'); }; return '<tr><td>' + r.label + '</td><td>' + c(r.low) + '</td><td>' + c(r.high) + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
+    // trazabilidad
+    html += '<div class="card"><h3>Trazabilidad del cálculo</h3><p class="small">Cada línea muestra la fórmula con los valores de este escenario. Sirve para verificar a mano cualquier resultado.</p>' +
+      ARCHS.map(function (k) {
+        return '<details><summary>' + k + ' · ' + P[k].label + '</summary><div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Magnitud</th><th>Cálculo</th><th class="num">Valor</th></tr></thead><tbody>' + res[k].trace.map(function (t) { return '<tr><td>' + esc(t.k) + '</td><td>' + esc(t.f) + '</td><td class="num">' + esc(t.v) + '</td></tr>'; }).join('') + '</tbody></table></div></details>';
+      }).join('') + '</div>';
+    el.innerHTML = html;
+    $('#rchips').addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (b) { state.runView = b.dataset.id; renderResultados(); } });
+    $('#exportPdf').onclick = function () {
+      var m = $('#exportMsg'), framed = false;
+      try { framed = window.self !== window.top; } catch (e) { framed = true; }
+      prepareReport();
+      if (framed) m.textContent = 'Esta vista no permite imprimir ni descargar. Abre el simulador publicado en Firebase y pulsa de nuevo; en el cuadro de impresión elige «Guardar como PDF».';
+      else m.textContent = 'En el cuadro de impresión elige «Guardar como PDF».';
+      try { window.print(); } catch (e) {}
+    };
+    $('#pdfBtn').onclick = exportPdf;
+    var rr = $('#rerun'); if (rr) rr.onclick = function () { runScenario(id); renderResultados(); };
+    var drawSweep = function () {
+      var key = state.sweepVar, vals = SWEEP[key].slice(), v0 = JSON.parse(entry.vars);
+      if (vals.indexOf(v0[key]) < 0) vals.push(v0[key]); vals.sort(function (a, b) { return a - b; });
+      var sw = M.sweep(v0, proj, key, vals), md = METRICS[state.sweepMetric];
+      var series = ARCHS.map(function (k) { return { k: k, pts: sw.map(function (s) { return { x: s.x, y: md.get(s.run.results[k]), ok: s.run.results[k].feasible }; }) }; });
+      $('#sweepBox').innerHTML = lineChart(series, vals, md, proj, M.VARS[key].label + ' (' + M.VARS[key].unit + ')', key === 'users' || key === 'rtt');
+    };
+    $('#swVar').onchange = function (e) { state.sweepVar = e.target.value; drawSweep(); };
+    $('#swMet').onchange = function (e) { state.sweepMetric = e.target.value; drawSweep(); };
+    drawSweep();
+  }
+
+  /* ---------- Informe imprimible (PDF) ---------- */
+  function buildReport() {
+    var proj = state.proj, ran = state.scenarios.filter(function (s) { return state.runs[s.id]; }), saved = state.runView;
+    var d = new Date(), fecha = d.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+    var vlabel = function (k) { return M.VARS[k].label + ' (' + M.VARS[k].unit + ')'; };
+    var SHORT = { users: 'Usuarios', reqPerMin: 'Solic./min', hit: 'Caché', rtt: 'RTT (ms)', pois: 'Lugares' };
+    var html = '<div class="rpt-head"><small class="small">Universidad Libre · Ingeniería Aplicada · Actividad 9 · ' + fecha + '</small><h1>Simulador de arquitectura: ' + esc(proj.name) + '</h1><p>' + esc(proj.description) + '</p><p class="small">Usuarios previstos: ' + esc(proj.users) + '</p></div>';
+    html += '<div class="card"><h3>Requisitos, restricciones y pesos</h3><div class="tablewrap"><table><tbody>' +
+      '<tr><th>Latencia máxima p95</th><td>' + nf(proj.latMaxMs, 0) + ' ms</td><th>Disponibilidad mínima</th><td>' + proj.availMinPct + ' %</td></tr>' +
+      '<tr><th>Presupuesto mensual</th><td>' + nf(proj.budgetUsd, 0) + ' USD</td><th>Equipo</th><td>' + proj.teamSize + ' personas, ' + proj.weeksAvail + ' semanas, dedicación ' + proj.dedication + '</td></tr>' +
+      '<tr><th>Pesos de decisión</th><td colspan="3">' + M.WEIGHT_KEYS.map(function (k) { return WLABEL[k] + ' ' + nf(proj.weights[k], 2); }).join(' · ') + '</td></tr></tbody></table></div></div>';
+    html += '<div class="card"><h3>Escenarios ejecutados</h3><div class="tablewrap"><table><thead><tr><th>Escenario</th>' + Object.keys(M.VARS).map(function (k) { return '<th class="num">' + SHORT[k] + '</th>'; }).join('') + '<th>Overpass propio</th><th>Recomendada</th></tr></thead><tbody>' +
+      ran.map(function (s) { var e = state.runs[s.id], v = JSON.parse(e.vars), rc = e.run.recommendation; return '<tr><td>' + esc(s.name) + '</td>' + Object.keys(M.VARS).map(function (k) { return '<td class="num">' + nf(v[k], k === 'hit' || k === 'reqPerMin' ? 2 : 0) + '</td>'; }).join('') + '<td>' + (v.selfHost ? 'Sí' : 'No') + '</td><td>' + (rc.best ? rc.best + ' · ' + esc(P[rc.best].label) : 'Ninguna cumple') + '</td></tr>'; }).join('') + '</tbody></table></div><p class="small">Los resultados son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento real.</p></div>';
+    ran.forEach(function (s) {
+      state.runView = s.id; renderResultados();
+      var c = $('#v-resultados').cloneNode(true);
+      ['#rchips', '.row', '#sweepBox'].forEach(function (q) { c.querySelectorAll(q).forEach(function (n) { var t = (q === '#sweepBox') ? n.closest('.card') : n; if (t && t.parentNode) t.parentNode.removeChild(t); }); });
+      c.querySelectorAll('h3').forEach(function (h) { if (h.textContent === 'Comparación entre escenarios') { var cd = h.closest('.card'); if (cd && cd.parentNode) cd.parentNode.removeChild(cd); } });
+      c.querySelectorAll('.banner.none').forEach(function (n) { if (n.querySelector('.btn') || /anteriores/.test(n.textContent)) n.parentNode.removeChild(n); });
+      c.querySelectorAll('details').forEach(function (n) { var cd = n.closest('.card'); if (cd && cd.parentNode) cd.parentNode.removeChild(cd); });
+      var first = c.firstElementChild; if (first && first.tagName === 'DIV' && first.querySelector('h2')) c.removeChild(first);
+      var v = JSON.parse(state.runs[s.id].vars);
+      html += '<section class="rpt-sec"><h2>Escenario: ' + esc(s.name) + '</h2><p class="small">' + Object.keys(M.VARS).map(function (k) { return vlabel(k) + ': ' + nf(v[k], k === 'hit' || k === 'reqPerMin' ? 2 : 0); }).join(' · ') + ' · Overpass propio: ' + (v.selfHost ? 'sí' : 'no') + '</p><div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">' + c.innerHTML + '</div></section>';
+    });
+    state.runView = saved; renderResultados();
+    html += '<section class="rpt-sec"><h2>Información adicional para validar en una aplicación real</h2><ul class="plain"><li>Latencias y tasas de error reales de Overpass, Nominatim y Open-Elevation, medidas desde Colombia.</li><li>Tasa real de aciertos de caché con usuarios reales.</li><li>Precios actuales del proveedor y consumo real de Firestore.</li><li>Pruebas de carga con JMeter o k6 sobre un prototipo de cada alternativa.</li></ul></section>';
+    return html;
+  }
+  var themeBefore = null;
+  function prepareReport() {
+    $('#report').innerHTML = buildReport();
+    var r = document.documentElement; if (themeBefore === null) themeBefore = r.getAttribute('data-theme') || '';
+    r.setAttribute('data-theme', 'light');
+  }
+  window.addEventListener('afterprint', function () {
+    var r = document.documentElement;
+    if (themeBefore !== null) { if (themeBefore) r.setAttribute('data-theme', themeBefore); else r.removeAttribute('data-theme'); themeBefore = null; }
+    $('#report').innerHTML = '';
+  });
+  window.__locusPrepareReport = function () { Object.keys(state.runs).length || state.scenarios.forEach(function (x) { runScenario(x.id); }); prepareReport(); };
+
+  /* ---------- Informe PDF ---------- */
+  function buildReport() {
+    var p = state.proj, ran = state.scenarios.filter(function (s) { return state.runs[s.id]; });
+    var fecha = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+    var h = '<div class="rep-head"><h1>' + esc(p.name) + ': informe de simulación de arquitectura</h1><p class="small">Ingeniería Aplicada, Actividad 9 · Tres Felices Tigres, Universidad Libre · ' + esc(fecha) + '</p>' +
+      '<p>' + esc(p.description) + '</p><p><b>Usuarios previstos:</b> ' + esc(p.users) + '</p>' +
+      '<p><b>Requisitos obligatorios:</b> latencia p95 ≤ ' + nf(p.latMaxMs, 0) + ' ms; disponibilidad ≥ ' + p.availMinPct + ' %; capacidad ≥ demanda pico; costo ≤ ' + nf(p.budgetUsd, 0) + ' USD al mes; esfuerzo ≤ ' + nf(p.teamSize * p.weeksAvail * p.dedication, 1) + ' persona-semanas (' + p.teamSize + ' integrantes × ' + p.weeksAvail + ' semanas × ' + p.dedication + ').</p>' +
+      '<p><b>Pesos de decisión:</b> ' + M.WEIGHT_KEYS.map(function (k) { return WLABEL[k] + ' ' + nf(p.weights[k], 2); }).join(', ') + '.</p>' +
+      '<p class="small">Los resultados son estimaciones del modelo con los parámetros documentados en el simulador. No son mediciones de rendimiento real.</p></div>';
+    ran.forEach(function (s) {
+      var e = state.runs[s.id], run = e.run, res = run.results, rec = run.recommendation, v = JSON.parse(e.vars);
+      h += '<div class="rep-sc"><h2>Escenario: ' + esc(s.name) + (s.base ? ' (referencia)' : '') + '</h2>' +
+        '<p><b>Entradas:</b> ' + Object.keys(M.VARS).map(function (k) { return M.VARS[k].label + ' ' + nf(v[k], v[k] < 1 ? 2 : 1) + ' ' + M.VARS[k].unit; }).join('; ') + (v.selfHost ? '; Overpass propio activado' : '') + '.</p>' +
+        '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h3>' + (rec.status === 'ok' ? 'Recomendación: ' + rec.best + ' · ' + P[rec.best].label : 'Ninguna alternativa cumple') + '</h3>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>' +
+        '<h3>Requisitos obligatorios</h3><div class="tablewrap"><table><thead><tr><th>Requisito</th>' + ARCHS.map(function (k) { return '<th>' + k + ' · ' + P[k].label + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        res.A.checks.map(function (c, i) { return '<tr><td>' + esc(c.label) + '</td>' + ARCHS.map(function (k) { var x = res[k].checks[i]; return '<td>' + (x.ok ? 'Cumple' : 'No cumple') + ' (' + (x.key === 'lat' ? ms(x.value) : x.key === 'av' ? nf(x.value, 3) + ' %' : x.key === 'cap' ? nf(x.value, 2) + '×' : x.key === 'cost' ? nf(x.value, 2) + ' USD' : nf(x.value, 0) + ' p-s') + ')</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
+        '<h3>Indicadores calculados</h3><div class="tablewrap"><table><thead><tr><th>Indicador</th>' + ARCHS.map(function (k) { return '<th>' + k + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        IND.map(function (r) { return '<tr><td>' + r[0] + '</td>' + ARCHS.map(function (k) { return '<td>' + r[3](res[k]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
+        '<div class="rep-chart"><h3>Puntaje de decisión</h3>' + scoreChart(res, p) + '</div>' +
+        (rec.reasons.length ? '<h3>Alternativas descartadas</h3><ul class="plain">' + rec.reasons.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
+    });
+    h += '<div class="rep-sc"><h2>Comparación entre escenarios</h2><div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Recomendada</th>' + ARCHS.map(function (k) { return '<th class="num">p95 ' + k + '</th>'; }).join('') + ARCHS.map(function (k) { return '<th class="num">Costo ' + k + ' (USD)</th>'; }).join('') + '</tr></thead><tbody>' +
+      ran.map(function (s) { var r = state.runs[s.id].run.results, rc = state.runs[s.id].run.recommendation; return '<tr><td>' + esc(s.name) + '</td><td>' + (rc.best || 'ninguna') + '</td>' + ARCHS.map(function (k) { return '<td class="num">' + (r[k].feasible ? '' : '✗ ') + ms(r[k].latencyP95) + '</td>'; }).join('') + ARCHS.map(function (k) { return '<td class="num">' + nf(r[k].cost, 0) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div><p class="small">✗ marca las alternativas que incumplen algún requisito obligatorio.</p>' +
+      '<h3>Supuestos y limitaciones</h3><ul class="plain">' + (ran.length ? state.runs[ran[0].id].run.recommendation.assumptions.concat(state.runs[ran[0].id].run.recommendation.limitations) : []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+    return h;
+  }
+  function exportPdf() {
+    var hint = $('#pdfHint'), root = document.documentElement;
+    $('#printReport').innerHTML = buildReport();
+    var prevTheme = root.getAttribute('data-theme'), prevTitle = document.title, fired = false;
+    var restore = function () { if (prevTheme === null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prevTheme); document.title = prevTitle; };
+    var onBefore = function () { fired = true; };
+    window.addEventListener('beforeprint', onBefore);
+    window.addEventListener('afterprint', function done() { window.removeEventListener('afterprint', done); window.removeEventListener('beforeprint', onBefore); restore(); });
+    root.setAttribute('data-theme', 'light'); document.title = 'Locus-simulacion-arquitectura';
+    try { window.print(); } catch (e) {}
+    setTimeout(function () {
+      if (!fired) { restore(); window.removeEventListener('beforeprint', onBefore); if (hint) hint.textContent = 'Este visor no permite imprimir. Abre el simulador publicado en GitHub Pages o Firebase y usa «Exportar informe en PDF»; en el diálogo elige «Guardar como PDF».'; }
+    }, 900);
+  }
+
+  /* ---------- 5. Pruebas ---------- */
+  function renderPruebas() {
+    var res = TS.runAll(M), ok = res.filter(function (r) { return r.pass; }).length;
+    $('#v-pruebas').innerHTML =
+      '<div><h2>Validación y pruebas</h2><p class="lead">Estas pruebas se ejecutan ahora mismo sobre el mismo modelo que calcula los resultados. El archivo <code>tests.js</code> corre las mismas con Node.</p></div>' +
+      '<div class="banner ' + (ok === res.length ? 'ok' : 'none') + '" role="status"><h2>' + ok + ' de ' + res.length + ' pruebas pasan</h2><p>Cubren cálculo manual, monotonía, presupuesto, coherencia de la recomendación, escenarios imposibles, validación de entradas, repetibilidad y sensibilidad a los pesos.</p></div>' +
+      '<div class="tablewrap"><table><thead><tr><th>Prueba</th><th>Qué demuestra</th><th>Esperado</th><th>Obtenido</th><th>Resultado</th></tr></thead><tbody>' +
+      res.map(function (r) { return '<tr><td><b>' + r.id + '</b> ' + esc(r.name) + '</td><td>' + esc(r.desc) + '</td><td>' + esc(r.expected) + '</td><td>' + esc(r.obtained) + '</td><td><span class="pill ' + (r.pass ? 'ok' : 'bad') + '">' + (r.pass ? 'Pasa' : 'Falla') + '</span></td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="card"><h3>Controles de entradas inválidas</h3><p>Cada campo valida tipo, rango y entero cuando corresponde. Mientras haya un error el botón de ejecutar queda desactivado y el mensaje dice qué corregir. Los pesos no pueden ser negativos ni sumar cero.</p></div>';
+  }
+
+  /* ---------- 6. Documentación ---------- */
+  function renderDoc() {
+    var varsRows = Object.keys(M.VARS).map(function (k) { var d = M.VARS[k]; return '<tr><td><code>' + k + '</code></td><td>' + d.label + '</td><td>' + d.min + ' a ' + d.max + ' ' + d.unit + '</td><td>' + WHY[k] + '</td></tr>'; }).join('');
+    var parRows = [
+      ['tExtBaseMs', C.tExtBaseMs, 'ms', 'Latencia base de Overpass y Nominatim'], ['tExtPerPoiMs', C.tExtPerPoiMs, 'ms por lugar', 'Tamaño de la respuesta'],
+      ['routeUsPerN2', C.routeUsPerN2, 'µs', 'Vecino más cercano O(n²) en servidor'], ['clientCpuFactor', C.clientCpuFactor, '×', 'Teléfono frente a servidor'],
+      ['renderMs', C.renderMs, 'ms', 'Pintar el itinerario'], ['cacheReadMs', C.cacheReadMs, 'ms', 'Leer del caché'], ['parseMsPerPoi', C.parseMsPerPoi, 'ms por lugar', 'Interpretar la respuesta del mapa'],
+      ['rhoTarget', C.rhoTarget, '', 'Utilización objetivo de servidores'], ['rhoExtTarget', C.rhoExtTarget, '', 'Uso cómodo de la API pública'],
+      ['extCapPerIpRps', C.extCapPerIpRps, 'req/s', 'Tolerancia de la API pública por IP'], ['extCapGlobalRps', C.extCapGlobalRps, 'req/s', 'Parte pública que le toca a Locus (clientes directos)'],
+      ['selfHostTExtBaseMs / selfHostCapRps / selfHostUsd', C.selfHostTExtBaseMs + ' / ' + C.selfHostCapRps + ' / ' + C.selfHostUsd, 'ms / req/s / USD', 'Overpass propio: consulta base, capacidad y costo mensual'], ['rateLimitPerIpPerMin', C.rateLimitPerIpPerMin, 'req/min', 'Umbral del error 429 por usuario'], ['rateLimitBackoffMs', C.rateLimitBackoffMs, 'ms', 'Espera tras un 429'],
+      ['localCacheFactor (A)', P.A.localCacheFactor, '', 'Aciertos del caché solo en el teléfono frente a uno compartido'],
+      ['extAvail', C.extAvail, '', 'Disponibilidad de los espejos de Overpass'], ['dbAvail / hostingAvail', C.dbAvail, '', 'Firestore y Hosting'], ['instAvail', C.instAvail, '', 'Una instancia de servidor'],
+      ['minReplicas', C.minReplicas, '', 'Réplicas mínimas por servicio si el presupuesto alcanza'], ['dutyHoursPerDay', C.dutyHoursPerDay, 'h', 'Horas al día a la carga simulada'],
+      ['freeOpsPerMonth', C.freeOpsPerMonth, 'ops', 'Cuota gratuita de Firestore'], ['usdPerMillionOps', C.usdPerMillionOps, 'USD', 'Costo por millón de operaciones'], ['opsPerRequest', C.opsPerRequest, 'ops', 'Operaciones de Firestore por solicitud'],
+      ['p95Queue / p95Ext / p95Ramp', C.p95Queue + ' / ' + C.p95Ext + ' / ' + C.p95Ramp, '', 'Factores del percentil 95']
+    ].map(function (r) { return '<tr><td><code>' + r[0] + '</code></td><td class="num">' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>'; }).join('');
+    $('#v-documentacion').innerHTML =
+      '<div><h2>Documentación del simulador</h2><p class="lead">Describe el modelo, las variables, las fórmulas, los criterios de decisión, el uso y las limitaciones.</p></div>' +
+      '<div class="card"><h3>Enlace al simulador</h3><div class="copy"><code id="selfUrl"></code><button class="btn" id="copyUrl" type="button">Copiar enlace</button><span class="small" id="copyMsg" role="status"></span></div></div>' +
+      '<div class="card"><h2>1. Descripción del modelo</h2><p>El simulador compara tres arquitecturas para Locus (cliente directo, monolito con caché y microservicios) con las mismas entradas. Para cada una calcula la demanda, reparte instancias según el presupuesto, estima cola, latencia, capacidad, disponibilidad y costo, verifica cinco requisitos obligatorios y puntúa las que cumplen con los pesos del equipo.</p>' +
+      '<p>La parte dominante del tiempo de respuesta es la consulta a OpenStreetMap, y la diferencia entre arquitecturas está en cuánta de esa consulta evitan mediante caché, cuánta capacidad tienen para atender la demanda y qué cuestan.</p></div>' +
+      '<div class="card"><h2>2. Variables de entrada</h2><div class="tablewrap"><table><thead><tr><th>Variable</th><th>Significado</th><th>Rango válido</th><th>Relación con requisitos y resultados</th></tr></thead><tbody>' + varsRows + '</tbody></table></div><p class="small">Además se configuran en la pestaña Proyecto: latencia máxima, disponibilidad mínima, presupuesto, equipo, semanas, dedicación y pesos.</p></div>' +
+      '<div class="card"><h2>3. Fórmulas</h2><pre>' + esc(
+'Demanda\n  λ = usuarios × solicitudes_por_minuto / 60                         [req/s]\n  aciertos efectivos h = aciertos (B, C)  |  aciertos × 0.35 (A)\n  λ_ext = λ × (1 − h)\n\n' +
+'Servicios (B y C)\n  D = base + porLugar·n [+ ruta n²·2µs] [+ (1−h)·0.4·n + h·2]       [ms por solicitud]\n  instancias k = clamp( máx( ⌈λ·D/1000/0.7⌉, ⌈λ_ext/(8·0.5)⌉ si sale a OSM, 2 ), 1, máx_k )\n  si costo > presupuesto: quitar una instancia al servicio con más réplicas, hasta cumplir\n  ρ = λ·D / (k·1000)        R = D / (1 − ρ)        (M/M/1 por servicio)\n\n' +
+'API externa\n  capacidad = k_salida × 8 req/s (B, C)  |  40 req/s (A)\n  T_ext = 900 + 25·n  (300 + 25·n con Overpass propio, capacidad 60 req/s, +30 USD)\n  u = λ_ext / capacidad        T_ext_ef = T_ext × (1 + u / (2(1−u)))   (M/D/1)\n\n' +
+'Latencia\n  B, C: media = RTT + saltos + render + ΣR + (1−h)·T_ext_ef\n        p95   = RTT + saltos + render + 3·ΣR + 1.5·rampa·T_ext_ef,  rampa = mín(1, (1−h)/0.05)\n  A:    media = ruta_en_teléfono + render + h·2 + (1−h)·(RTT + T_ext_ef + P429·2000)\n        p95   = ruta + render + RTT + 1.5·rampa·T_ext_ef + mín(1, P429/0.05)·2000\n        P429 = máx(0, mín(1, (solicitudes_por_min − 6)/6))\n\n' +
+'Capacidad y escalabilidad\n  capacidad = mín( mín_s k_s·0.7·1000/D_s , 0.5·capacidad_ext/(1−h) )     margen = capacidad / λ\n  escalabilidad = techo técnico (con máx_k instancias) / λ\n\n' +
+'Disponibilidad\n  Disp = hosting × Firestore × Π_s (1 − (1−0.995)^k_s) × [broker 0.999 en C] × (1 − (1−0.99)(1−h))\n\n' +
+'Costo\n  costo = fijo + Σ k_s × precio_s + máx(0, ops_mes − 600 000)/10⁶ × 0.9\n  ops_mes = λ × 3600 × 3 h × 30 días × 0.2\n') + '</pre></div>' +
+      '<div class="card"><h2>4. Parámetros y supuestos</h2><div class="tablewrap"><table><thead><tr><th>Parámetro</th><th class="num">Valor</th><th>Unidad</th><th>Qué representa</th></tr></thead><tbody>' + parRows + '</tbody></table></div>' +
+      '<ul class="plain"><li>Todos los valores son supuestos del equipo basados en el comportamiento típico de las APIs públicas y de los artículos del curso. No son mediciones.</li><li>Las solicitudes llegan de forma uniforme durante las horas simuladas.</li><li>Cada instancia de servidor tiene su propia IP de salida.</li><li>Los esfuerzos de desarrollo (6, 10 y 24 persona-semanas) son estimaciones del equipo.</li></ul></div>' +
+      '<div class="card"><h2>5. Criterios de decisión</h2><ol class="plain"><li><b>Requisitos obligatorios.</b> Se descarta toda alternativa que incumpla: latencia p95 máxima, disponibilidad mínima, capacidad para la demanda pico (margen ≥ 1), costo dentro del presupuesto y esfuerzo dentro de la capacidad del equipo.</li><li><b>Puntaje 0 a 1 por criterio.</b> Latencia: 1 − p95/límite. Disponibilidad: log₁₀(indisponibilidad permitida / indisponibilidad calculada)/1.5. Costo: 1 − costo/presupuesto. Escalabilidad: log₂(techo/demanda)/4. Simplicidad: 1 − esfuerzo/capacidad del equipo. Todos limitados a [0, 1].</li><li><b>Suma ponderada</b> con los pesos normalizados del equipo. Gana el mayor puntaje entre las que cumplen. Si ninguna cumple, se indica cuál se acerca más y qué requisito falla.</li></ol></div>' +
+      '<div class="card"><h2>6. Instrucciones de uso</h2><ol class="plain"><li>En Proyecto, revisa los requisitos, el presupuesto, el equipo y los pesos.</li><li>En Escenarios, ajusta el escenario de referencia y los demás, o crea uno nuevo.</li><li>Pulsa «Ejecutar todos los escenarios».</li><li>En Resultados, lee la recomendación, la tabla de requisitos, los indicadores y los gráficos. Usa el barrido para ver el punto donde cambia la decisión.</li><li>Abre la trazabilidad para verificar cualquier número con su fórmula.</li><li>En Pruebas, comprueba que el modelo se comporta de forma coherente.</li></ol></div>' +
+      '<div class="card"><h2>7. Limitaciones</h2><ul class="plain"><li>Los resultados son estimaciones del modelo, no mediciones de rendimiento real.</li><li>No hay picos dentro del minuto, fallas correlacionadas ni diferencias entre proveedores de nube.</li><li>Un monolito en una sola máquina suele superar a los microservicios en rendimiento puro, según los artículos, y el resultado no se generaliza a todos los sistemas.</li><li>El modelo supone que la API pública de OSM se comporta igual en todo el día.</li><li>La seguridad y el cifrado no se modelan como indicador.</li></ul>' +
+      '<h3>Información adicional para validar en una aplicación real</h3><ul class="plain"><li>Latencias y tasas de error reales de Overpass, Nominatim y Open-Elevation, medidas desde Colombia.</li><li>Tasa real de aciertos de caché con usuarios reales.</li><li>Precios actuales del proveedor y consumo real de Firestore.</li><li>Pruebas de carga con JMeter o k6 sobre un prototipo de cada alternativa.</li></ul></div>' +
+      '<div class="card"><h2>8. Guion de sustentación</h2><div class="step"><b>1</b><p>Muestra la pestaña Proyecto y explica los requisitos obligatorios.</p></div><div class="step"><b>2</b><p>En Escenarios, ejecuta los cuatro. Señala que cada resultado sale del cálculo.</p></div><div class="step"><b>3</b><p>Cambia una variable, por ejemplo sube los usuarios de la temporada alta, y vuelve a ejecutar.</p></div><div class="step"><b>4</b><p>Lee la recomendación y abre la trazabilidad para mostrar la fórmula con números.</p></div><div class="step"><b>5</b><p>Usa el barrido y la sensibilidad para explicar cuándo cambiaría la decisión.</p></div></div>' +
+      '<div class="card"><h2>9. Referencias</h2><ul class="plain"><li>From Monolithic Systems to Microservices: A Comparative Study of Performance.</li><li>Monolithic vs. Microservice Architecture: A Performance and Scalability Evaluation.</li><li>A Comparative Review of Microservices and Monolithic Architectures.</li><li>MVC Architecture: A Comparative Study Between Laravel Framework and Slim Framework in Freelancer Project Monitoring System Web Based.</li></ul></div>';
+    var url = ''; try { url = location.href.split('#')[0]; } catch (e) {}
+    $('#selfUrl').textContent = url || '(abre el simulador desde su enlace publicado)';
+    $('#copyUrl').onclick = function () {
+      var m = $('#copyMsg');
+      try { navigator.clipboard.writeText(url).then(function () { m.textContent = 'Enlace copiado'; }, function () { sel(); }); } catch (e) { sel(); }
+      function sel() { var r = document.createRange(); r.selectNodeContents($('#selfUrl')); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); m.textContent = 'Enlace seleccionado, cópialo con el menú'; }
+    };
+  }
+
+  /* ---------- tema e inicio ---------- */
+  function initTheme() {
+    var b = $('#themeBtn'), root = document.documentElement;
+    var cur = function () { var t = root.getAttribute('data-theme'); if (t) return t; return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; };
+    var label = function () { b.textContent = cur() === 'dark' ? 'Tema claro' : 'Tema oscuro'; };
+    b.onclick = function () { root.setAttribute('data-theme', cur() === 'dark' ? 'light' : 'dark'); label(); };
+    label();
+  }
+  load(); buildTabs(); initTheme();
+  var h = (location.hash || '').replace('#', '');
+  var start = VIEWS.some(function (v) { return v[0] === h; }) ? h : 'proyecto';
+  go(start, true);
+  window.addEventListener('hashchange', function () { var x = (location.hash || '').replace('#', ''); if (VIEWS.some(function (v) { return v[0] === x; }) && x !== state.view) go(x, true); });
+})();
+</script>
+
+</body>
+</html>

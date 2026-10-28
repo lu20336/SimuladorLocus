@@ -204,11 +204,11 @@ svg .muted{fill:var(--muted)}
 
   /* ---------- Variables y validación ---------- */
   const VARS = {
-    users:     { label: 'Usuarios simultáneos en el pico', unit: 'usuarios', min: 1, max: 50000, int: true, step: 1 },
-    reqPerMin: { label: 'Solicitudes por usuario',        unit: 'por minuto', min: 0.1, max: 30, step: 0.1 },
-    hit:       { label: 'Aciertos de caché',              unit: 'fracción', min: 0, max: 0.99, step: 0.01 },
-    rtt:       { label: 'Latencia de red del celular',    unit: 'ms', min: 5, max: 2000, step: 5 },
-    pois:      { label: 'Lugares por itinerario',         unit: 'lugares', min: 3, max: 60, int: true, step: 1 }
+    users:     { label: 'Usuarios simultáneos en el pico', unit: 'usuarios', min: 10, max: 5000, int: true, step: 10 },
+    reqPerMin: { label: 'Solicitudes por usuario',        unit: 'por minuto', min: 0.5, max: 10, step: 0.5 },
+    hit:       { label: 'Aciertos de caché',              unit: 'fracción', min: 0, max: 0.95, step: 0.05 },
+    rtt:       { label: 'Latencia de red del celular',    unit: 'ms', min: 20, max: 1000, step: 10 },
+    pois:      { label: 'Lugares por itinerario',         unit: 'lugares', min: 5, max: 40, int: true, step: 1 }
   };
   const PROJECT_FIELDS = {
     latMaxMs:   { label: 'Latencia máxima (p95)', min: 200, max: 60000 },
@@ -463,24 +463,93 @@ svg .muted{fill:var(--muted)}
     return rec;
   }
 
-  function runScenario(v, proj, P) {
+  function evalAll(v, proj, P) { const r = {}; ARCHS.forEach(k => { r[k] = computeArch(k, v, proj, P); }); return r; }
+  function bestFeasible(results) {
+    let b = null;
+    ARCHS.forEach(k => { if (results[k].feasible && (b === null || results[k].total > results[b].total)) b = k; });
+    return b;
+  }
+  const BUDGET_MULT = [1, 1.25, 1.5, 2, 3, 5], WEEKS_MULT = [1, 1.5, 2, 3];
+
+  /* Cuando ninguna alternativa cumple, busca la propuesta que menos cambia el plan:
+     Overpass propio, caché precalentado, más presupuesto, más plazo; y como último recurso, limitar usuarios. */
+  function propose(v, proj, P) {
+    const cands = [];
+    (v.selfHost ? [false] : [false, true]).forEach(sh => [0, 0.2, 0.35].forEach((hb, hi) => {
+      if (hb && v.hit >= 0.95) return;
+      BUDGET_MULT.forEach((bm, bi) => WEEKS_MULT.forEach((wm, wi) => {
+        cands.push({ sh: sh, hb: hb, bm: bm, wm: wm, pen: (sh ? 2 : 0) + hi * 1.5 + bi + wi * 1.2 });
+      }));
+    }));
+    cands.sort((a, b) => a.pen - b.pen);
+    const apply = c => {
+      const vv = Object.assign({}, v), pp = JSON.parse(JSON.stringify(proj));
+      if (c.sh) vv.selfHost = true;
+      if (c.hb) vv.hit = Math.min(0.95, Math.round((v.hit + c.hb) * 100) / 100);
+      pp.budgetUsd = Math.round(proj.budgetUsd * c.bm);
+      pp.weeksAvail = Math.min(104, Math.ceil(proj.weeksAvail * c.wm));
+      return { vv: vv, pp: pp };
+    };
+    const describe = (c, vv, pp) => {
+      const ch = [];
+      if (c.sh) ch.push('activar un servidor propio de OpenStreetMap (Overpass autoalojado, ' + PARAMS.common.selfHostUsd + ' USD al mes)');
+      if (c.hb) ch.push('precalentar el caché con los destinos más consultados (aciertos de ' + fmt(v.hit, 2) + ' a ' + fmt(vv.hit, 2) + ')');
+      if (pp.budgetUsd !== proj.budgetUsd) ch.push('subir el presupuesto mensual de ' + proj.budgetUsd + ' a ' + pp.budgetUsd + ' USD');
+      if (pp.weeksAvail !== proj.weeksAvail) ch.push('ampliar el plazo de ' + proj.weeksAvail + ' a ' + pp.weeksAvail + ' semanas');
+      return ch;
+    };
+    for (let n = 0; n < cands.length; n++) {
+      const c = cands[n], a = apply(c), res = evalAll(a.vv, a.pp, P), b = bestFeasible(res);
+      if (b) {
+        const ch = describe(c, a.vv, a.pp);
+        return { kind: 'adjusted', best: b, vars: a.vv, proj: a.pp, results: res, changes: ch,
+          text: ['Ninguna alternativa cumple todos los requisitos obligatorios con las entradas tal como están.',
+                 'La propuesta que menos cambia el plan es ' + ch.join(', ') + '.',
+                 'Con esos ajustes se recomienda «' + res[b].label + '» (' + b + '): cumple los 5 requisitos y suma ' + fmt(res[b].total, 3) + ' puntos de 1.'] };
+      }
+    }
+    // último recurso: límite de usuarios con sala de espera, con todos los ajustes al máximo
+    const cmax = { sh: true, hb: v.hit < 0.95 ? 0.35 : 0, bm: 5, wm: 3 }, am = apply(cmax);
+    let u = v.users;
+    for (let k = 0; k < 80; k++) {
+      u = Math.floor(u * 0.9);
+      if (u < 1) break;
+      const vv = Object.assign({}, am.vv, { users: u }), res = evalAll(vv, am.pp, P), b = bestFeasible(res);
+      if (b) {
+        const ch = describe(cmax, am.vv, am.pp).concat(['limitar a ' + u + ' usuarios simultáneos con una sala de espera para el resto']);
+        return { kind: 'throttle', best: b, vars: vv, proj: am.pp, results: res, changes: ch, maxUsers: u,
+          text: ['Con ' + v.users + ' usuarios simultáneos ninguna alternativa cumple los requisitos, ni siquiera con todos los ajustes al máximo.',
+                 'La propuesta es ' + ch.join(', ') + '.',
+                 'Con ese límite se recomienda «' + res[b].label + '» (' + b + '): cumple los 5 requisitos y suma ' + fmt(res[b].total, 3) + ' puntos de 1.'] };
+      }
+    }
+    return null;
+  }
+
+  function runScenario(v, proj, P, opts) {
     const errs = validate(v, proj);
     if (errs.length) return { ok: false, errors: errs };
-    const results = {};
-    ARCHS.forEach(k => { results[k] = computeArch(k, v, proj, P); });
-    return { ok: true, vars: JSON.parse(JSON.stringify(v)), results: results, recommendation: recommend(results, proj) };
+    const results = evalAll(v, proj, P);
+    const rec = recommend(results, proj);
+    if (rec.status === 'none' && !(opts && opts.proposal === false)) {
+      const pr = propose(v, proj, P);
+      if (pr) {
+        rec.proposal = pr; rec.strictStatus = 'none'; rec.status = pr.kind; rec.best = pr.best; rec.text = pr.text;
+      }
+    }
+    return { ok: true, vars: JSON.parse(JSON.stringify(v)), results: results, recommendation: rec };
   }
 
   /* ---------- Barrido y sensibilidad ---------- */
   function sweep(v, proj, key, values) {
     return values.map(x => {
       const w = Object.assign({}, v); w[key] = x;
-      const r = runScenario(w, proj);
+      const r = runScenario(w, proj, undefined, { proposal: false });
       return { x: x, run: r };
     });
   }
   function sensitivity(v, proj) {
-    const base = runScenario(v, proj);
+    const base = runScenario(v, proj, undefined, { proposal: false });
     const out = [];
     Object.keys(VARS).forEach(k => {
       const def = VARS[k];
@@ -489,7 +558,7 @@ svg .muted{fill:var(--muted)}
         x = clamp(x, def.min, def.max);
         if (def.int) x = Math.round(x);
         const w = Object.assign({}, v); w[k] = x;
-        const r = runScenario(w, proj);
+        const r = runScenario(w, proj, undefined, { proposal: false });
         return { value: x, best: r.ok ? r.recommendation.best : null, changed: r.ok ? r.recommendation.best !== base.recommendation.best : false };
       };
       out.push({ key: k, label: def.label, low: mk(0.5), high: mk(2) });
@@ -576,43 +645,55 @@ svg .muted{fill:var(--muted)}
       });
 
     add('P5', 'La recomendación coincide con el cálculo',
-      'En los 4 escenarios predefinidos, la alternativa recomendada es la de mayor puntaje entre las que cumplen todos los requisitos obligatorios, recalculado fuera del modelo.',
+      'En los 4 escenarios predefinidos, la alternativa recomendada es la de mayor puntaje entre las que cumplen todos los requisitos obligatorios, recalculado fuera del modelo. Si ninguna cumple, el simulador debe indicarlo en el cálculo estricto y pasar a proponer ajustes.',
       () => {
         const rows = [];
         let ok = true;
         M.defaultScenarios().forEach(s => {
-          const p = proj(), run = M.runScenario(s.vars, p);
-          const feas = M.ARCHS.filter(k => run.results[k].feasible);
+          const p = proj(), strict = M.runScenario(s.vars, p, undefined, { proposal: false }), full = M.runScenario(s.vars, p);
+          const feas = M.ARCHS.filter(k => strict.results[k].feasible);
           let best = null;
-          feas.forEach(k => { if (best === null || run.results[k].total > run.results[best].total) best = k; });
-          if (best !== run.recommendation.best) ok = false;
-          rows.push(s.id + '→' + (run.recommendation.best || 'ninguna'));
+          feas.forEach(k => { if (best === null || strict.results[k].total > strict.results[best].total) best = k; });
+          if (best !== strict.recommendation.best) ok = false;
+          if (best !== null && (full.recommendation.status !== 'ok' || full.recommendation.best !== best)) ok = false;
+          if (best === null && full.recommendation.status === 'ok') ok = false;
+          rows.push(s.id + '→' + (best || 'ajustes: ' + full.recommendation.best));
         });
-        return { expected: 'Recomendación = máximo puntaje entre alternativas factibles (o «ninguna» si no hay)', obtained: rows.join(', '), pass: ok };
+        return { expected: 'Recomendación = máximo puntaje entre alternativas factibles; sin factibles, propuesta de ajustes', obtained: rows.join(', '), pass: ok };
       });
 
-    add('P6', 'Escenario imposible: ninguna alternativa',
-      'Con 20 000 usuarios, 30 solicitudes por minuto y 50 USD de presupuesto, el simulador no debe inventar una recomendación.',
+    add('P6', 'Siempre hay una propuesta',
+      'Con 5000 usuarios, 10 solicitudes por minuto, caché 0 y 50 USD de presupuesto ninguna alternativa cumple tal cual. El simulador debe proponer ajustes, y al volver a simular con esos ajustes la alternativa propuesta debe cumplir los 5 requisitos. Además se barren 270 combinaciones de entradas y ninguna puede quedar sin propuesta.',
       () => {
         const q = Object.assign(proj(), { budgetUsd: 50 });
-        const run = M.runScenario({ users: 20000, reqPerMin: 30, hit: 0.2, rtt: 100, pois: 30 }, q);
-        return { expected: 'status = none y sin alternativa recomendada', obtained: 'status = ' + run.recommendation.status + ', mejor = ' + run.recommendation.best, pass: run.recommendation.status === 'none' && run.recommendation.best === null };
+        const v = { users: 5000, reqPerMin: 10, hit: 0, rtt: 100, pois: 30 };
+        const strict = M.runScenario(v, q, undefined, { proposal: false });
+        const run = M.runScenario(v, q), pr = run.recommendation.proposal;
+        let again = null;
+        if (pr) again = M.runScenario(pr.vars, pr.proj, undefined, { proposal: false });
+        let none = 0, n = 0;
+        [10, 500, 2000, 3000, 5000].forEach(u => [0.5, 3, 10].forEach(r => [0, 0.5, 0.95].forEach(h => [20, 455, 1000].forEach(rt => [5, 40].forEach(po => {
+          n++; if (M.runScenario({ users: u, reqPerMin: r, hit: h, rtt: rt, pois: po }, proj()).recommendation.status === 'none') none++;
+        })))));
+        const ok = strict.recommendation.status === 'none' && !!pr && again.recommendation.status === 'ok' && again.recommendation.best === pr.best && none === 0;
+        return { expected: 'Sin propuesta estricta; con ajustes la propuesta cumple; 0 de 270 combinaciones sin propuesta', obtained: 'estricto: ' + strict.recommendation.status + '; propuesta: ' + (pr ? pr.kind + ' → ' + pr.best + ', re-simulada: ' + again.recommendation.status : 'ninguna') + '; sin propuesta: ' + none + ' de ' + n, pass: ok };
       });
 
     add('P7', 'Validación de entradas inválidas',
-      'Rechaza usuarios negativos, caché mayor a 0.99, texto en lugar de número, lugares decimales y pesos que suman 0.',
+      'Rechaza usuarios negativos, usuarios sobre el máximo de 5000, caché mayor a 0.95, texto en lugar de número, lugares decimales y pesos que suman 0.',
       () => {
         const p = proj();
         const cases = [
           M.validate(Object.assign(ref(), { users: -5 }), p),
+          M.validate(Object.assign(ref(), { users: 6000 }), p),
           M.validate(Object.assign(ref(), { hit: 1.2 }), p),
           M.validate(Object.assign(ref(), { rtt: NaN }), p),
           M.validate(Object.assign(ref(), { pois: 7.5 }), p),
           M.validate(ref(), Object.assign(proj(), { weights: { lat: 0, av: 0, cost: 0, scal: 0, simp: 0 } })),
           M.validate(ref(), p)
         ];
-        const ok = cases.slice(0, 5).every(e => e.length > 0) && cases[5].length === 0 && M.runScenario(Object.assign(ref(), { users: -5 }), p).ok === false;
-        return { expected: '5 entradas inválidas rechazadas y la entrada de referencia aceptada', obtained: cases.map(e => e.length).join(' / ') + ' errores', pass: ok };
+        const ok = cases.slice(0, 6).every(e => e.length > 0) && cases[6].length === 0 && M.runScenario(Object.assign(ref(), { users: -5 }), p).ok === false;
+        return { expected: '6 entradas inválidas rechazadas y la entrada de referencia aceptada', obtained: cases.map(e => e.length).join(' / ') + ' errores', pass: ok };
       });
 
     add('P8', 'Resultados repetibles',
@@ -837,7 +918,7 @@ svg .muted{fill:var(--muted)}
       '<div class="grid" id="vars">' + Object.keys(M.VARS).map(function (k) {
         var d = M.VARS[k];
         return '<div class="vcard"><label for="n-' + k + '">' + d.label + ' <span class="hint">(' + d.unit + ')</span></label>' +
-          '<div class="ctrl"><input id="n-' + k + '" type="number" inputmode="decimal" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '" value="' + s.vars[k] + '"><input id="r-' + k + '" type="range" aria-label="' + d.label + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '" value="' + s.vars[k] + '"></div>' +
+          '<div class="ctrl"><input id="n-' + k + '" type="number" inputmode="decimal" min="' + d.min + '" max="' + d.max + '" step="any" value="' + s.vars[k] + '"><input id="r-' + k + '" type="range" aria-label="' + d.label + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '" value="' + s.vars[k] + '"></div>' +
           '<span class="delta" id="d-' + k + '"></span><p class="why">' + WHY[k] + '</p></div>';
       }).join('') + '</div>' +
       '<div class="vcard"><label for="selfHost" style="flex-direction:row;align-items:center;gap:10px"><input id="selfHost" type="checkbox"' + (s.vars.selfHost ? ' checked' : '') + ' style="width:20px;height:20px"> Usar un servidor propio de OpenStreetMap (Overpass autoalojado)</label><p class="why">Sustituye la API pública, que se satura. Consulta en ' + C.selfHostTExtBaseMs + ' ms base, atiende ' + C.selfHostCapRps + ' solicitudes por segundo, quita el límite 429 y suma ' + C.selfHostUsd + ' USD al mes a cualquier alternativa.</p></div>' +
@@ -890,12 +971,18 @@ svg .muted{fill:var(--muted)}
     head: { label: 'Margen de capacidad (×)', get: function (r) { return r.headroom; }, line: function () { return 1; }, lineLabel: 'demanda', cap: function () { return 6; } }
   };
   var SWEEP = {
-    users: [5, 10, 25, 50, 100, 200, 400, 800, 1500, 3000, 6000],
-    reqPerMin: [0.5, 1, 2, 3, 4, 6, 8, 10, 15, 20, 30],
+    users: [10, 50, 100, 250, 500, 1000, 1500, 2000, 3000, 4000, 5000],
+    reqPerMin: [0.5, 1, 2, 3, 4, 5, 6, 8, 10],
     hit: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95],
-    rtt: [20, 50, 100, 200, 300, 500, 800, 1200, 2000],
-    pois: [5, 10, 15, 20, 25, 30, 40, 50, 60]
+    rtt: [20, 50, 100, 200, 300, 500, 700, 1000],
+    pois: [5, 10, 15, 20, 25, 30, 35, 40]
   };
+  function recTitle(rec, html) {
+    var t = rec.status === 'ok' ? 'Recomendación' : rec.status === 'adjusted' ? 'Recomendación con ajustes' : rec.status === 'throttle' ? 'Recomendación con límite de usuarios' : null;
+    if (!t) return 'Ninguna alternativa cumple';
+    return t + ': ' + (html ? tag(rec.best) + ' ' : rec.best + ' · ') + P[rec.best].label;
+  }
+
   function lineChart(series, xs, mdef, proj, xlabel, logx) {
     var W = 640, H = 300, L = 58, R = 40, T = 16, B = 44;
     var all = []; series.forEach(function (s) { s.pts.forEach(function (p) { all.push(p.y); }); });
@@ -962,6 +1049,17 @@ svg .muted{fill:var(--muted)}
       ['Instancias', null, null, function (r) { return r.services.length ? r.services.map(function (s) { return s.inst; }).join(' / ') : 'ninguna'; }],
       ['Uso de la API pública de mapas', function (r) { return r.uExt; }, true, function (r) { return nf(r.uExt * 100, 0) + ' %'; }]
     ];
+  function proposalCard(pr, id) {
+    var r = pr.results;
+    var rows = ARCHS.map(function (k) {
+      var x = r[k];
+      return '<tr><td>' + tag(k) + ' ' + P[k].label + (k === pr.best ? ' <span class="pill ok">propuesta</span>' : '') + '</td><td class="num">' + ms(x.latencyP95) + '</td><td class="num">' + nf(x.availability * 100, 3) + ' %</td><td class="num">' + nf(x.headroom, 2) + '×</td><td class="num">' + nf(x.cost, 0) + ' USD</td><td>' + (x.feasible ? '<span class="pill ok">Cumple</span>' : '<span class="pill bad">No cumple</span>') + '</td></tr>';
+    }).join('');
+    return '<div class="card"><h3>Ajustes propuestos</h3><ul class="plain">' + pr.changes.map(function (c) { return '<li>' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '.</li>'; }).join('') + '</ul>' +
+      '<p class="small">Resultado de volver a simular con esos ajustes (usuarios ' + nf(pr.vars.users, 0) + ', caché ' + nf(pr.vars.hit, 2) + ', presupuesto ' + nf(pr.proj.budgetUsd, 0) + ' USD, plazo ' + pr.proj.weeksAvail + ' semanas):</p>' +
+      '<div class="tablewrap"><table><thead><tr><th>Alternativa</th><th class="num">Latencia p95</th><th class="num">Disponibilidad</th><th class="num">Margen</th><th class="num">Costo</th><th>Requisitos</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="row"><button class="btn primary" id="applyProp" type="button">Aplicar la propuesta a este escenario</button><span class="small" id="applyMsg" role="status">Cambia las variables de este escenario y el presupuesto y plazo del proyecto.</span></div></div>';
+  }
   function renderResultados() {
     var el = $('#v-resultados'), ran = state.scenarios.filter(function (s) { return state.runs[s.id]; });
     if (!ran.length) {
@@ -977,7 +1075,8 @@ svg .muted{fill:var(--muted)}
     if (stale) html += '<div class="banner none" role="status"><p>Este resultado corresponde a valores anteriores. Vuelve a ejecutar el escenario para actualizarlo.</p><div class="row"><button class="btn primary" id="rerun" type="button">Ejecutar de nuevo</button></div></div>';
     html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button><span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
     // recomendación
-    html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + (rec.status === 'ok' ? 'Recomendación: ' + tag(rec.best) + ' ' + P[rec.best].label : 'Ninguna alternativa cumple') + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + recTitle(rec, true) + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    if (rec.proposal) html += proposalCard(rec.proposal, id);
     // requisitos
     html += '<div class="card"><h3>Requisitos obligatorios</h3><div class="tablewrap"><table><thead><tr><th>Requisito</th>' + ARCHS.map(function (k) { return '<th>' + k + ' · ' + P[k].label + '</th>'; }).join('') + '</tr></thead><tbody>' +
       res.A.checks.map(function (c, i) {
@@ -1003,7 +1102,7 @@ svg .muted{fill:var(--muted)}
     html += '<div class="card"><h3>Comparación entre escenarios</h3><div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Recomendada</th>' + ARCHS.map(function (k) { return '<th class="num">p95 ' + k + '</th>'; }).join('') + ARCHS.map(function (k) { return '<th class="num">Costo ' + k + '</th>'; }).join('') + '</tr></thead><tbody>' +
       ran.map(function (s) {
         var e = state.runs[s.id], r = e.run.results, rc = e.run.recommendation;
-        return '<tr><td>' + esc(s.name) + (s.base ? ' <span class="small">(referencia)</span>' : '') + '</td><td>' + (rc.best ? tag(rc.best) : '<span class="pill warn">ninguna</span>') + '</td>' +
+        return '<tr><td>' + esc(s.name) + (s.base ? ' <span class="small">(referencia)</span>' : '') + '</td><td>' + (rc.best ? tag(rc.best) + (rc.status === 'ok' ? '' : ' <span class="pill warn">con ajustes</span>') : '<span class="pill warn">ninguna</span>') + '</td>' +
           ARCHS.map(function (k) { return '<td class="num">' + (r[k].feasible ? '' : '<span class="small" title="no cumple">✗ </span>') + ms(r[k].latencyP95) + '</td>'; }).join('') + ARCHS.map(function (k) { return '<td class="num">' + nf(r[k].cost, 0) + '</td>'; }).join('') + '</tr>';
       }).join('') + '</tbody></table></div><p class="small">✗ marca las alternativas que incumplen algún requisito obligatorio en ese escenario.' + (ran.length < 3 ? ' Ejecuta al menos tres escenarios para completar la comparación.' : '') + '</p></div>';
     if (baseRun && id !== state.scenarios[0].id && !isStale(state.scenarios[0].id)) {
@@ -1028,6 +1127,11 @@ svg .muted{fill:var(--muted)}
       }).join('') + '</div>';
     el.innerHTML = html;
     $('#rchips').addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (b) { state.runView = b.dataset.id; renderResultados(); } });
+    var ap = $('#applyProp'); if (ap) ap.onclick = function () {
+      var pr = rec.proposal, sc = scen(id);
+      Object.keys(pr.vars).forEach(function (k) { sc.vars[k] = pr.vars[k]; });
+      state.proj = pr.proj; save(); runScenario(id); renderResultados();
+    };
     $('#pdfScope').onchange = function (e) { state.pdfScope = e.target.value; };
     $('#pdfBtn').onclick = function () { exportPdf($('#pdfScope').value, id, $('#pdfHint')); };
     var rr = $('#rerun'); if (rr) rr.onclick = function () { runScenario(id); renderResultados(); };
@@ -1056,7 +1160,8 @@ svg .muted{fill:var(--muted)}
       var e = state.runs[s.id], run = e.run, res = run.results, rec = run.recommendation, v = JSON.parse(e.vars);
       h += '<div class="rep-sc"><h2>Escenario: ' + esc(s.name) + (s.base ? ' (referencia)' : '') + '</h2>' +
         '<p><b>Entradas:</b> ' + Object.keys(M.VARS).map(function (k) { return M.VARS[k].label + ' ' + nf(v[k], v[k] < 1 ? 2 : 1) + ' ' + M.VARS[k].unit; }).join('; ') + (v.selfHost ? '; Overpass propio activado' : '') + '.</p>' +
-        '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h3>' + (rec.status === 'ok' ? 'Recomendación: ' + rec.best + ' · ' + P[rec.best].label : 'Ninguna alternativa cumple') + '</h3>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>' +
+        '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h3>' + recTitle(rec, false) + '</h3>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>' +
+        (rec.proposal ? '<h3>Ajustes propuestos</h3><ul class="plain">' + rec.proposal.changes.map(function (c) { return '<li>' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '.</li>'; }).join('') + '</ul>' : '') +
         '<h3>Requisitos obligatorios</h3><div class="tablewrap"><table><thead><tr><th>Requisito</th>' + ARCHS.map(function (k) { return '<th>' + k + ' · ' + P[k].label + '</th>'; }).join('') + '</tr></thead><tbody>' +
         res.A.checks.map(function (c, i) { return '<tr><td>' + esc(c.label) + '</td>' + ARCHS.map(function (k) { var x = res[k].checks[i]; return '<td>' + (x.ok ? 'Cumple' : 'No cumple') + ' (' + (x.key === 'lat' ? ms(x.value) : x.key === 'av' ? nf(x.value, 3) + ' %' : x.key === 'cap' ? nf(x.value, 2) + '×' : x.key === 'cost' ? nf(x.value, 2) + ' USD' : nf(x.value, 0) + ' p-s') + ')</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
         '<h3>Indicadores calculados</h3><div class="tablewrap"><table><thead><tr><th>Indicador</th>' + ARCHS.map(function (k) { return '<th>' + k + '</th>'; }).join('') + '</tr></thead><tbody>' +
@@ -1065,7 +1170,7 @@ svg .muted{fill:var(--muted)}
         (rec.reasons.length ? '<h3>Alternativas descartadas</h3><ul class="plain">' + rec.reasons.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
     });
     h += '<div class="rep-sc">' + (ran.length < 2 ? '' : '<h2>Comparación entre escenarios</h2><div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Recomendada</th>' + ARCHS.map(function (k) { return '<th class="num">p95 ' + k + '</th>'; }).join('') + ARCHS.map(function (k) { return '<th class="num">Costo ' + k + ' (USD)</th>'; }).join('') + '</tr></thead><tbody>' +
-      ran.map(function (s) { var r = state.runs[s.id].run.results, rc = state.runs[s.id].run.recommendation; return '<tr><td>' + esc(s.name) + '</td><td>' + (rc.best || 'ninguna') + '</td>' + ARCHS.map(function (k) { return '<td class="num">' + (r[k].feasible ? '' : '✗ ') + ms(r[k].latencyP95) + '</td>'; }).join('') + ARCHS.map(function (k) { return '<td class="num">' + nf(r[k].cost, 0) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div><p class="small">✗ marca las alternativas que incumplen algún requisito obligatorio.</p>') +
+      ran.map(function (s) { var r = state.runs[s.id].run.results, rc = state.runs[s.id].run.recommendation; return '<tr><td>' + esc(s.name) + '</td><td>' + (rc.best ? rc.best + (rc.status === 'ok' ? '' : ' (con ajustes)') : 'ninguna') + '</td>' + ARCHS.map(function (k) { return '<td class="num">' + (r[k].feasible ? '' : '✗ ') + ms(r[k].latencyP95) + '</td>'; }).join('') + ARCHS.map(function (k) { return '<td class="num">' + nf(r[k].cost, 0) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div><p class="small">✗ marca las alternativas que incumplen algún requisito obligatorio.</p>') +
       '<h3>Supuestos y limitaciones</h3><ul class="plain">' + (ran.length ? state.runs[ran[0].id].run.recommendation.assumptions.concat(state.runs[ran[0].id].run.recommendation.limitations) : []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
     return h;
   }
@@ -1139,7 +1244,7 @@ svg .muted{fill:var(--muted)}
 'Costo\n  costo = fijo + Σ k_s × precio_s + máx(0, ops_mes − 600 000)/10⁶ × 0.9\n  ops_mes = λ × 3600 × 3 h × 30 días × 0.2\n') + '</pre></div>' +
       '<div class="card"><h2>4. Parámetros y supuestos</h2><div class="tablewrap"><table><thead><tr><th>Parámetro</th><th class="num">Valor</th><th>Unidad</th><th>Qué representa</th></tr></thead><tbody>' + parRows + '</tbody></table></div>' +
       '<ul class="plain"><li>Todos los valores son supuestos del equipo basados en el comportamiento típico de las APIs públicas y de los artículos del curso. No son mediciones.</li><li>Las solicitudes llegan de forma uniforme durante las horas simuladas.</li><li>Cada instancia de servidor tiene su propia IP de salida.</li><li>Los esfuerzos de desarrollo (6, 10 y 24 persona-semanas) son estimaciones del equipo.</li></ul></div>' +
-      '<div class="card"><h2>5. Criterios de decisión</h2><ol class="plain"><li><b>Requisitos obligatorios.</b> Se descarta toda alternativa que incumpla: latencia p95 máxima, disponibilidad mínima, capacidad para la demanda pico (margen ≥ 1), costo dentro del presupuesto y esfuerzo dentro de la capacidad del equipo.</li><li><b>Puntaje 0 a 1 por criterio.</b> Latencia: 1 − p95/límite. Disponibilidad: log₁₀(indisponibilidad permitida / indisponibilidad calculada)/1.5. Costo: 1 − costo/presupuesto. Escalabilidad: log₂(techo/demanda)/4. Simplicidad: 1 − esfuerzo/capacidad del equipo. Todos limitados a [0, 1].</li><li><b>Suma ponderada</b> con los pesos normalizados del equipo. Gana el mayor puntaje entre las que cumplen. Si ninguna cumple, se indica cuál se acerca más y qué requisito falla.</li></ol></div>' +
+      '<div class="card"><h2>5. Criterios de decisión</h2><ol class="plain"><li><b>Requisitos obligatorios.</b> Se descarta toda alternativa que incumpla: latencia p95 máxima, disponibilidad mínima, capacidad para la demanda pico (margen ≥ 1), costo dentro del presupuesto y esfuerzo dentro de la capacidad del equipo.</li><li><b>Puntaje 0 a 1 por criterio.</b> Latencia: 1 − p95/límite. Disponibilidad: log₁₀(indisponibilidad permitida / indisponibilidad calculada)/1.5. Costo: 1 − costo/presupuesto. Escalabilidad: log₂(techo/demanda)/4. Simplicidad: 1 − esfuerzo/capacidad del equipo. Todos limitados a [0, 1].</li><li><b>Suma ponderada</b> con los pesos normalizados del equipo. Gana el mayor puntaje entre las que cumplen. Si ninguna cumple, el simulador busca la propuesta que menos cambia el plan, probando en este orden de esfuerzo: servidor propio de OpenStreetMap (Overpass autoalojado), precalentar el caché (+0.20 o +0.35 de aciertos), subir el presupuesto (×1.25 a ×5) y ampliar el plazo (×1.5 a ×3). Cada combinación se vuelve a simular y se elige la primera donde alguna alternativa cumple los 5 requisitos. Si ni con todos los ajustes al máximo alcanza, propone limitar los usuarios simultáneos con una sala de espera y calcula el límite. Solo si el requisito es imposible incluso con un usuario (por ejemplo, 200 ms de latencia) se indica cuál se acerca más y qué requisito falla.</li></ol></div>' +
       '<div class="card"><h2>6. Instrucciones de uso</h2><ol class="plain"><li>En Proyecto, revisa los requisitos, el presupuesto, el equipo y los pesos.</li><li>En Escenarios, ajusta el escenario de referencia y los demás, o crea uno nuevo.</li><li>Pulsa «Ejecutar todos los escenarios».</li><li>En Resultados, lee la recomendación, la tabla de requisitos, los indicadores y los gráficos. Usa el barrido para ver el punto donde cambia la decisión.</li><li>Abre la trazabilidad para verificar cualquier número con su fórmula.</li><li>En Pruebas, comprueba que el modelo se comporta de forma coherente.</li></ol></div>' +
       '<div class="card"><h2>7. Limitaciones</h2><ul class="plain"><li>Los resultados son estimaciones del modelo, no mediciones de rendimiento real.</li><li>No hay picos dentro del minuto, fallas correlacionadas ni diferencias entre proveedores de nube.</li><li>Un monolito en una sola máquina suele superar a los microservicios en rendimiento puro, según los artículos, y el resultado no se generaliza a todos los sistemas.</li><li>El modelo supone que la API pública de OSM se comporta igual en todo el día.</li><li>La seguridad y el cifrado no se modelan como indicador.</li></ul>' +
       '<h3>Información adicional para validar en una aplicación real</h3><ul class="plain"><li>Latencias y tasas de error reales de Overpass, Nominatim y Open-Elevation, medidas desde Colombia.</li><li>Tasa real de aciertos de caché con usuarios reales.</li><li>Precios actuales del proveedor y consumo real de Firestore.</li><li>Pruebas de carga con JMeter o k6 sobre un prototipo de cada alternativa.</li></ul></div>' +

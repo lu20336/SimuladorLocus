@@ -59,11 +59,11 @@
 
   /* ---------- Variables y validación ---------- */
   const VARS = {
-    users:     { label: 'Usuarios simultáneos en el pico', unit: 'usuarios', min: 1, max: 50000, int: true, step: 1 },
-    reqPerMin: { label: 'Solicitudes por usuario',        unit: 'por minuto', min: 0.1, max: 30, step: 0.1 },
-    hit:       { label: 'Aciertos de caché',              unit: 'fracción', min: 0, max: 0.99, step: 0.01 },
-    rtt:       { label: 'Latencia de red del celular',    unit: 'ms', min: 5, max: 2000, step: 5 },
-    pois:      { label: 'Lugares por itinerario',         unit: 'lugares', min: 3, max: 60, int: true, step: 1 }
+    users:     { label: 'Usuarios simultáneos en el pico', unit: 'usuarios', min: 10, max: 5000, int: true, step: 10 },
+    reqPerMin: { label: 'Solicitudes por usuario',        unit: 'por minuto', min: 0.5, max: 10, step: 0.5 },
+    hit:       { label: 'Aciertos de caché',              unit: 'fracción', min: 0, max: 0.95, step: 0.05 },
+    rtt:       { label: 'Latencia de red del celular',    unit: 'ms', min: 20, max: 1000, step: 10 },
+    pois:      { label: 'Lugares por itinerario',         unit: 'lugares', min: 5, max: 40, int: true, step: 1 }
   };
   const PROJECT_FIELDS = {
     latMaxMs:   { label: 'Latencia máxima (p95)', min: 200, max: 60000 },
@@ -318,24 +318,93 @@
     return rec;
   }
 
-  function runScenario(v, proj, P) {
+  function evalAll(v, proj, P) { const r = {}; ARCHS.forEach(k => { r[k] = computeArch(k, v, proj, P); }); return r; }
+  function bestFeasible(results) {
+    let b = null;
+    ARCHS.forEach(k => { if (results[k].feasible && (b === null || results[k].total > results[b].total)) b = k; });
+    return b;
+  }
+  const BUDGET_MULT = [1, 1.25, 1.5, 2, 3, 5], WEEKS_MULT = [1, 1.5, 2, 3];
+
+  /* Cuando ninguna alternativa cumple, busca la propuesta que menos cambia el plan:
+     Overpass propio, caché precalentado, más presupuesto, más plazo; y como último recurso, limitar usuarios. */
+  function propose(v, proj, P) {
+    const cands = [];
+    (v.selfHost ? [false] : [false, true]).forEach(sh => [0, 0.2, 0.35].forEach((hb, hi) => {
+      if (hb && v.hit >= 0.95) return;
+      BUDGET_MULT.forEach((bm, bi) => WEEKS_MULT.forEach((wm, wi) => {
+        cands.push({ sh: sh, hb: hb, bm: bm, wm: wm, pen: (sh ? 2 : 0) + hi * 1.5 + bi + wi * 1.2 });
+      }));
+    }));
+    cands.sort((a, b) => a.pen - b.pen);
+    const apply = c => {
+      const vv = Object.assign({}, v), pp = JSON.parse(JSON.stringify(proj));
+      if (c.sh) vv.selfHost = true;
+      if (c.hb) vv.hit = Math.min(0.95, Math.round((v.hit + c.hb) * 100) / 100);
+      pp.budgetUsd = Math.round(proj.budgetUsd * c.bm);
+      pp.weeksAvail = Math.min(104, Math.ceil(proj.weeksAvail * c.wm));
+      return { vv: vv, pp: pp };
+    };
+    const describe = (c, vv, pp) => {
+      const ch = [];
+      if (c.sh) ch.push('activar un servidor propio de OpenStreetMap (Overpass autoalojado, ' + PARAMS.common.selfHostUsd + ' USD al mes)');
+      if (c.hb) ch.push('precalentar el caché con los destinos más consultados (aciertos de ' + fmt(v.hit, 2) + ' a ' + fmt(vv.hit, 2) + ')');
+      if (pp.budgetUsd !== proj.budgetUsd) ch.push('subir el presupuesto mensual de ' + proj.budgetUsd + ' a ' + pp.budgetUsd + ' USD');
+      if (pp.weeksAvail !== proj.weeksAvail) ch.push('ampliar el plazo de ' + proj.weeksAvail + ' a ' + pp.weeksAvail + ' semanas');
+      return ch;
+    };
+    for (let n = 0; n < cands.length; n++) {
+      const c = cands[n], a = apply(c), res = evalAll(a.vv, a.pp, P), b = bestFeasible(res);
+      if (b) {
+        const ch = describe(c, a.vv, a.pp);
+        return { kind: 'adjusted', best: b, vars: a.vv, proj: a.pp, results: res, changes: ch,
+          text: ['Ninguna alternativa cumple todos los requisitos obligatorios con las entradas tal como están.',
+                 'La propuesta que menos cambia el plan es ' + ch.join(', ') + '.',
+                 'Con esos ajustes se recomienda «' + res[b].label + '» (' + b + '): cumple los 5 requisitos y suma ' + fmt(res[b].total, 3) + ' puntos de 1.'] };
+      }
+    }
+    // último recurso: límite de usuarios con sala de espera, con todos los ajustes al máximo
+    const cmax = { sh: true, hb: v.hit < 0.95 ? 0.35 : 0, bm: 5, wm: 3 }, am = apply(cmax);
+    let u = v.users;
+    for (let k = 0; k < 80; k++) {
+      u = Math.floor(u * 0.9);
+      if (u < 1) break;
+      const vv = Object.assign({}, am.vv, { users: u }), res = evalAll(vv, am.pp, P), b = bestFeasible(res);
+      if (b) {
+        const ch = describe(cmax, am.vv, am.pp).concat(['limitar a ' + u + ' usuarios simultáneos con una sala de espera para el resto']);
+        return { kind: 'throttle', best: b, vars: vv, proj: am.pp, results: res, changes: ch, maxUsers: u,
+          text: ['Con ' + v.users + ' usuarios simultáneos ninguna alternativa cumple los requisitos, ni siquiera con todos los ajustes al máximo.',
+                 'La propuesta es ' + ch.join(', ') + '.',
+                 'Con ese límite se recomienda «' + res[b].label + '» (' + b + '): cumple los 5 requisitos y suma ' + fmt(res[b].total, 3) + ' puntos de 1.'] };
+      }
+    }
+    return null;
+  }
+
+  function runScenario(v, proj, P, opts) {
     const errs = validate(v, proj);
     if (errs.length) return { ok: false, errors: errs };
-    const results = {};
-    ARCHS.forEach(k => { results[k] = computeArch(k, v, proj, P); });
-    return { ok: true, vars: JSON.parse(JSON.stringify(v)), results: results, recommendation: recommend(results, proj) };
+    const results = evalAll(v, proj, P);
+    const rec = recommend(results, proj);
+    if (rec.status === 'none' && !(opts && opts.proposal === false)) {
+      const pr = propose(v, proj, P);
+      if (pr) {
+        rec.proposal = pr; rec.strictStatus = 'none'; rec.status = pr.kind; rec.best = pr.best; rec.text = pr.text;
+      }
+    }
+    return { ok: true, vars: JSON.parse(JSON.stringify(v)), results: results, recommendation: rec };
   }
 
   /* ---------- Barrido y sensibilidad ---------- */
   function sweep(v, proj, key, values) {
     return values.map(x => {
       const w = Object.assign({}, v); w[key] = x;
-      const r = runScenario(w, proj);
+      const r = runScenario(w, proj, undefined, { proposal: false });
       return { x: x, run: r };
     });
   }
   function sensitivity(v, proj) {
-    const base = runScenario(v, proj);
+    const base = runScenario(v, proj, undefined, { proposal: false });
     const out = [];
     Object.keys(VARS).forEach(k => {
       const def = VARS[k];
@@ -344,7 +413,7 @@
         x = clamp(x, def.min, def.max);
         if (def.int) x = Math.round(x);
         const w = Object.assign({}, v); w[k] = x;
-        const r = runScenario(w, proj);
+        const r = runScenario(w, proj, undefined, { proposal: false });
         return { value: x, best: r.ok ? r.recommendation.best : null, changed: r.ok ? r.recommendation.best !== base.recommendation.best : false };
       };
       out.push({ key: k, label: def.label, low: mk(0.5), high: mk(2) });

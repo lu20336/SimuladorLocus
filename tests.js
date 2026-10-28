@@ -55,43 +55,55 @@
       });
 
     add('P5', 'La recomendación coincide con el cálculo',
-      'En los 4 escenarios predefinidos, la alternativa recomendada es la de mayor puntaje entre las que cumplen todos los requisitos obligatorios, recalculado fuera del modelo.',
+      'En los 4 escenarios predefinidos, la alternativa recomendada es la de mayor puntaje entre las que cumplen todos los requisitos obligatorios, recalculado fuera del modelo. Si ninguna cumple, el simulador debe indicarlo en el cálculo estricto y pasar a proponer ajustes.',
       () => {
         const rows = [];
         let ok = true;
         M.defaultScenarios().forEach(s => {
-          const p = proj(), run = M.runScenario(s.vars, p);
-          const feas = M.ARCHS.filter(k => run.results[k].feasible);
+          const p = proj(), strict = M.runScenario(s.vars, p, undefined, { proposal: false }), full = M.runScenario(s.vars, p);
+          const feas = M.ARCHS.filter(k => strict.results[k].feasible);
           let best = null;
-          feas.forEach(k => { if (best === null || run.results[k].total > run.results[best].total) best = k; });
-          if (best !== run.recommendation.best) ok = false;
-          rows.push(s.id + '→' + (run.recommendation.best || 'ninguna'));
+          feas.forEach(k => { if (best === null || strict.results[k].total > strict.results[best].total) best = k; });
+          if (best !== strict.recommendation.best) ok = false;
+          if (best !== null && (full.recommendation.status !== 'ok' || full.recommendation.best !== best)) ok = false;
+          if (best === null && full.recommendation.status === 'ok') ok = false;
+          rows.push(s.id + '→' + (best || 'ajustes: ' + full.recommendation.best));
         });
-        return { expected: 'Recomendación = máximo puntaje entre alternativas factibles (o «ninguna» si no hay)', obtained: rows.join(', '), pass: ok };
+        return { expected: 'Recomendación = máximo puntaje entre alternativas factibles; sin factibles, propuesta de ajustes', obtained: rows.join(', '), pass: ok };
       });
 
-    add('P6', 'Escenario imposible: ninguna alternativa',
-      'Con 20 000 usuarios, 30 solicitudes por minuto y 50 USD de presupuesto, el simulador no debe inventar una recomendación.',
+    add('P6', 'Siempre hay una propuesta',
+      'Con 5000 usuarios, 10 solicitudes por minuto, caché 0 y 50 USD de presupuesto ninguna alternativa cumple tal cual. El simulador debe proponer ajustes, y al volver a simular con esos ajustes la alternativa propuesta debe cumplir los 5 requisitos. Además se barren 270 combinaciones de entradas y ninguna puede quedar sin propuesta.',
       () => {
         const q = Object.assign(proj(), { budgetUsd: 50 });
-        const run = M.runScenario({ users: 20000, reqPerMin: 30, hit: 0.2, rtt: 100, pois: 30 }, q);
-        return { expected: 'status = none y sin alternativa recomendada', obtained: 'status = ' + run.recommendation.status + ', mejor = ' + run.recommendation.best, pass: run.recommendation.status === 'none' && run.recommendation.best === null };
+        const v = { users: 5000, reqPerMin: 10, hit: 0, rtt: 100, pois: 30 };
+        const strict = M.runScenario(v, q, undefined, { proposal: false });
+        const run = M.runScenario(v, q), pr = run.recommendation.proposal;
+        let again = null;
+        if (pr) again = M.runScenario(pr.vars, pr.proj, undefined, { proposal: false });
+        let none = 0, n = 0;
+        [10, 500, 2000, 3000, 5000].forEach(u => [0.5, 3, 10].forEach(r => [0, 0.5, 0.95].forEach(h => [20, 455, 1000].forEach(rt => [5, 40].forEach(po => {
+          n++; if (M.runScenario({ users: u, reqPerMin: r, hit: h, rtt: rt, pois: po }, proj()).recommendation.status === 'none') none++;
+        })))));
+        const ok = strict.recommendation.status === 'none' && !!pr && again.recommendation.status === 'ok' && again.recommendation.best === pr.best && none === 0;
+        return { expected: 'Sin propuesta estricta; con ajustes la propuesta cumple; 0 de 270 combinaciones sin propuesta', obtained: 'estricto: ' + strict.recommendation.status + '; propuesta: ' + (pr ? pr.kind + ' → ' + pr.best + ', re-simulada: ' + again.recommendation.status : 'ninguna') + '; sin propuesta: ' + none + ' de ' + n, pass: ok };
       });
 
     add('P7', 'Validación de entradas inválidas',
-      'Rechaza usuarios negativos, caché mayor a 0.99, texto en lugar de número, lugares decimales y pesos que suman 0.',
+      'Rechaza usuarios negativos, usuarios sobre el máximo de 5000, caché mayor a 0.95, texto en lugar de número, lugares decimales y pesos que suman 0.',
       () => {
         const p = proj();
         const cases = [
           M.validate(Object.assign(ref(), { users: -5 }), p),
+          M.validate(Object.assign(ref(), { users: 6000 }), p),
           M.validate(Object.assign(ref(), { hit: 1.2 }), p),
           M.validate(Object.assign(ref(), { rtt: NaN }), p),
           M.validate(Object.assign(ref(), { pois: 7.5 }), p),
           M.validate(ref(), Object.assign(proj(), { weights: { lat: 0, av: 0, cost: 0, scal: 0, simp: 0 } })),
           M.validate(ref(), p)
         ];
-        const ok = cases.slice(0, 5).every(e => e.length > 0) && cases[5].length === 0 && M.runScenario(Object.assign(ref(), { users: -5 }), p).ok === false;
-        return { expected: '5 entradas inválidas rechazadas y la entrada de referencia aceptada', obtained: cases.map(e => e.length).join(' / ') + ' errores', pass: ok };
+        const ok = cases.slice(0, 6).every(e => e.length > 0) && cases[6].length === 0 && M.runScenario(Object.assign(ref(), { users: -5 }), p).ok === false;
+        return { expected: '6 entradas inválidas rechazadas y la entrada de referencia aceptada', obtained: cases.map(e => e.length).join(' / ') + ' errores', pass: ok };
       });
 
     add('P8', 'Resultados repetibles',

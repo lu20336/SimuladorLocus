@@ -132,6 +132,7 @@ svg .muted{fill:var(--muted)}
   .rep-head+.rep-sc{break-before:auto}
   #printReport h2,#printReport h3{break-after:avoid}
   .rep-chart{break-inside:avoid}
+  .docprint{display:flex;flex-direction:column;gap:8px} .docprint .card{border:0;padding:0;gap:6px;background:none} .docprint h2{font-size:14px;margin-top:10px} .docprint p,.docprint li{font-size:11px;line-height:1.45} .docprint .tablewrap{border-radius:0} .docprint tr{break-inside:avoid} .docprint pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow:visible;font-size:9.5px;line-height:1.45} .docprint ol,.docprint ul{break-inside:auto}
   #printReport,#printReport *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .rep-head{display:flex;flex-direction:column;gap:8px}
   #printReport table{font-size:10.5px} #printReport th,#printReport td{padding:5px 8px}
@@ -803,14 +804,18 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
       if (isStale(id)) runScenario(id);
       ids = [id];
     }
-    $('#printReport').innerHTML = buildReport(ids);
+    printPage(buildReport(ids), scope === 'all' ? 'Locus-simulacion-todos-los-escenarios' : 'Locus-simulacion-' + (scen(id).name || id).replace(/[^A-Za-z0-9]+/g, '-'), hint);
+  }
+  function printPage(html, title, hint) {
+    var root = document.documentElement;
+    $('#printReport').innerHTML = html;
     var prevTheme = root.getAttribute('data-theme'), prevTitle = document.title, fired = false;
     var restore = function () { if (prevTheme === null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prevTheme); document.title = prevTitle; $('#printReport').innerHTML = ''; };
     var onBefore = function () { fired = true; };
     window.addEventListener('beforeprint', onBefore);
     window.addEventListener('afterprint', function done() { window.removeEventListener('afterprint', done); window.removeEventListener('beforeprint', onBefore); restore(); });
     root.setAttribute('data-theme', 'light');
-    document.title = scope === 'all' ? 'Locus-simulacion-todos-los-escenarios' : 'Locus-simulacion-' + (scen(id).name || id).replace(/[^A-Za-z0-9]+/g, '-');
+    document.title = title;
     if (hint) hint.textContent = 'En el cuadro de impresión elige «Guardar como PDF».';
     try { window.print(); } catch (e) {}
     setTimeout(function () {
@@ -910,6 +915,7 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
     ].map(function (r) { return '<tr><td><code>' + r[0] + '</code></td><td class="num">' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>'; }).join('');
     $('#v-documentacion').innerHTML =
       '<div><h2>Documentación del simulador</h2><p class="lead">Describe el modelo, las variables, las fórmulas, los criterios de decisión, el uso y las limitaciones.</p></div>' +
+      '<div class="row"><button class="btn primary" id="docPdf" type="button">Descargar PDF de la documentación</button><span class="small hint-pdf" id="docHint" role="status">Se abre el cuadro de impresión: elige «Guardar como PDF».</span></div>' +
       '<div class="card"><h3>Enlace al simulador</h3><div class="copy"><code id="selfUrl"></code><button class="btn" id="copyUrl" type="button">Copiar enlace</button><span class="small" id="copyMsg" role="status"></span></div></div>' +
       '<div class="card"><h2>1. Descripción del modelo</h2><p>El simulador compara tres arquitecturas para Locus (cliente directo, monolito con caché y microservicios) con las mismas entradas. Para cada una calcula la demanda, reparte instancias según el presupuesto, estima cola, latencia, capacidad, disponibilidad y costo, verifica cinco requisitos obligatorios y puntúa las que cumplen con los pesos del equipo.</p>' +
       '<p>La parte dominante del tiempo de respuesta es la consulta a OpenStreetMap, y la diferencia entre arquitecturas está en cuánta de esa consulta evitan mediante caché, cuánta capacidad tienen para atender la demanda y qué cuestan.</p></div>' +
@@ -931,6 +937,13 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
       '<div class="card"><h2>8. Referencias</h2><ul class="plain"><li>From Monolithic Systems to Microservices: A Comparative Study of Performance.</li><li>Monolithic vs. Microservice Architecture: A Performance and Scalability Evaluation.</li><li>A Comparative Review of Microservices and Monolithic Architectures.</li><li>MVC Architecture: A Comparative Study Between Laravel Framework and Slim Framework in Freelancer Project Monitoring System Web Based.</li></ul></div>';
     var url = ''; try { url = location.href.split('#')[0]; } catch (e) {}
     $('#selfUrl').textContent = url || '(abre el simulador desde su enlace publicado)';
+    $('#docPdf').onclick = function () {
+      var clone = $('#v-documentacion').cloneNode(true);
+      var drop = [clone.firstElementChild, clone.querySelector('#docPdf').parentNode, clone.querySelector('#selfUrl').closest('.card')];
+      drop.forEach(function (n) { if (n && n.parentNode) n.parentNode.removeChild(n); });
+      var fecha = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+      printPage('<div class="rep-head"><h1>Documentación del simulador de arquitectura de Locus</h1><p>Ingeniería Aplicada · Actividad 9 · Universidad Libre · Tres Felices Tigres · ' + esc(fecha) + '</p><p>Los resultados del simulador son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento.</p></div><div class="docprint">' + clone.innerHTML + '</div>', 'Locus-documentacion-simulador', $('#docHint'));
+    };
     $('#copyUrl').onclick = function () {
       var m = $('#copyMsg');
       try { navigator.clipboard.writeText(url).then(function () { m.textContent = 'Enlace copiado'; }, function () { sel(); }); } catch (e) { sel(); }

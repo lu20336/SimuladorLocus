@@ -819,7 +819,7 @@ svg .muted{fill:var(--muted)}
   function nf(x, d) { if (!isFinite(x)) return '∞'; return Number(x).toLocaleString('es-CO', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
   function ms(x) { return x > 60000 ? '> 60 s' : nf(x, 0) + ' ms'; }
   function tag(k) { return '<span class="tag t' + k + '" title="' + esc(P[k].label) + '">' + k + '</span>'; }
-  function save() { if ($('#badge-resultados')) updateNav(); try { localStorage.setItem(KEY, JSON.stringify({ proj: state.proj, scenarios: state.scenarios, active: state.active, ran: Object.keys(state.runs) })); } catch (e) {} }
+  function save() { if ($('#badge-resultados')) updateNav(); }
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -990,7 +990,7 @@ svg .muted{fill:var(--muted)}
       '<div class="vcard"><label for="selfHost" style="flex-direction:row;align-items:center;gap:10px"><input id="selfHost" type="checkbox"' + (s.vars.selfHost ? ' checked' : '') + ' style="width:20px;height:20px"> Usar un servidor propio de OpenStreetMap (Overpass autoalojado)</label><p class="why">Sustituye la API pública, que se satura. Consulta en ' + C.selfHostTExtBaseMs + ' ms base, atiende ' + C.selfHostCapRps + ' solicitudes por segundo, quita el límite 429 y suma ' + C.selfHostUsd + ' USD al mes a cualquier alternativa.</p></div>' +
       '<p class="small" id="modNote"></p>' +
       '<p class="small" id="derived"></p><div id="sErr"></div><p class="small" id="pdfMsgE" role="status"></p>' +
-      '<div class="row"><button class="btn primary" id="runOne" type="button">Ejecutar este escenario</button><button class="btn" id="runAll" type="button">Ejecutar todos los escenarios</button><button class="btn" id="runPdf" type="button">Ejecutar y exportar PDF</button>' + '<button class="btn" id="resetScen" type="button" hidden>Restaurar valores iniciales</button><button class="btn" id="resetAll" type="button">Restaurar los 4 escenarios de ejemplo</button>' + (s.base ? '' : '<button class="btn" id="delScen" type="button">Eliminar</button>') + '</div></div>';
+      '<div class="row"><button class="btn primary" id="runOne" type="button">Ejecutar este escenario</button><button class="btn" id="runAll" type="button">Ejecutar todos los escenarios</button><button class="btn" id="runPdf" type="button">Ejecutar y exportar PDF</button><button class="btn" id="resetScen" type="button">Restaurar escenarios iniciales</button>' + '<button class="btn" id="resetScen" type="button" hidden>Restaurar valores iniciales</button><button class="btn" id="resetAll" type="button">Restaurar los 4 escenarios de ejemplo</button>' + (s.base ? '' : '<button class="btn" id="delScen" type="button">Eliminar</button>') + '</div></div>';
     var upd = function () {
       var errs = M.validate(s.vars, state.proj);
       $('#sErr').innerHTML = errs.length ? '<div class="errors" role="alert"><ul>' + errs.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>' : '';
@@ -1027,13 +1027,14 @@ svg .muted{fill:var(--muted)}
       if (!armed) { armed = true; ra.textContent = 'Confirmar: se pierden tus cambios y escenarios nuevos'; setTimeout(function () { armed = false; ra.textContent = 'Restaurar los 4 escenarios de ejemplo'; }, 5000); return; }
       state.scenarios = M.defaultScenarios(); state.active = state.scenarios[0].id; state.runs = {}; save(); renderEscenarios();
     };
+    $('#resetScen').onclick = function () { state.scenarios = M.defaultScenarios(); state.runs = {}; state.active = 'ref'; state.runView = 'ref'; updateNav(); renderEscenarios(); };
     $('#runPdf').onclick = function () { var r = runScenario(s.id); if (r && r.ok) { state.runView = s.id; exportPdf('one', s.id, $('#pdfMsgE')); } };
     $('#selfHost').onchange = function (e) { s.vars.selfHost = e.target.checked; upd(); };
     $('#runOne').onclick = function () { runScenario(s.id); state.runView = s.id; go('resultados'); };
     $('#runAll').onclick = function () {
       var bad = state.scenarios.filter(function (x) { return M.validate(x.vars, state.proj).length; });
       if (bad.length) { $('#sErr').innerHTML = '<div class="errors" role="alert">Corrige los valores inválidos de: ' + bad.map(function (x) { return esc(x.name); }).join(', ') + '.</div>'; return; }
-      state.scenarios.forEach(function (x) { runScenario(x.id); }); state.runView = s.id; go('resultados');
+      state.scenarios.forEach(function (x) { runScenario(x.id); }); state.runView = state.scenarios[0].id; go('resultados');
     };
     var d = $('#delScen'); if (d) d.onclick = function () { state.scenarios = state.scenarios.filter(function (x) { return x.id !== s.id; }); delete state.runs[s.id]; state.active = state.scenarios[0].id; save(); renderEscenarios(); };
     upd();
@@ -1205,6 +1206,26 @@ svg .muted{fill:var(--muted)}
     }
     return out + '</ol></div>';
   }
+  /* ---------- Veredicto global entre escenarios ---------- */
+  function globalVerdict(ids) {
+    var ran = state.scenarios.filter(function (s) { return state.runs[s.id] && ids.indexOf(s.id) >= 0; });
+    if (ran.length < 2) return '';
+    var stat = ARCHS.map(function (k) {
+      var ok = 0, sum = 0;
+      ran.forEach(function (s) { var r = state.runs[s.id].run.results[k]; if (r.feasible) { ok++; sum += r.total; } });
+      return { k: k, ok: ok, avg: sum / ran.length };
+    }).sort(function (x, y) { return (y.ok - x.ok) || (y.avg - x.avg); });
+    var b = stat[0], n = ran.length, msg;
+    if (b.ok === n) msg = 'La mejor opción global es ' + tag(b.k) + ' <b>' + P[b.k].label + '</b>: cumple los 5 requisitos en los ' + n + ' escenarios y tiene el mayor puntaje promedio (' + nf(b.avg, 3) + ').';
+    else if (b.ok > 0) msg = 'Ninguna opción cumple en todos los escenarios. La que cumple en más es ' + tag(b.k) + ' <b>' + P[b.k].label + '</b> (' + b.ok + ' de ' + n + '). En los demás escenarios hace falta aplicar los ajustes propuestos.';
+    else msg = 'Ninguna opción cumple los requisitos en estos escenarios. Revisa los ajustes propuestos en cada uno.';
+    return '<div class="card"><h3>Veredicto de los ' + n + ' escenarios</h3><p>' + msg + '</p>' +
+      '<div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Mejor opción</th></tr></thead><tbody>' +
+      ran.map(function (s) { var rc = state.runs[s.id].run.recommendation; return '<tr><td>' + esc(s.name) + '</td><td>' + (rc.best ? tag(rc.best) + ' ' + P[rc.best].label + (rc.status === 'ok' ? '' : ' <span class="pill warn">con ajustes</span>') : '<span class="pill warn">ninguna</span>') + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="tablewrap"><table><thead><tr><th>Alternativa</th><th class="num">Escenarios en que cumple</th><th class="num">Puntaje promedio</th></tr></thead><tbody>' +
+      stat.map(function (x) { return '<tr><td>' + tag(x.k) + ' ' + P[x.k].label + (x.k === b.k && b.ok > 0 ? ' <span class="pill ok">mejor global</span>' : '') + '</td><td class="num">' + x.ok + ' de ' + n + '</td><td class="num">' + nf(x.avg, 3) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<p class="small">El puntaje promedio cuenta 0 en los escenarios donde la alternativa no cumple los requisitos.</p></div>';
+  }
   function renderResultados() {
     var el = $('#v-resultados'), ran = state.scenarios.filter(function (s) { return state.runs[s.id]; });
     if (!ran.length) {
@@ -1216,6 +1237,7 @@ svg .muted{fill:var(--muted)}
     var id = state.runView, entry = state.runs[id], run = entry.run, res = run.results, rec = run.recommendation, proj = state.proj;
     var stale = isStale(id);
     var html = '<div><h2>Resultados</h2><p class="lead">Son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento.' + (JSON.parse(entry.vars).selfHost ? ' Este escenario usa Overpass propio.' : '') + '</p></div>';
+    html += globalVerdict(ran.map(function (s) { return s.id; }));
     html += '<div class="chips" id="rchips" role="group" aria-label="Escenario mostrado">' + ran.map(function (s) { return '<button class="chip" type="button" data-id="' + s.id + '" aria-pressed="' + (s.id === id) + '">' + esc(s.name) + (isStale(s.id) ? ' <span class="pill warn stale">desactualizado</span>' : '') + '</button>'; }).join('') + '</div>';
     if (stale) html += '<div class="banner none" role="status"><p>Este resultado corresponde a valores anteriores. Vuelve a ejecutar el escenario para actualizarlo.</p><div class="row"><button class="btn primary" id="rerun" type="button">Ejecutar de nuevo</button></div></div>';
     html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button><span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
@@ -1302,6 +1324,7 @@ svg .muted{fill:var(--muted)}
       '<p><b>Requisitos obligatorios:</b> latencia p95 ≤ ' + nf(p.latMaxMs, 0) + ' ms; disponibilidad ≥ ' + p.availMinPct + ' %; capacidad ≥ demanda pico; costo ≤ ' + nf(p.budgetUsd, 0) + ' USD al mes; esfuerzo ≤ ' + nf(p.teamSize * p.weeksAvail * p.dedication, 1) + ' persona-semanas (' + p.teamSize + ' integrantes × ' + p.weeksAvail + ' semanas × ' + p.dedication + ').</p>' +
       '<p><b>Pesos de decisión:</b> ' + M.WEIGHT_KEYS.map(function (k) { return WLABEL[k] + ' ' + nf(p.weights[k], 2); }).join(', ') + '.</p>' +
       '<p class="small">Los resultados son estimaciones del modelo con los parámetros documentados en el simulador. No son mediciones de rendimiento real.</p></div>';
+    h += globalVerdict(ids);
     ran.forEach(function (s) {
       var e = state.runs[s.id], run = e.run, res = run.results, rec = run.recommendation, v = JSON.parse(e.vars);
       h += '<div class="rep-sc"><h2>Escenario: ' + esc(s.name) + (s.base ? ' (referencia)' : '') + '</h2>' +
@@ -1414,7 +1437,7 @@ svg .muted{fill:var(--muted)}
     b.onclick = function () { root.setAttribute('data-theme', cur() === 'dark' ? 'light' : 'dark'); label(); };
     label();
   }
-  load(); buildTabs(); initTheme();
+  buildTabs(); initTheme();
   $('#pager').addEventListener('click', function (e) { var b = e.target.closest('button[data-v]'); if (b) go(b.dataset.v); });
   (state.ranIds || []).slice().forEach(function (id) { var sc = scen(id); if (sc && !M.validate(sc.vars, state.proj).length) runScenario(id); });
   var h = (location.hash || '').replace('#', '');

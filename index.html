@@ -884,7 +884,7 @@ svg .muted{fill:var(--muted)}
       '<label for="pName">Nombre del proyecto<input id="pName" type="text" value="' + esc(p.name) + '"></label>' +
       '<label for="pDesc">Descripción<textarea id="pDesc">' + esc(p.description) + '</textarea></label>' +
       '<label for="pUsers">Usuarios previstos<textarea id="pUsers">' + esc(p.users) + '</textarea></label></div>' +
-      '<div class="grid"><div class="card"><h3>Requisitos de calidad (obligatorios)</h3>' +
+      '<div class="grid"><div class="card"><h3>Requisitos de calidad</h3>' +
       numField('latMaxMs', 'Latencia máxima, percentil 95 (ms)', 'La búsqueda de destinos no debe pasar de 5 s', p.latMaxMs, 200, 60000, 100) +
       numField('availMinPct', 'Disponibilidad mínima (%)', 'Porcentaje del tiempo en que la app responde', p.availMinPct, 90, 99.999, 0.1) +
       '<p class="small">Además, toda alternativa debe tener capacidad para la demanda pico (utilización de servidores ≤ 70 %).</p></div>' +
@@ -1216,11 +1216,12 @@ svg .muted{fill:var(--muted)}
     if (!state.runs[state.runView]) state.runView = ran[0].id;
     var id = state.runView, entry = state.runs[id], run = entry.run, res = run.results, rec = run.recommendation, proj = state.proj;
     var stale = isStale(id);
+    var allDone = state.scenarios.every(function (x) { return state.runs[x.id] && !isStale(x.id); });
     var html = '<div><h2>Resultados</h2><p class="lead">Son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento.' + (JSON.parse(entry.vars).selfHost ? ' Este escenario usa Overpass propio.' : '') + '</p></div>';
     html += globalVerdict(ran.map(function (s) { return s.id; }));
     html += '<div class="chips" id="rchips" role="group" aria-label="Escenario mostrado">' + ran.map(function (s) { return '<button class="chip" type="button" data-id="' + s.id + '" aria-pressed="' + (s.id === id) + '">' + esc(s.name) + (isStale(s.id) ? ' <span class="pill warn stale">desactualizado</span>' : '') + '</button>'; }).join('') + '</div>';
     if (stale) html += '<div class="banner none" role="status"><p>Este resultado corresponde a valores anteriores. Vuelve a ejecutar el escenario para actualizarlo.</p><div class="row"><button class="btn primary" id="rerun" type="button">Ejecutar de nuevo</button></div></div>';
-    html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button><button class="btn" id="runAllRes" type="button">Ejecutar todos los escenarios</button><span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
+    html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button>' + (allDone ? '' : '<button class="btn" id="runAllRes" type="button">Ejecutar todos los escenarios</button>') + '<span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
     // recomendación
     html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + recTitle(rec, true) + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
     var sens = M.sensitivity(JSON.parse(entry.vars), proj);
@@ -1280,7 +1281,7 @@ svg .muted{fill:var(--muted)}
       Object.keys(pr.vars).forEach(function (k) { sc.vars[k] = pr.vars[k]; });
       state.proj = pr.proj; save(); runScenario(id); renderResultados();
     };
-    $('#runAllRes').onclick = function () {
+    var rab = $('#runAllRes'); if (rab) rab.onclick = function () {
       var bad = state.scenarios.filter(function (x) { return M.validate(x.vars, state.proj).length; });
       if (bad.length) { $('#pdfHint').textContent = 'Corrige los valores inválidos de: ' + bad.map(function (x) { return x.name; }).join(', ') + '.'; return; }
       state.scenarios.forEach(function (x) { runScenario(x.id); }); renderResultados();

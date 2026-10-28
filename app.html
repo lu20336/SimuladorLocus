@@ -96,23 +96,6 @@ svg .muted{fill:var(--muted)}
 .copy code{overflow-wrap:anywhere}
 .step{display:flex;gap:12px}
 .step b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--bg);display:grid;place-items:center;font-size:13px}
-@media print{
-  body{background:#fff!important;color:#12263F!important;padding:0!important}
-  body::before{display:none!important}
-  .top,.tabs,.view{display:none!important}
-  #report{display:block!important}
-  .card,.banner,details{break-inside:avoid}
-  .rpt-sec{break-before:page}
-  .tablewrap{overflow:visible}
-  body{font-size:12px!important}
-  table{font-size:11px!important}
-  th,td{padding:6px 8px!important}
-  th{white-space:normal!important}
-  .chartbox{overflow:visible}
-  @page{size:A4;margin:14mm}
-}
-#report{display:none}
-.rpt-head{display:flex;flex-direction:column;gap:6px;border-bottom:2px solid var(--navy);padding-bottom:10px}
 #printReport{display:none}
 .hint-pdf{font-size:13px}
 @media print{
@@ -126,6 +109,7 @@ svg .muted{fill:var(--muted)}
   .rep-head+.rep-sc{break-before:auto}
   #printReport h2,#printReport h3{break-after:avoid}
   .rep-chart{break-inside:avoid}
+  #printReport,#printReport *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .rep-head{display:flex;flex-direction:column;gap:8px}
   #printReport table{font-size:10.5px} #printReport th,#printReport td{padding:5px 8px}
   .tablewrap{overflow:visible;border-radius:0}
@@ -148,7 +132,6 @@ svg .muted{fill:var(--muted)}
   <section class="view" id="v-pruebas" aria-label="Pruebas"></section>
   <section class="view" id="v-documentacion" aria-label="Documentación"></section>
   <div id="printReport" aria-hidden="true"></div>
-  <div id="report" aria-hidden="true"></div>
 </div>
 
 <script>
@@ -165,7 +148,7 @@ svg .muted{fill:var(--muted)}
   var KEY = 'locus-sim9-v2';
   var VIEWS = [['proyecto', 'Proyecto'], ['alternativas', 'Alternativas'], ['escenarios', 'Escenarios'], ['resultados', 'Resultados'], ['pruebas', 'Pruebas'], ['documentacion', 'Documentación']];
   var WLABEL = { lat: 'Latencia', av: 'Disponibilidad', cost: 'Costo', scal: 'Escalabilidad', simp: 'Simplicidad para el equipo' };
-  var state = { proj: M.defaultProject(), scenarios: M.defaultScenarios(), active: 'ref', runs: {}, runView: 'ref', sweepVar: 'users', sweepMetric: 'p95', view: 'proyecto' };
+  var state = { pdfScope: 'one', proj: M.defaultProject(), scenarios: M.defaultScenarios(), active: 'ref', runs: {}, runView: 'ref', sweepVar: 'users', sweepMetric: 'p95', view: 'proyecto' };
 
   /* ---------- utilidades ---------- */
   function $(s, r) { return (r || document).querySelector(s); }
@@ -321,12 +304,12 @@ svg .muted{fill:var(--muted)}
           '<span class="delta" id="d-' + k + '"></span><p class="why">' + WHY[k] + '</p></div>';
       }).join('') + '</div>' +
       '<div class="vcard"><label for="selfHost" style="flex-direction:row;align-items:center;gap:10px"><input id="selfHost" type="checkbox"' + (s.vars.selfHost ? ' checked' : '') + ' style="width:20px;height:20px"> Usar un servidor propio de OpenStreetMap (Overpass autoalojado)</label><p class="why">Sustituye la API pública, que se satura. Consulta en ' + C.selfHostTExtBaseMs + ' ms base, atiende ' + C.selfHostCapRps + ' solicitudes por segundo, quita el límite 429 y suma ' + C.selfHostUsd + ' USD al mes a cualquier alternativa.</p></div>' +
-      '<p class="small" id="derived"></p><div id="sErr"></div>' +
-      '<div class="row"><button class="btn primary" id="runOne" type="button">Ejecutar este escenario</button><button class="btn" id="runAll" type="button">Ejecutar todos los escenarios</button>' + (s.base ? '' : '<button class="btn" id="delScen" type="button">Eliminar</button>') + '</div></div>';
+      '<p class="small" id="derived"></p><div id="sErr"></div><p class="small" id="pdfMsgE" role="status"></p>' +
+      '<div class="row"><button class="btn primary" id="runOne" type="button">Ejecutar este escenario</button><button class="btn" id="runAll" type="button">Ejecutar todos los escenarios</button><button class="btn" id="runPdf" type="button">Ejecutar y exportar PDF</button>' + (s.base ? '' : '<button class="btn" id="delScen" type="button">Eliminar</button>') + '</div></div>';
     var upd = function () {
       var errs = M.validate(s.vars, state.proj);
       $('#sErr').innerHTML = errs.length ? '<div class="errors" role="alert"><ul>' + errs.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>' : '';
-      $('#runOne').disabled = errs.length > 0;
+      $('#runOne').disabled = errs.length > 0; $('#runPdf').disabled = errs.length > 0;
       var lam = s.vars.users * s.vars.reqPerMin / 60;
       $('#derived').textContent = isFinite(lam) ? 'Demanda derivada: λ = ' + nf(lam, 2) + ' solicitudes por segundo.' : '';
       Object.keys(M.VARS).forEach(function (k) {
@@ -350,6 +333,7 @@ svg .muted{fill:var(--muted)}
       if (id[0] === 'n' && isFinite(v)) $('#r-' + k).value = v; else if (id[0] === 'r') $('#n-' + k).value = v;
       upd();
     });
+    $('#runPdf').onclick = function () { var r = runScenario(s.id); if (r && r.ok) { state.runView = s.id; exportPdf('one', s.id, $('#pdfMsgE')); } };
     $('#selfHost').onchange = function (e) { s.vars.selfHost = e.target.checked; upd(); };
     $('#runOne').onclick = function () { runScenario(s.id); state.runView = s.id; go('resultados'); };
     $('#runAll').onclick = function () {
@@ -451,12 +435,10 @@ svg .muted{fill:var(--muted)}
     if (!state.runs[state.runView]) state.runView = ran[0].id;
     var id = state.runView, entry = state.runs[id], run = entry.run, res = run.results, rec = run.recommendation, proj = state.proj;
     var stale = isStale(id);
-    var anyStale = ran.some(function (s) { return isStale(s.id); });
     var html = '<div><h2>Resultados</h2><p class="lead">Son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento.' + (JSON.parse(entry.vars).selfHost ? ' Este escenario usa Overpass propio.' : '') + '</p></div>';
-    html += '<div class="row"><button class="btn" id="exportPdf" type="button">Exportar resultados a PDF</button><span class="small" id="exportMsg" role="status"></span></div>';
     html += '<div class="chips" id="rchips" role="group" aria-label="Escenario mostrado">' + ran.map(function (s) { return '<button class="chip" type="button" data-id="' + s.id + '" aria-pressed="' + (s.id === id) + '">' + esc(s.name) + (isStale(s.id) ? ' <span class="pill warn stale">desactualizado</span>' : '') + '</button>'; }).join('') + '</div>';
     if (stale) html += '<div class="banner none" role="status"><p>Este resultado corresponde a valores anteriores. Vuelve a ejecutar el escenario para actualizarlo.</p><div class="row"><button class="btn primary" id="rerun" type="button">Ejecutar de nuevo</button></div></div>';
-    html += '<div class="row"><button class="btn" id="pdfBtn" type="button">Exportar informe en PDF</button><span class="small hint-pdf" id="pdfHint" role="status">' + (anyStale ? 'Hay escenarios desactualizados: se exportan con sus últimos resultados ejecutados.' : 'Incluye todos los escenarios ejecutados.') + '</span></div>';
+    html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button><span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
     // recomendación
     html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + (rec.status === 'ok' ? 'Recomendación: ' + tag(rec.best) + ' ' + P[rec.best].label : 'Ninguna alternativa cumple') + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
     // requisitos
@@ -509,15 +491,8 @@ svg .muted{fill:var(--muted)}
       }).join('') + '</div>';
     el.innerHTML = html;
     $('#rchips').addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (b) { state.runView = b.dataset.id; renderResultados(); } });
-    $('#exportPdf').onclick = function () {
-      var m = $('#exportMsg'), framed = false;
-      try { framed = window.self !== window.top; } catch (e) { framed = true; }
-      prepareReport();
-      if (framed) m.textContent = 'Esta vista no permite imprimir ni descargar. Abre el simulador publicado en Firebase y pulsa de nuevo; en el cuadro de impresión elige «Guardar como PDF».';
-      else m.textContent = 'En el cuadro de impresión elige «Guardar como PDF».';
-      try { window.print(); } catch (e) {}
-    };
-    $('#pdfBtn').onclick = exportPdf;
+    $('#pdfScope').onchange = function (e) { state.pdfScope = e.target.value; };
+    $('#pdfBtn').onclick = function () { exportPdf($('#pdfScope').value, id, $('#pdfHint')); };
     var rr = $('#rerun'); if (rr) rr.onclick = function () { runScenario(id); renderResultados(); };
     var drawSweep = function () {
       var key = state.sweepVar, vals = SWEEP[key].slice(), v0 = JSON.parse(entry.vars);
@@ -531,50 +506,9 @@ svg .muted{fill:var(--muted)}
     drawSweep();
   }
 
-  /* ---------- Informe imprimible (PDF) ---------- */
-  function buildReport() {
-    var proj = state.proj, ran = state.scenarios.filter(function (s) { return state.runs[s.id]; }), saved = state.runView;
-    var d = new Date(), fecha = d.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
-    var vlabel = function (k) { return M.VARS[k].label + ' (' + M.VARS[k].unit + ')'; };
-    var SHORT = { users: 'Usuarios', reqPerMin: 'Solic./min', hit: 'Caché', rtt: 'RTT (ms)', pois: 'Lugares' };
-    var html = '<div class="rpt-head"><small class="small">Universidad Libre · Ingeniería Aplicada · Actividad 9 · ' + fecha + '</small><h1>Simulador de arquitectura: ' + esc(proj.name) + '</h1><p>' + esc(proj.description) + '</p><p class="small">Usuarios previstos: ' + esc(proj.users) + '</p></div>';
-    html += '<div class="card"><h3>Requisitos, restricciones y pesos</h3><div class="tablewrap"><table><tbody>' +
-      '<tr><th>Latencia máxima p95</th><td>' + nf(proj.latMaxMs, 0) + ' ms</td><th>Disponibilidad mínima</th><td>' + proj.availMinPct + ' %</td></tr>' +
-      '<tr><th>Presupuesto mensual</th><td>' + nf(proj.budgetUsd, 0) + ' USD</td><th>Equipo</th><td>' + proj.teamSize + ' personas, ' + proj.weeksAvail + ' semanas, dedicación ' + proj.dedication + '</td></tr>' +
-      '<tr><th>Pesos de decisión</th><td colspan="3">' + M.WEIGHT_KEYS.map(function (k) { return WLABEL[k] + ' ' + nf(proj.weights[k], 2); }).join(' · ') + '</td></tr></tbody></table></div></div>';
-    html += '<div class="card"><h3>Escenarios ejecutados</h3><div class="tablewrap"><table><thead><tr><th>Escenario</th>' + Object.keys(M.VARS).map(function (k) { return '<th class="num">' + SHORT[k] + '</th>'; }).join('') + '<th>Overpass propio</th><th>Recomendada</th></tr></thead><tbody>' +
-      ran.map(function (s) { var e = state.runs[s.id], v = JSON.parse(e.vars), rc = e.run.recommendation; return '<tr><td>' + esc(s.name) + '</td>' + Object.keys(M.VARS).map(function (k) { return '<td class="num">' + nf(v[k], k === 'hit' || k === 'reqPerMin' ? 2 : 0) + '</td>'; }).join('') + '<td>' + (v.selfHost ? 'Sí' : 'No') + '</td><td>' + (rc.best ? rc.best + ' · ' + esc(P[rc.best].label) : 'Ninguna cumple') + '</td></tr>'; }).join('') + '</tbody></table></div><p class="small">Los resultados son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento real.</p></div>';
-    ran.forEach(function (s) {
-      state.runView = s.id; renderResultados();
-      var c = $('#v-resultados').cloneNode(true);
-      ['#rchips', '.row', '#sweepBox'].forEach(function (q) { c.querySelectorAll(q).forEach(function (n) { var t = (q === '#sweepBox') ? n.closest('.card') : n; if (t && t.parentNode) t.parentNode.removeChild(t); }); });
-      c.querySelectorAll('h3').forEach(function (h) { if (h.textContent === 'Comparación entre escenarios') { var cd = h.closest('.card'); if (cd && cd.parentNode) cd.parentNode.removeChild(cd); } });
-      c.querySelectorAll('.banner.none').forEach(function (n) { if (n.querySelector('.btn') || /anteriores/.test(n.textContent)) n.parentNode.removeChild(n); });
-      c.querySelectorAll('details').forEach(function (n) { var cd = n.closest('.card'); if (cd && cd.parentNode) cd.parentNode.removeChild(cd); });
-      var first = c.firstElementChild; if (first && first.tagName === 'DIV' && first.querySelector('h2')) c.removeChild(first);
-      var v = JSON.parse(state.runs[s.id].vars);
-      html += '<section class="rpt-sec"><h2>Escenario: ' + esc(s.name) + '</h2><p class="small">' + Object.keys(M.VARS).map(function (k) { return vlabel(k) + ': ' + nf(v[k], k === 'hit' || k === 'reqPerMin' ? 2 : 0); }).join(' · ') + ' · Overpass propio: ' + (v.selfHost ? 'sí' : 'no') + '</p><div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">' + c.innerHTML + '</div></section>';
-    });
-    state.runView = saved; renderResultados();
-    html += '<section class="rpt-sec"><h2>Información adicional para validar en una aplicación real</h2><ul class="plain"><li>Latencias y tasas de error reales de Overpass, Nominatim y Open-Elevation, medidas desde Colombia.</li><li>Tasa real de aciertos de caché con usuarios reales.</li><li>Precios actuales del proveedor y consumo real de Firestore.</li><li>Pruebas de carga con JMeter o k6 sobre un prototipo de cada alternativa.</li></ul></section>';
-    return html;
-  }
-  var themeBefore = null;
-  function prepareReport() {
-    $('#report').innerHTML = buildReport();
-    var r = document.documentElement; if (themeBefore === null) themeBefore = r.getAttribute('data-theme') || '';
-    r.setAttribute('data-theme', 'light');
-  }
-  window.addEventListener('afterprint', function () {
-    var r = document.documentElement;
-    if (themeBefore !== null) { if (themeBefore) r.setAttribute('data-theme', themeBefore); else r.removeAttribute('data-theme'); themeBefore = null; }
-    $('#report').innerHTML = '';
-  });
-  window.__locusPrepareReport = function () { Object.keys(state.runs).length || state.scenarios.forEach(function (x) { runScenario(x.id); }); prepareReport(); };
-
   /* ---------- Informe PDF ---------- */
-  function buildReport() {
-    var p = state.proj, ran = state.scenarios.filter(function (s) { return state.runs[s.id]; });
+  function buildReport(ids) {
+    var p = state.proj, ran = state.scenarios.filter(function (s) { return state.runs[s.id] && ids.indexOf(s.id) >= 0; });
     var fecha = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
     var h = '<div class="rep-head"><h1>' + esc(p.name) + ': informe de simulación de arquitectura</h1><p class="small">Ingeniería Aplicada, Actividad 9 · Tres Felices Tigres, Universidad Libre · ' + esc(fecha) + '</p>' +
       '<p>' + esc(p.description) + '</p><p><b>Usuarios previstos:</b> ' + esc(p.users) + '</p>' +
@@ -593,23 +527,35 @@ svg .muted{fill:var(--muted)}
         '<div class="rep-chart"><h3>Puntaje de decisión</h3>' + scoreChart(res, p) + '</div>' +
         (rec.reasons.length ? '<h3>Alternativas descartadas</h3><ul class="plain">' + rec.reasons.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
     });
-    h += '<div class="rep-sc"><h2>Comparación entre escenarios</h2><div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Recomendada</th>' + ARCHS.map(function (k) { return '<th class="num">p95 ' + k + '</th>'; }).join('') + ARCHS.map(function (k) { return '<th class="num">Costo ' + k + ' (USD)</th>'; }).join('') + '</tr></thead><tbody>' +
-      ran.map(function (s) { var r = state.runs[s.id].run.results, rc = state.runs[s.id].run.recommendation; return '<tr><td>' + esc(s.name) + '</td><td>' + (rc.best || 'ninguna') + '</td>' + ARCHS.map(function (k) { return '<td class="num">' + (r[k].feasible ? '' : '✗ ') + ms(r[k].latencyP95) + '</td>'; }).join('') + ARCHS.map(function (k) { return '<td class="num">' + nf(r[k].cost, 0) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div><p class="small">✗ marca las alternativas que incumplen algún requisito obligatorio.</p>' +
+    h += '<div class="rep-sc">' + (ran.length < 2 ? '' : '<h2>Comparación entre escenarios</h2><div class="tablewrap"><table><thead><tr><th>Escenario</th><th>Recomendada</th>' + ARCHS.map(function (k) { return '<th class="num">p95 ' + k + '</th>'; }).join('') + ARCHS.map(function (k) { return '<th class="num">Costo ' + k + ' (USD)</th>'; }).join('') + '</tr></thead><tbody>' +
+      ran.map(function (s) { var r = state.runs[s.id].run.results, rc = state.runs[s.id].run.recommendation; return '<tr><td>' + esc(s.name) + '</td><td>' + (rc.best || 'ninguna') + '</td>' + ARCHS.map(function (k) { return '<td class="num">' + (r[k].feasible ? '' : '✗ ') + ms(r[k].latencyP95) + '</td>'; }).join('') + ARCHS.map(function (k) { return '<td class="num">' + nf(r[k].cost, 0) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div><p class="small">✗ marca las alternativas que incumplen algún requisito obligatorio.</p>') +
       '<h3>Supuestos y limitaciones</h3><ul class="plain">' + (ran.length ? state.runs[ran[0].id].run.recommendation.assumptions.concat(state.runs[ran[0].id].run.recommendation.limitations) : []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
     return h;
   }
-  function exportPdf() {
-    var hint = $('#pdfHint'), root = document.documentElement;
-    $('#printReport').innerHTML = buildReport();
+  /* scope: 'one' (escenario indicado) o 'all'. Reejecuta los escenarios cuyas variables cambiaron para que el PDF refleje lo que hay en pantalla. */
+  function exportPdf(scope, id, hint) {
+    var root = document.documentElement, ids;
+    if (scope === 'all') {
+      ids = state.scenarios.filter(function (s) { return M.validate(s.vars, state.proj).length === 0; }).map(function (s) { return s.id; });
+      ids.forEach(function (x) { if (isStale(x)) runScenario(x); });
+    } else {
+      var errs = M.validate((scen(id) || {}).vars, state.proj);
+      if (errs.length) { if (hint) hint.textContent = 'Corrige los valores inválidos antes de exportar.'; return; }
+      if (isStale(id)) runScenario(id);
+      ids = [id];
+    }
+    $('#printReport').innerHTML = buildReport(ids);
     var prevTheme = root.getAttribute('data-theme'), prevTitle = document.title, fired = false;
-    var restore = function () { if (prevTheme === null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prevTheme); document.title = prevTitle; };
+    var restore = function () { if (prevTheme === null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prevTheme); document.title = prevTitle; $('#printReport').innerHTML = ''; };
     var onBefore = function () { fired = true; };
     window.addEventListener('beforeprint', onBefore);
     window.addEventListener('afterprint', function done() { window.removeEventListener('afterprint', done); window.removeEventListener('beforeprint', onBefore); restore(); });
-    root.setAttribute('data-theme', 'light'); document.title = 'Locus-simulacion-arquitectura';
+    root.setAttribute('data-theme', 'light');
+    document.title = scope === 'all' ? 'Locus-simulacion-todos-los-escenarios' : 'Locus-simulacion-' + (scen(id).name || id).replace(/[^A-Za-z0-9]+/g, '-');
+    if (hint) hint.textContent = 'En el cuadro de impresión elige «Guardar como PDF».';
     try { window.print(); } catch (e) {}
     setTimeout(function () {
-      if (!fired) { restore(); window.removeEventListener('beforeprint', onBefore); if (hint) hint.textContent = 'Este visor no permite imprimir. Abre el simulador publicado en GitHub Pages o Firebase y usa «Exportar informe en PDF»; en el diálogo elige «Guardar como PDF».'; }
+      if (!fired) { restore(); window.removeEventListener('beforeprint', onBefore); if (hint) hint.textContent = 'Esta vista no permite imprimir. Abre el simulador publicado (GitHub Pages o Firebase) y pulsa de nuevo; en el cuadro de impresión elige «Guardar como PDF».'; }
     }, 900);
   }
 

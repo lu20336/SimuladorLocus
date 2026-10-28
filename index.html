@@ -172,7 +172,6 @@ svg .muted{fill:var(--muted)}
     <aside class="side">
       <div class="brand"><small>Ingeniería Aplicada · Actividad 9</small><h1>Simulador de arquitectura de Locus</h1></div>
       <nav id="tabs" role="tablist" aria-label="Secciones del simulador"></nav>
-      <button class="iconbtn" id="themeBtn" type="button" aria-label="Cambiar tema claro u oscuro">Tema</button>
     </aside>
     <main class="content">
       <section class="view" id="v-proyecto" aria-label="Proyecto"></section>
@@ -1416,14 +1415,7 @@ svg .muted{fill:var(--muted)}
   }
 
   /* ---------- tema e inicio ---------- */
-  function initTheme() {
-    var b = $('#themeBtn'), root = document.documentElement;
-    var cur = function () { var t = root.getAttribute('data-theme'); if (t) return t; return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; };
-    var label = function () { b.textContent = cur() === 'dark' ? 'Tema claro' : 'Tema oscuro'; };
-    b.onclick = function () { root.setAttribute('data-theme', cur() === 'dark' ? 'light' : 'dark'); label(); };
-    label();
-  }
-  buildTabs(); initTheme();
+  buildTabs();
   $('#pager').addEventListener('click', function (e) { var b = e.target.closest('button[data-v]'); if (b) go(b.dataset.v); });
   var h = (location.hash || '').replace('#', '');
   var start = VIEWS.some(function (v) { return v[0] === h; }) ? h : 'proyecto';

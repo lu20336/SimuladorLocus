@@ -182,6 +182,43 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
 .wpill{display:inline-block;align-self:flex-start;padding:1px 8px;border-radius:99px;background:var(--surface2);color:var(--teal);font-weight:700;font-size:12.5px}
 @media (max-width:899px){.sidefoot{display:none}}
 @media (max-width:600px){th{white-space:normal;font-size:11px;letter-spacing:.02em} th,td{padding:8px 8px} .hero-name{font-size:23px}}
+
+/* ---- pruebas ---- */
+.tests-empty{flex-direction:row;align-items:center;gap:18px;flex-wrap:wrap;border-style:dashed}
+.tests-empty>div:nth-child(2){flex:1 1 280px}
+.tests-empty p{color:var(--muted);margin-top:4px}
+.te-ic{width:48px;height:48px;border-radius:50%;background:var(--surface2);color:var(--teal);display:grid;place-items:center;font-size:24px;font-weight:700;flex:none}
+.thero{flex-direction:row;align-items:center;gap:22px;flex-wrap:wrap;border-width:1.5px}
+.thero.good{border-color:var(--ok);background:linear-gradient(135deg,var(--ok-bg),var(--surface) 70%)}
+.thero.warn{border-color:var(--warn);background:linear-gradient(135deg,var(--warn-bg),var(--surface) 70%)}
+.thero-txt{flex:1 1 300px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.thero-txt h3{font-family:var(--f-display);font-size:26px;color:var(--navy);line-height:1.2}
+.ring{width:132px;height:132px;flex:none}
+.tgrid{grid-template-columns:repeat(auto-fit,minmax(min(100%,215px),1fr))}
+.tgroup{gap:10px}
+.tgroup.good{border-top:3px solid var(--ok)} .tgroup.warn{border-top:3px solid var(--bad)}
+.tg-top{display:flex;justify-content:space-between;align-items:center}
+.tbar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--ok);border-radius:99px}
+.tgroup.warn .tbar i{background:var(--bad)}
+.tanalysis h4{font-size:14px;margin-bottom:6px}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.tlist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.titem{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.titem.bad{border-color:var(--bad)}
+.titem>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px}
+.titem>summary::-webkit-details-marker{display:none}
+.titem>summary:hover{background:var(--surface2)}
+.tmark{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none;background:var(--ok-bg);color:var(--ok)}
+.titem.bad .tmark{background:var(--bad-bg);color:var(--bad)}
+.tname{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tname small{color:var(--muted);font-size:12.5px;line-height:1.4}
+.tbody{padding:4px 14px 14px 52px;display:flex;flex-direction:column;gap:10px;font-size:13.5px}
+.tcmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.tcmp>div{background:var(--surface2);border-radius:8px;padding:10px 12px}
+.tcmp span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tcmp p{margin-top:2px;overflow-wrap:anywhere}
+@media (max-width:600px){.tbody{padding-left:14px}.ring{width:110px;height:110px}.thero-txt h3{font-size:21px}}
 </style>
 
 <div class="wrap">
@@ -782,21 +819,67 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
   }
 
   /* ---------- 5. Pruebas ---------- */
+  var TGROUPS = [
+    { id: 'calc', name: 'Los números están bien calculados', ids: ['P1', 'P8'], bad: 'Los números no son confiables: no uses los resultados hasta corregir el cálculo.' },
+    { id: 'beh', name: 'El modelo reacciona con sentido común', ids: ['P2', 'P3', 'P10', 'P12'], bad: 'El modelo se comporta de forma ilógica: las comparaciones entre escenarios podrían engañar.' },
+    { id: 'req', name: 'Los requisitos se aplican de verdad', ids: ['P4', 'P7', 'P11'], bad: 'Los requisitos no se aplican bien: podría recomendarse una opción que en realidad no cumple.' },
+    { id: 'dec', name: 'La recomendación es confiable', ids: ['P5', 'P6', 'P9'], bad: 'La recomendación no es confiable: revisa puntajes y propuestas antes de presentarla.' }
+  ];
+  var TMEAN = {
+    P1: 'La fórmula del simulador da el mismo número que hacerla a mano.',
+    P2: 'Si la señal del celular empeora, la app tarda más, como debe ser.',
+    P3: 'Más respuestas guardadas en caché hacen la app más rápida y más disponible.',
+    P4: 'Con poco dinero no se pueden pagar servidores: el simulador lo reconoce y marca el costo como incumplido.',
+    P5: 'La opción recomendada es realmente la de mayor puntaje entre las que cumplen.',
+    P6: 'Aun en una situación extrema (5 000 usuarios y poco presupuesto) nunca se queda sin una propuesta útil.',
+    P7: 'Los datos mal escritos se rechazan antes de calcular, así nadie obtiene resultados falsos.',
+    P8: 'Repetir el mismo escenario da exactamente los mismos números: no hay azar.',
+    P9: 'Cambiar lo que le importa al equipo (costo o disponibilidad) cambia la recomendación: los pesos sí influyen.',
+    P10: 'El cliente directo depende de una API pública: al duplicar los usuarios, su margen cae a la mitad.',
+    P11: 'Un requisito imposible descarta a todas las opciones y el motivo queda registrado.',
+    P12: 'Un servidor propio de mapas baja la latencia y la carga externa, a cambio de pagar más.'
+  };
+  function ring(ok, n) {
+    var r = 52, c = 2 * Math.PI * r, f = n ? ok / n : 0;
+    return '<svg class="ring" viewBox="0 0 120 120" role="img" aria-label="' + ok + ' de ' + n + ' pruebas pasan"><circle cx="60" cy="60" r="' + r + '" fill="none" stroke="var(--surface2)" stroke-width="12"/>' +
+      '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + (ok === n ? 'var(--ok)' : 'var(--warn)') + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + (c * f).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 60 60)"/>' +
+      '<text x="60" y="58" text-anchor="middle" font-size="26" font-weight="700" style="fill:var(--ink)">' + ok + '/' + n + '</text><text x="60" y="78" text-anchor="middle" font-size="11" style="fill:var(--muted)">pruebas</text></svg>';
+  }
   function renderPruebas() {
-    var t = state.tests, ok = t ? t.res.filter(function (r) { return r.pass; }).length : 0;
-    var head = '<div><h2>Validación y pruebas</h2><p class="lead">Las pruebas se ejecutan sobre el mismo modelo que calcula los resultados. El archivo <code>tests.js</code> corre las mismas con Node.</p></div>';
-    var bar = '<div class="row"><button class="btn primary" id="runTests" type="button">' + (t ? 'Volver a ejecutar las pruebas' : 'Ejecutar las pruebas ahora') + '</button>' +
-      (t ? '<span class="small" role="status">Última ejecución: ' + esc(t.at) + ' · ' + t.ms + ' ms</span>' : '') + '</div>';
+    var t = state.tests, head = '<div><h2>Validación y pruebas</h2><p class="lead">Estas pruebas comprueban que el modelo calcula bien y se comporta con sentido común. Corren sobre el mismo modelo que genera los resultados; el archivo <code>tests.js</code> corre las mismas con Node.</p></div>';
+    var btn = '<button class="btn primary" id="runTests" type="button">' + (t ? 'Volver a ejecutar las pruebas' : 'Ejecutar las pruebas ahora') + '</button>';
     var body;
     if (!t) {
-      body = '<div class="card"><p>Aún no se han ejecutado las pruebas en esta sesión. Pulsa «Ejecutar las pruebas ahora» para correrlas y ver el resultado de cada una.</p>' +
-        '<p class="small">Cubren cálculo manual, monotonía, presupuesto, coherencia de la recomendación, escenarios imposibles, validación de entradas, repetibilidad y sensibilidad a los pesos.</p></div>';
+      body = '<div class="card tests-empty"><div class="te-ic" aria-hidden="true">✓</div><div><h3>Aún no se han ejecutado las pruebas</h3><p>Pulsa el botón para correr las 12 pruebas. Verás cuántas pasan, qué significa cada una y qué tan confiable es el simulador.</p></div>' + btn + '</div>' +
+        '<div class="grid tgrid">' + TGROUPS.map(function (g) { return '<div class="card tgroup"><h3>' + g.name + '</h3><p class="small">' + g.ids.length + ' pruebas: ' + g.ids.join(', ') + '</p></div>'; }).join('') + '</div>';
     } else {
-      body = '<div class="banner ' + (ok === t.res.length ? 'ok' : 'none') + '" role="status"><h2>' + ok + ' de ' + t.res.length + ' pruebas pasan</h2><p>Cubren cálculo manual, monotonía, presupuesto, coherencia de la recomendación, escenarios imposibles, validación de entradas, repetibilidad y sensibilidad a los pesos.</p></div>' +
-        '<div class="tablewrap"><table><thead><tr><th>Prueba</th><th>Qué demuestra</th><th>Esperado</th><th>Obtenido</th><th>Resultado</th></tr></thead><tbody>' +
-        t.res.map(function (r) { return '<tr><td><b>' + r.id + '</b> ' + esc(r.name) + '</td><td>' + esc(r.desc) + '</td><td>' + esc(r.expected) + '</td><td>' + esc(r.obtained) + '</td><td><span class="pill ' + (r.pass ? 'ok' : 'bad') + '">' + (r.pass ? 'Pasa' : 'Falla') + '</span></td></tr>'; }).join('') + '</tbody></table></div>';
+      var byId = {}; t.res.forEach(function (r) { byId[r.id] = r; });
+      var ok = t.res.filter(function (r) { return r.pass; }).length, n = t.res.length, all = ok === n;
+      var fails = t.res.filter(function (r) { return !r.pass; });
+      var gst = TGROUPS.map(function (g) { var rs = g.ids.map(function (i) { return byId[i]; }).filter(Boolean); return { g: g, n: rs.length, ok: rs.filter(function (r) { return r.pass; }).length }; });
+      body = '<div class="card thero ' + (all ? 'good' : 'warn') + '">' + ring(ok, n) +
+        '<div class="thero-txt"><span class="eyebrow">Resultado</span><h3>' + (all ? 'Todas las pruebas pasan' : fails.length + (fails.length === 1 ? ' prueba falla' : ' pruebas fallan')) + '</h3>' +
+        '<p>' + (all ? 'El simulador calcula bien, reacciona con sentido común y aplica los requisitos como se definió.' : 'Hay comportamientos que no coinciden con lo esperado. Revisa el análisis de abajo antes de usar los resultados.') + '</p>' +
+        '<div class="row">' + btn + '<span class="small" role="status">Última ejecución: ' + esc(t.at) + ' · ' + t.ms + ' ms</span></div></div></div>' +
+        '<div class="grid tgrid">' + gst.map(function (x) {
+          var good = x.ok === x.n;
+          return '<div class="card tgroup ' + (good ? 'good' : 'warn') + '"><div class="tg-top"><span class="pill ' + (good ? 'ok' : 'bad') + '">' + (good ? 'Correcto' : 'Revisar') + '</span><b>' + x.ok + ' de ' + x.n + '</b></div><h3>' + x.g.name + '</h3>' +
+            '<div class="tbar" aria-hidden="true"><i style="width:' + Math.round(100 * x.ok / x.n) + '%"></i></div><p class="small">' + x.g.ids.map(function (i) { return '<b>' + i + '</b> ' + esc(byId[i] ? byId[i].name : ''); }).join('<br>') + '</p></div>';
+        }).join('') + '</div>' +
+        '<div class="card tanalysis"><h3>Qué significan estos resultados</h3>' +
+        (all
+          ? '<p class="easy-sum"><b>El modelo es confiable para comparar arquitecturas.</b> Pasaron las ' + n + ' pruebas: las cuentas coinciden con el cálculo a mano, los resultados se repiten, cada variable mueve los indicadores en la dirección correcta y la recomendación siempre sigue las reglas del equipo.</p>'
+          : '<p class="easy-sum"><b>No uses todavía las recomendaciones.</b> ' + fails.length + ' de ' + n + ' pruebas no dieron lo esperado, así que el simulador podría estar equivocándose en algo que el equipo dio por cierto.</p><ul class="plain">' +
+            gst.filter(function (x) { return x.ok < x.n; }).map(function (x) { return '<li><b>' + x.g.name + ':</b> ' + x.g.bad + '</li>'; }).join('') + '</ul>') +
+        '<div class="two-col"><div><h4>Lo que sí demuestran</h4><ul class="plain"><li>El modelo es <b>coherente</b>: no se contradice ni cambia al repetirlo.</li><li>Los <b>5 requisitos</b> descartan de verdad a las opciones que no cumplen.</li><li>Ante cualquier entrada válida, hay una <b>recomendación o una propuesta de ajuste</b>.</li></ul></div>' +
+        '<div><h4>Lo que no demuestran</h4><ul class="plain"><li>No prueban que Locus rinda así en producción: las cifras son <b>estimaciones</b> con supuestos documentados.</li><li>Para confirmarlo haría falta una <b>prueba de carga</b> con usuarios reales y el servicio desplegado.</li><li>Si cambian los supuestos (costos, latencias), conviene volver a ejecutar las pruebas.</li></ul></div></div></div>' +
+        '<div class="card"><h3>Detalle de cada prueba</h3><p class="small">Abre una prueba para ver qué se comparó, qué se esperaba y qué se obtuvo.</p><div class="tlist">' +
+        t.res.map(function (r) {
+          return '<details class="titem ' + (r.pass ? 'good' : 'bad') + '"' + (r.pass ? '' : ' open') + '><summary><span class="tmark" aria-hidden="true">' + (r.pass ? '✓' : '✕') + '</span><span class="tname"><b>' + r.id + '</b> ' + esc(r.name) + '<small>' + esc(TMEAN[r.id] || r.desc) + '</small></span><span class="pill ' + (r.pass ? 'ok' : 'bad') + '">' + (r.pass ? 'Pasa' : 'Falla') + '</span></summary>' +
+            '<div class="tbody"><p><b>Qué se comparó.</b> ' + esc(r.desc) + '</p><div class="tcmp"><div><span>Esperado</span><p>' + esc(r.expected) + '</p></div><div><span>Obtenido</span><p>' + esc(r.obtained) + '</p></div></div></div></details>';
+        }).join('') + '</div></div>';
     }
-    $('#v-pruebas').innerHTML = head + bar + body +
+    $('#v-pruebas').innerHTML = head + body +
       '<div class="card"><h3>Controles de entradas inválidas</h3><p>Cada campo valida tipo, rango y entero cuando corresponde. Mientras haya un error el botón de ejecutar queda desactivado y el mensaje dice qué corregir. Los pesos no pueden ser negativos ni sumar cero.</p></div>';
     $('#runTests').onclick = function () {
       var b = this; b.disabled = true; b.textContent = 'Ejecutando…';

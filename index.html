@@ -1218,10 +1218,10 @@ svg .muted{fill:var(--muted)}
     var stale = isStale(id);
     var allDone = state.scenarios.every(function (x) { return state.runs[x.id] && !isStale(x.id); });
     var html = '<div><h2>Resultados</h2><p class="lead">Son estimaciones del modelo con los parámetros documentados, no mediciones de rendimiento.' + (JSON.parse(entry.vars).selfHost ? ' Este escenario usa Overpass propio.' : '') + '</p></div>';
-    html += globalVerdict(ran.map(function (s) { return s.id; }));
     html += '<div class="chips" id="rchips" role="group" aria-label="Escenario mostrado">' + ran.map(function (s) { return '<button class="chip" type="button" data-id="' + s.id + '" aria-pressed="' + (s.id === id) + '">' + esc(s.name) + (isStale(s.id) ? ' <span class="pill warn stale">desactualizado</span>' : '') + '</button>'; }).join('') + '</div>';
     if (stale) html += '<div class="banner none" role="status"><p>Este resultado corresponde a valores anteriores. Vuelve a ejecutar el escenario para actualizarlo.</p><div class="row"><button class="btn primary" id="rerun" type="button">Ejecutar de nuevo</button></div></div>';
     html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button>' + (allDone ? '' : '<button class="btn" id="runAllRes" type="button">Ejecutar todos los escenarios</button>') + '<span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
+    html += globalVerdict(ran.map(function (s) { return s.id; }));
     // recomendación
     html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + recTitle(rec, true) + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
     var sens = M.sensitivity(JSON.parse(entry.vars), proj);

@@ -783,13 +783,30 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
 
   /* ---------- 5. Pruebas ---------- */
   function renderPruebas() {
-    var res = TS.runAll(M), ok = res.filter(function (r) { return r.pass; }).length;
-    $('#v-pruebas').innerHTML =
-      '<div><h2>Validación y pruebas</h2><p class="lead">Estas pruebas se ejecutan ahora mismo sobre el mismo modelo que calcula los resultados. El archivo <code>tests.js</code> corre las mismas con Node.</p></div>' +
-      '<div class="banner ' + (ok === res.length ? 'ok' : 'none') + '" role="status"><h2>' + ok + ' de ' + res.length + ' pruebas pasan</h2><p>Cubren cálculo manual, monotonía, presupuesto, coherencia de la recomendación, escenarios imposibles, validación de entradas, repetibilidad y sensibilidad a los pesos.</p></div>' +
-      '<div class="tablewrap"><table><thead><tr><th>Prueba</th><th>Qué demuestra</th><th>Esperado</th><th>Obtenido</th><th>Resultado</th></tr></thead><tbody>' +
-      res.map(function (r) { return '<tr><td><b>' + r.id + '</b> ' + esc(r.name) + '</td><td>' + esc(r.desc) + '</td><td>' + esc(r.expected) + '</td><td>' + esc(r.obtained) + '</td><td><span class="pill ' + (r.pass ? 'ok' : 'bad') + '">' + (r.pass ? 'Pasa' : 'Falla') + '</span></td></tr>'; }).join('') + '</tbody></table></div>' +
+    var t = state.tests, ok = t ? t.res.filter(function (r) { return r.pass; }).length : 0;
+    var head = '<div><h2>Validación y pruebas</h2><p class="lead">Las pruebas se ejecutan sobre el mismo modelo que calcula los resultados. El archivo <code>tests.js</code> corre las mismas con Node.</p></div>';
+    var bar = '<div class="row"><button class="btn primary" id="runTests" type="button">' + (t ? 'Volver a ejecutar las pruebas' : 'Ejecutar las pruebas ahora') + '</button>' +
+      (t ? '<span class="small" role="status">Última ejecución: ' + esc(t.at) + ' · ' + t.ms + ' ms</span>' : '') + '</div>';
+    var body;
+    if (!t) {
+      body = '<div class="card"><p>Aún no se han ejecutado las pruebas en esta sesión. Pulsa «Ejecutar las pruebas ahora» para correrlas y ver el resultado de cada una.</p>' +
+        '<p class="small">Cubren cálculo manual, monotonía, presupuesto, coherencia de la recomendación, escenarios imposibles, validación de entradas, repetibilidad y sensibilidad a los pesos.</p></div>';
+    } else {
+      body = '<div class="banner ' + (ok === t.res.length ? 'ok' : 'none') + '" role="status"><h2>' + ok + ' de ' + t.res.length + ' pruebas pasan</h2><p>Cubren cálculo manual, monotonía, presupuesto, coherencia de la recomendación, escenarios imposibles, validación de entradas, repetibilidad y sensibilidad a los pesos.</p></div>' +
+        '<div class="tablewrap"><table><thead><tr><th>Prueba</th><th>Qué demuestra</th><th>Esperado</th><th>Obtenido</th><th>Resultado</th></tr></thead><tbody>' +
+        t.res.map(function (r) { return '<tr><td><b>' + r.id + '</b> ' + esc(r.name) + '</td><td>' + esc(r.desc) + '</td><td>' + esc(r.expected) + '</td><td>' + esc(r.obtained) + '</td><td><span class="pill ' + (r.pass ? 'ok' : 'bad') + '">' + (r.pass ? 'Pasa' : 'Falla') + '</span></td></tr>'; }).join('') + '</tbody></table></div>';
+    }
+    $('#v-pruebas').innerHTML = head + bar + body +
       '<div class="card"><h3>Controles de entradas inválidas</h3><p>Cada campo valida tipo, rango y entero cuando corresponde. Mientras haya un error el botón de ejecutar queda desactivado y el mensaje dice qué corregir. Los pesos no pueden ser negativos ni sumar cero.</p></div>';
+    $('#runTests').onclick = function () {
+      var b = this; b.disabled = true; b.textContent = 'Ejecutando…';
+      setTimeout(function () {
+        var t0 = Date.now(), res = TS.runAll(M);
+        state.tests = { res: res, at: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), ms: Date.now() - t0 };
+        renderPruebas();
+        var f = $('#runTests'); if (f) f.focus();
+      }, 60);
+    };
   }
 
   /* ---------- 6. Documentación ---------- */
@@ -825,7 +842,7 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
       '<div class="card"><h2>4. Parámetros y supuestos</h2><div class="tablewrap"><table><thead><tr><th>Parámetro</th><th class="num">Valor</th><th>Unidad</th><th>Qué representa</th></tr></thead><tbody>' + parRows + '</tbody></table></div>' +
       '<ul class="plain"><li>Todos los valores son supuestos del equipo basados en el comportamiento típico de las APIs públicas y de los artículos del curso. No son mediciones.</li><li>Las solicitudes llegan de forma uniforme durante las horas simuladas.</li><li>Cada instancia de servidor tiene su propia IP de salida.</li><li>Los esfuerzos de desarrollo (6, 10 y 24 persona-semanas) son estimaciones del equipo.</li></ul></div>' +
       '<div class="card"><h2>5. Criterios de decisión</h2><ol class="plain"><li><b>Requisitos obligatorios.</b> Se descarta toda alternativa que incumpla: latencia p95 máxima, disponibilidad mínima, capacidad para la demanda pico (margen ≥ 1), costo dentro del presupuesto y esfuerzo dentro de la capacidad del equipo.</li><li><b>Puntaje 0 a 1 por criterio.</b> Latencia: 1 − p95/límite. Disponibilidad: log₁₀(indisponibilidad permitida / indisponibilidad calculada)/1.5. Costo: 1 − costo/presupuesto. Escalabilidad: log₂(techo/demanda)/4. Simplicidad: 1 − esfuerzo/capacidad del equipo. Todos limitados a [0, 1].</li><li><b>Suma ponderada</b> con los pesos normalizados del equipo. Gana el mayor puntaje entre las que cumplen. Si ninguna cumple, el simulador busca la propuesta que menos cambia el plan, probando en este orden de esfuerzo: servidor propio de OpenStreetMap (Overpass autoalojado), precalentar el caché (+0.20 o +0.35 de aciertos), subir el presupuesto (×1.25 a ×5) y ampliar el plazo (×1.5 a ×3). Cada combinación se vuelve a simular y se elige la primera donde alguna alternativa cumple los 5 requisitos. Si ni con todos los ajustes al máximo alcanza, propone limitar los usuarios simultáneos con una sala de espera y calcula el límite. Solo si el requisito es imposible incluso con un usuario (por ejemplo, 200 ms de latencia) se indica cuál se acerca más y qué requisito falla.</li></ol></div>' +
-      '<div class="card"><h2>6. Instrucciones de uso</h2><ol class="plain"><li>En Proyecto, revisa los requisitos, el presupuesto, el equipo y los pesos.</li><li>En Escenarios, ajusta el escenario de referencia y los demás, o crea uno nuevo.</li><li>Pulsa «Ejecutar todos los escenarios».</li><li>En Resultados, lee la recomendación, la tabla de requisitos, los indicadores y los gráficos. Usa el barrido para ver el punto donde cambia la decisión.</li><li>Abre la trazabilidad para verificar cualquier número con su fórmula.</li><li>En Pruebas, comprueba que el modelo se comporta de forma coherente.</li></ol></div>' +
+      '<div class="card"><h2>6. Instrucciones de uso</h2><ol class="plain"><li>En Proyecto, revisa los requisitos, el presupuesto, el equipo y los pesos.</li><li>En Escenarios, ajusta el escenario de referencia y los demás, o crea uno nuevo.</li><li>Pulsa «Ejecutar todos los escenarios».</li><li>En Resultados, lee la recomendación, la tabla de requisitos, los indicadores y los gráficos. Usa el barrido para ver el punto donde cambia la decisión.</li><li>Abre la trazabilidad para verificar cualquier número con su fórmula.</li><li>En Pruebas, pulsa «Ejecutar las pruebas ahora» y comprueba que el modelo se comporta de forma coherente.</li></ol></div>' +
       '<div class="card"><h2>7. Limitaciones</h2><ul class="plain"><li>Los resultados son estimaciones del modelo, no mediciones de rendimiento real.</li><li>No hay picos dentro del minuto, fallas correlacionadas ni diferencias entre proveedores de nube.</li><li>Un monolito en una sola máquina suele superar a los microservicios en rendimiento puro, según los artículos, y el resultado no se generaliza a todos los sistemas.</li><li>El modelo supone que la API pública de OSM se comporta igual en todo el día.</li><li>La seguridad y el cifrado no se modelan como indicador.</li></ul>' +
       '<h3>Información adicional para validar en una aplicación real</h3><ul class="plain"><li>Latencias y tasas de error reales de Overpass, Nominatim y Open-Elevation, medidas desde Colombia.</li><li>Tasa real de aciertos de caché con usuarios reales.</li><li>Precios actuales del proveedor y consumo real de Firestore.</li><li>Pruebas de carga con JMeter o k6 sobre un prototipo de cada alternativa.</li></ul></div>' +
       '<div class="card"><h2>8. Referencias</h2><ul class="plain"><li>From Monolithic Systems to Microservices: A Comparative Study of Performance.</li><li>Monolithic vs. Microservice Architecture: A Performance and Scalability Evaluation.</li><li>A Comparative Review of Microservices and Monolithic Architectures.</li><li>MVC Architecture: A Comparative Study Between Laravel Framework and Slim Framework in Freelancer Project Monitoring System Web Based.</li></ul></div>';

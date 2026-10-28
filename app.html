@@ -536,7 +536,7 @@ svg .muted{fill:var(--muted)}
     var lab = function (k) { return '<b>' + k + ' (' + P[k].label + ')</b>'; };
     var strictRes = rec.proposal ? res : res;
     var feas = ARCHS.filter(function (k) { return res[k].feasible; }).sort(function (x, y) { return res[y].total - res[x].total; });
-    var out = '<div class="card easy"><h3>¿Por qué esta recomendación? Explicado fácil</h3>';
+    var out = '<div class="card easy"><h3>¿Por qué esta recomendación?</h3>';
     // frase resumen
     var win = rec.best, summary;
     if (rec.status === 'ok') {

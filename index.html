@@ -60,6 +60,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tab[aria-selected="true"] .badge{background:rgba(255,255,255,.22);color:inherit}
 .iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;white-space:nowrap;min-height:44px;width:100%}
 .content{min-width:0;padding-block:20px 8px;display:flex;flex-direction:column;gap:24px}
+.easy{border-color:var(--teal)}
+.easy-sum{font-size:16px;line-height:1.55;max-width:75ch}
+.easy-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:14px;max-width:80ch}
+.easy-steps>li::marker{font-weight:700;color:var(--teal)}
+.easy-steps ul{margin-top:8px}
 .pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px}
 .pager .btn{display:flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1.3;min-width:150px}
 .pager .btn small{font-weight:400;color:var(--muted);font-size:12px}
@@ -1076,21 +1081,30 @@ svg .muted{fill:var(--muted)}
     });
     return out + '</svg>';
   }
+  var CHECK_SHORT = { lat: 'rapidez', av: 'disponibilidad', cap: 'capacidad', cost: 'costo', team: 'esfuerzo del equipo' };
   function scoreChart(res, proj) {
-    var W = 640, rowH = 46, H = 40 + rowH * 3, L = 40, R = 56, bw = W - L - R;
+    var W = 720, L = 44, R = 70, T = 8, rowH = 62, bw = W - L - R, H = T + rowH * 3 + 36;
     var cols = { lat: 'var(--navy)', av: 'var(--teal)', cost: 'var(--cA)', scal: 'var(--cC)', simp: 'var(--muted)' };
-    var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="min-width:420px;max-width:760px" role="img" aria-label="Puntaje de decisión por alternativa, dividido por criterio">';
-    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) { var x = L + bw * t; out += '<line x1="' + x + '" x2="' + x + '" y1="8" y2="' + (H - 28) + '" stroke="var(--line)"/><text class="muted" x="' + x + '" y="' + (H - 12) + '" font-size="11" text-anchor="middle">' + nf(t, 2) + '</text>'; });
+    var maxT = Math.max.apply(null, ARCHS.map(function (k) { return res[k].total; }));
+    var xmax = Math.min(1, Math.max(0.2, Math.ceil((maxT + 0.03) * 10) / 10)), xstep = xmax <= 0.5 ? 0.1 : xmax <= 0.8 ? 0.2 : 0.25;
+    var fx = function (v) { return L + bw * v / xmax; };
+    var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="min-width:520px;max-width:820px" role="img" aria-label="Puntaje de decisión por alternativa, dividido por criterio">';
+    for (var t = 0; t * xstep <= xmax + 1e-9; t++) {
+      var v = t * xstep, x = fx(v);
+      out += '<line x1="' + x + '" x2="' + x + '" y1="' + T + '" y2="' + (T + rowH * 3) + '" stroke="var(--line)"/><text class="muted" x="' + x + '" y="' + (T + rowH * 3 + 18) + '" font-size="12" text-anchor="middle">' + nf(v, 2) + '</text>';
+    }
     ARCHS.forEach(function (k, i) {
-      var r = res[k], y = 14 + i * rowH, x = L;
-      out += '<text x="' + (L - 10) + '" y="' + (y + 20) + '" font-size="14" font-weight="700" text-anchor="end" style="fill:var(--c' + k + ')">' + k + '</text>';
+      var r = res[k], y = T + 6 + i * rowH, x = L;
+      out += '<text x="' + (L - 12) + '" y="' + (y + 20) + '" font-size="15" font-weight="700" text-anchor="end" style="fill:var(--c' + k + ')">' + k + '</text>';
       M.WEIGHT_KEYS.forEach(function (c) {
-        var w = r.contrib[c] * bw; if (w <= 0) return;
-        out += '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + w.toFixed(1) + '" height="28" fill="' + cols[c] + '" opacity="' + (r.feasible ? 1 : 0.35) + '"><title>' + WLABEL[c] + ': ' + nf(r.contrib[c], 3) + '</title></rect>';
+        var w = fx(r.contrib[c]) - L; if (w <= 0) return;
+        out += '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + w.toFixed(1) + '" height="30" fill="' + cols[c] + '" opacity="' + (r.feasible ? 1 : 0.38) + '"><title>' + WLABEL[c] + ': ' + nf(r.contrib[c], 3) + '</title></rect>';
         x += w;
       });
-      out += '<text x="' + (x + 8) + '" y="' + (y + 19) + '" font-size="13" font-weight="600">' + nf(r.total, 3) + '</text>';
-      if (!r.feasible) out += '<text x="' + (L + 8) + '" y="' + (y + 19) + '" font-size="12" font-weight="600" style="fill:var(--bad)">no cumple</text>';
+      out += '<text x="' + (x + 8) + '" y="' + (y + 20) + '" font-size="14" font-weight="700">' + nf(r.total, 3) + '</text>';
+      var why = r.checks.filter(function (c) { return !c.ok; }).map(function (c) { return CHECK_SHORT[c.key]; });
+      out += r.feasible ? '<text x="' + L + '" y="' + (y + 48) + '" font-size="12" style="fill:var(--ok)">Cumple todos los requisitos</text>'
+                        : '<text x="' + L + '" y="' + (y + 48) + '" font-size="12" font-weight="600" style="fill:var(--bad)">No cumple: ' + why.join(', ') + '. No compite.</text>';
     });
     out += '</svg>';
     var leg = '<div class="legend">' + M.WEIGHT_KEYS.map(function (c) { return '<span><i style="background:' + cols[c] + '"></i>' + WLABEL[c] + '</span>'; }).join('') + '</div>';
@@ -1121,6 +1135,66 @@ svg .muted{fill:var(--muted)}
       '<div class="tablewrap"><table><thead><tr><th>Alternativa</th><th class="num">Latencia p95</th><th class="num">Disponibilidad</th><th class="num">Margen</th><th class="num">Costo</th><th>Requisitos</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<div class="row"><button class="btn primary" id="applyProp" type="button">Aplicar la propuesta a este escenario</button><span class="small" id="applyMsg" role="status">Cambia las variables de este escenario y el presupuesto y plazo del proyecto.</span></div></div>';
   }
+  /* ---------- Explicación en lenguaje simple ---------- */
+  var CNAME = { lat: 'rapidez', av: 'disponibilidad', cost: 'costo', scal: 'capacidad de crecer', simp: 'facilidad para el equipo' };
+  function cval(k, r) {
+    return { lat: nf(r.latencyP95 / 1000, 1) + ' s', av: nf(r.availability * 100, 2) + ' %', cost: nf(r.cost, 0) + ' USD al mes', scal: nf(r.scalability, 1) + ' veces la demanda', simp: nf(r.effort, 0) + ' persona-semanas' }[k];
+  }
+  function failPlain(c, r, proj) {
+    return { lat: 'es muy lenta: el 95 % de las búsquedas tardaría ' + nf(r.latencyP95 / 1000, 1) + ' s y el máximo permitido es ' + nf(proj.latMaxMs / 1000, 1) + ' s',
+             av: 'estaría disponible el ' + nf(r.availability * 100, 2) + ' % del tiempo y se pidió al menos ' + proj.availMinPct + ' %',
+             cap: 'no alcanza para el pico de usuarios: solo soporta el ' + nf(r.headroom * 100, 0) + ' % de la demanda',
+             cost: 'costaría ' + nf(r.cost, 0) + ' USD al mes y el presupuesto es ' + nf(proj.budgetUsd, 0) + ' USD',
+             team: 'pide ' + nf(r.effort, 0) + ' persona-semanas de trabajo y el equipo tiene ' + nf(r.effortCap, 1) }[c.key];
+  }
+  function explainEasy(run, entry, sens) {
+    var res = run.results, rec = run.recommendation, proj = state.proj, v = JSON.parse(entry.vars);
+    var wsum = M.WEIGHT_KEYS.reduce(function (s, k) { return s + proj.weights[k]; }, 0);
+    var pct = function (k) { return nf(100 * proj.weights[k] / wsum, 0) + ' %'; };
+    var lab = function (k) { return '<b>' + k + ' (' + P[k].label + ')</b>'; };
+    var strictRes = rec.proposal ? res : res;
+    var feas = ARCHS.filter(function (k) { return res[k].feasible; }).sort(function (x, y) { return res[y].total - res[x].total; });
+    var out = '<div class="card easy"><h3>¿Por qué esta recomendación? Explicado fácil</h3>';
+    // frase resumen
+    var win = rec.best, summary;
+    if (rec.status === 'ok') {
+      if (feas.length > 1) {
+        var sec = feas[1], diffs = M.WEIGHT_KEYS.map(function (k) { return { k: k, d: res[win].contrib[k] - res[sec].contrib[k] }; }).sort(function (x, y) { return y.d - x.d; });
+        var top = diffs.filter(function (d) { return d.d > 0.005; }).slice(0, 2).map(function (d) { return CNAME[d.k]; });
+        summary = 'Recomendamos ' + lab(win) + ' porque cumple todo lo que no se puede romper y, al compararla con ' + lab(sec) + ', le va mejor en ' + (top.length ? top.join(' y ') : 'el conjunto de criterios') + '.';
+      } else summary = lab(win) + ' es la única opción que cumple todo lo que pediste, por eso gana.';
+    } else if (rec.status === 'adjusted' || rec.status === 'throttle') {
+      summary = 'Con las entradas tal como están, ninguna opción cumple todo. Por eso el simulador probó cambios y encontró que con ' + (rec.status === 'throttle' ? 'un límite de usuarios y más recursos' : 'pocos ajustes') + ' sí se puede, y la mejor opción sería ' + lab(win) + '.';
+    } else summary = 'Ninguna opción cumple los requisitos, ni siquiera con ajustes. Hay que relajar alguno de ellos.';
+    out += '<p class="easy-sum">' + summary + '</p><ol class="easy-steps">';
+    // paso 1
+    out += '<li><b>Primero, lo que no se negocia.</b> Cada opción debe cumplir 5 requisitos: rapidez, disponibilidad, capacidad para el pico de usuarios, costo y esfuerzo del equipo. Una opción que falle en uno queda fuera, sin importar lo buena que sea en lo demás.<ul class="plain">' +
+      ARCHS.map(function (k) {
+        var bad = res[k].checks.filter(function (c) { return !c.ok; });
+        return '<li>' + lab(k) + ': ' + (bad.length ? '<span class="pill bad">queda fuera</span> porque ' + bad.map(function (c) { return failPlain(c, res[k], proj); }).join('; ') + '.' : '<span class="pill ok">cumple los 5</span>') + '</li>';
+      }).join('') + '</ul></li>';
+    if (rec.status === 'ok') {
+      // paso 2
+      out += '<li><b>Después, se comparan las que quedan.</b> A cada criterio se le da un puntaje y se multiplica por lo que vale para el equipo: ' + M.WEIGHT_KEYS.map(function (k) { return CNAME[k] + ' ' + pct(k); }).join(', ') + '. ' +
+        (feas.length > 1 ? lab(feas[0]) + ' suma <b>' + nf(res[feas[0]].total, 3) + '</b> y ' + lab(feas[1]) + ' suma <b>' + nf(res[feas[1]].total, 3) + '</b>.' : lab(feas[0]) + ' suma <b>' + nf(res[feas[0]].total, 3) + '</b>.');
+      if (feas.length > 1) {
+        var s2 = feas[1];
+        out += '<ul class="plain">' + M.WEIGHT_KEYS.map(function (k) { return { k: k, d: res[win].contrib[k] - res[s2].contrib[k] }; }).sort(function (x, y) { return Math.abs(y.d) - Math.abs(x.d); }).slice(0, 3).map(function (x) {
+          return x.d >= 0 ? '<li>En <b>' + CNAME[x.k] + '</b> gana ' + win + ': ' + cval(x.k, res[win]) + ' frente a ' + cval(x.k, res[s2]) + '.</li>'
+                          : '<li>En <b>' + CNAME[x.k] + '</b> gana ' + s2 + ' (' + cval(x.k, res[s2]) + ' frente a ' + cval(x.k, res[win]) + '), pero este criterio solo vale ' + pct(x.k) + ' y no alcanza para compensar.</li>';
+        }).join('') + '</ul>';
+      }
+      out += '</li>';
+      // paso 3
+      var chg = sens ? sens.rows.reduce(function (l, r) { [['low', 'baja a'], ['high', 'sube a']].forEach(function (p) { if (r[p[0]].changed) l.push('si ' + r.label.toLowerCase() + ' ' + p[1] + ' ' + nf(r[p[0]].value, r[p[0]].value < 1 ? 2 : 0) + ', la recomendación pasaría a ' + (r[p[0]].best || 'ninguna opción')); }); return l; }, []) : [];
+      out += '<li><b>¿Qué podría cambiar la respuesta?</b> ' + (chg.length ? 'Se repitió la simulación moviendo cada variable a la mitad y al doble. La recomendación cambia en estos casos:<ul class="plain">' + chg.map(function (c) { return '<li>' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '.</li>'; }).join('') + '</ul>' : 'Se repitió la simulación moviendo cada variable a la mitad y al doble, y la recomendación no cambió. Es una respuesta estable.') + '</li>';
+    } else if (rec.proposal) {
+      var pr = rec.proposal, pf = ARCHS.filter(function (k) { return pr.results[k].feasible; }).sort(function (x, y) { return pr.results[y].total - pr.results[x].total; });
+      out += '<li><b>Entonces, se buscó qué cambiar.</b> El simulador prueba cambios de menor a mayor esfuerzo hasta que alguna opción cumple los 5 requisitos. La propuesta es: ' + pr.changes.map(function (c) { return esc(c); }).join('; ') + '.</li>';
+      out += '<li><b>Con esos cambios.</b> ' + pf.map(function (k) { return lab(k) + ' suma ' + nf(pr.results[k].total, 3); }).join(' y ') + '. Gana ' + lab(pr.best) + ' porque es la de mayor puntaje entre las que cumplen. Los cambios no se aplican solos: puedes aceptarlos con el botón «Aplicar la propuesta» o ajustar tus requisitos.</li>';
+    }
+    return out + '</ol></div>';
+  }
   function renderResultados() {
     var el = $('#v-resultados'), ran = state.scenarios.filter(function (s) { return state.runs[s.id]; });
     if (!ran.length) {
@@ -1137,6 +1211,8 @@ svg .muted{fill:var(--muted)}
     html += '<div class="row"><label for="pdfScope" style="flex-direction:row;align-items:center;gap:8px">Exportar<select id="pdfScope" style="width:auto"><option value="one">Solo el escenario mostrado</option><option value="all"' + (state.pdfScope === 'all' ? ' selected' : '') + '>Todos los escenarios</option></select></label><button class="btn" id="pdfBtn" type="button">Exportar PDF</button><span class="small hint-pdf" id="pdfHint" role="status">' + (stale ? 'Cambiaste variables: el PDF volverá a calcular este escenario antes de exportar.' : 'El PDF refleja las variables actuales del escenario.') + '</span></div>';
     // recomendación
     html += '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h2>' + recTitle(rec, true) + '</h2>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    var sens = M.sensitivity(JSON.parse(entry.vars), proj);
+    html += explainEasy(run, entry, sens);
     if (rec.proposal) html += proposalCard(rec.proposal, id);
     // requisitos
     html += '<div class="card"><h3>Requisitos obligatorios</h3><div class="tablewrap"><table><thead><tr><th>Requisito</th>' + ARCHS.map(function (k) { return '<th>' + k + ' · ' + P[k].label + '</th>'; }).join('') + '</tr></thead><tbody>' +
@@ -1172,13 +1248,12 @@ svg .muted{fill:var(--muted)}
         ARCHS.map(function (k) { return '<tr><td>' + tag(k) + ' ' + P[k].label + '</td><td class="num">' + (cmp[k].latency >= 0 ? '+' : '') + nf(cmp[k].latency * 100, 0) + ' %</td><td class="num">' + (cmp[k].cost >= 0 ? '+' : '') + nf(cmp[k].cost * 100, 0) + ' %</td><td class="num">' + (cmp[k].availability >= 0 ? '+' : '') + nf(cmp[k].availability * 100, 3) + ' pp</td></tr>'; }).join('') + '</tbody></table></div></div>';
     }
     // explicación
-    html += '<div class="card"><h3>Por qué esta recomendación</h3>' +
+    html += '<div class="card"><h3>Detalle técnico: descartes, supuestos y limitaciones</h3>' +
       (rec.reasons.length ? '<div><h3>Alternativas descartadas</h3><ul class="plain">' + rec.reasons.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>' : '') +
       '<div><h3>Supuestos</h3><ul class="plain">' + rec.assumptions.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>' +
       '<div><h3>Limitaciones</h3><ul class="plain">' + rec.limitations.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>' +
       '</div>';
     // sensibilidad
-    var sens = M.sensitivity(JSON.parse(entry.vars), proj);
     html += '<div class="card"><h3>Sensibilidad de la decisión</h3><p class="small">Se repite la simulación con cada variable a la mitad y al doble. «Cambia» indica que la recomendación sería distinta a ' + (sens.base ? esc(sens.base) : 'ninguna') + '.</p><div class="tablewrap"><table><thead><tr><th>Variable</th><th>Mitad</th><th>Doble</th></tr></thead><tbody>' +
       sens.rows.map(function (r) { var c = function (x) { return nf(x.value, x.value < 1 ? 2 : 0) + ' → ' + (x.best || 'ninguna') + (x.changed ? ' <span class="pill warn">cambia</span>' : ' <span class="pill ok">igual</span>'); }; return '<tr><td>' + r.label + '</td><td>' + c(r.low) + '</td><td>' + c(r.high) + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
     // trazabilidad
@@ -1222,6 +1297,7 @@ svg .muted{fill:var(--muted)}
       h += '<div class="rep-sc"><h2>Escenario: ' + esc(s.name) + (s.base ? ' (referencia)' : '') + '</h2>' +
         '<p><b>Entradas:</b> ' + Object.keys(M.VARS).map(function (k) { return M.VARS[k].label + ' ' + nf(v[k], v[k] < 1 ? 2 : 1) + ' ' + M.VARS[k].unit; }).join('; ') + (v.selfHost ? '; Overpass propio activado' : '') + '.</p>' +
         '<div class="banner ' + (rec.status === 'ok' ? 'ok' : 'none') + '"><h3>' + recTitle(rec, false) + '</h3>' + rec.text.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>' +
+        explainEasy(run, e, M.sensitivity(v, p)) +
         (rec.proposal ? '<h3>Ajustes propuestos</h3><ul class="plain">' + rec.proposal.changes.map(function (c) { return '<li>' + esc(c.charAt(0).toUpperCase() + c.slice(1)) + '.</li>'; }).join('') + '</ul>' : '') +
         '<h3>Requisitos obligatorios</h3><div class="tablewrap"><table><thead><tr><th>Requisito</th>' + ARCHS.map(function (k) { return '<th>' + k + ' · ' + P[k].label + '</th>'; }).join('') + '</tr></thead><tbody>' +
         res.A.checks.map(function (c, i) { return '<tr><td>' + esc(c.label) + '</td>' + ARCHS.map(function (k) { var x = res[k].checks[i]; return '<td>' + (x.ok ? 'Cumple' : 'No cumple') + ' (' + (x.key === 'lat' ? ms(x.value) : x.key === 'av' ? nf(x.value, 3) + ' %' : x.key === 'cap' ? nf(x.value, 2) + '×' : x.key === 'cost' ? nf(x.value, 2) + ' USD' : nf(x.value, 0) + ' p-s') + ')</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +

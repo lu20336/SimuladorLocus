@@ -2286,7 +2286,7 @@ canvas{border-radius:12px}
   /* ---------- Simulación en vivo: ejecución real + representación visual ---------- */
   var SIMR = LocusRunner.create({ onChange: function (s) { onRunChange('sim', s); }, onFrame: function (s) { onRunFrame('sim', s); } });
   var TESTR = LocusRunner.create({ onChange: function (s) { onRunChange('test', s); }, onFrame: function (s) { onRunFrame('test', s); } });
-  state.sel = {}; state.animOn = true; state.preview = null; state.stageOpen = false; state.forceMotion = false; state.simSel = null; state.stage = { sim: null, test: null }; state.tests = null; state.testsStart = 0;
+  state.sel = {}; state.animOn = true; state.preview = null; state.stageOpen = false; state.forceMotion = true; state.simSel = null; state.stage = { sim: null, test: null }; state.tests = null; state.testsStart = 0;
   var STAGE_LABEL = { pending: 'Pendiente', current: 'En curso', done: 'Completada', warn: 'Con advertencias', error: 'Con errores', skipped: 'Omitida' };
   var STAGE_ICON = { pending: '○', current: '●', done: '✓', warn: '!', error: '✕', skipped: '–' };
   var ST_LABEL = { pending: 'Pendiente', queued: 'En cola', running: 'En ejecución', done: 'Completada', warn: 'Con observaciones', error: 'Fallida', skipped: 'Omitida', stale: 'Desactualizada' };
@@ -2422,7 +2422,7 @@ canvas{border-radius:12px}
   function stopPreview() { if (state.preview && state.preview.raf) cancelAnimationFrame(state.preview.raf); state.preview = null; }
   function previewTick() {
     var pv = state.preview; if (!pv) return;
-    var off = SIMR.isRunning() || TESTR.isRunning() || (pv.kind === 'sim' && state.view !== 'simulacion') || (pv.kind === 'test' && state.view !== 'pruebas') || Date.now() - pv.t0 > 16000 || !document.getElementById(pv.kind === 'sim' ? 'stage' : 'tstage');
+    var off = SIMR.isRunning() || TESTR.isRunning() || (pv.kind === 'sim' && state.view !== 'simulacion') || (pv.kind === 'test' && state.view !== 'pruebas') || !document.getElementById(pv.kind === 'sim' ? 'stage' : 'tstage');
     if (off) { var k = pv.kind; stopPreview(); if (k === 'sim' && state.view === 'simulacion') keepFocus(renderSim); else if (k === 'test' && state.view === 'pruebas') keepFocus(renderPruebas); return; }
     if (pv.kind === 'sim') paintSim(); else paintTestStage();
     pv.raf = requestAnimationFrame(previewTick);
@@ -2542,6 +2542,8 @@ canvas{border-radius:12px}
     $('#v-simulacion').innerHTML = vheadHtml('Simulación en vivo', 'Cada escenario se ejecuta de verdad en el modelo mientras ves la escena que lo representa.', chip, act) +
       timelineHtml(stages, state.stage.sim, 'sim') + '<div class="wb">' + list + '<div class="wb-main">' + simPanelHtml(snap) + '</div></div>';
     wireSim(); paintSim(snap);
+    var shownId = simShownId(snap), shownSt = scenState(shownId, snap).st;
+    if (!running && (!state.preview || state.preview.kind !== 'sim') && shownId && (shownSt === 'pending' || shownSt === 'stale')) startPreview(shownId, 'sim');
   }
   function wireSim() {
     var root = $('#v-simulacion');
@@ -2741,6 +2743,8 @@ canvas{border-radius:12px}
     var sp = $('#tStop'); if (sp) sp.onclick = function () { TESTR.stopAfterCurrent(); };
     var an = $('#tAnim'); if (an) an.onchange = function () { state.animOn = an.checked; };
     paintTestStage(snap);
+    var sid = testShownId(snap), sit = snap.items.filter(function (i) { return i.id === sid; })[0];
+    if (!running && (!state.preview || state.preview.kind !== 'test') && !(sit && (sit.state === 'done' || sit.state === 'error'))) startPreview(sid, 'test');
   }
 
   /* ---------- 6. Documentación ---------- */

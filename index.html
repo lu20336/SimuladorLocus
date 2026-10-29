@@ -444,6 +444,7 @@ canvas{border-radius:12px}
   .stagecard .pchips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
   .stagecard .pchip{flex:none}
 }
+.motion-note{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13.5px;font-weight:500}
 </style>
 
 <div class="wrap">
@@ -2285,7 +2286,7 @@ canvas{border-radius:12px}
   /* ---------- Simulación en vivo: ejecución real + representación visual ---------- */
   var SIMR = LocusRunner.create({ onChange: function (s) { onRunChange('sim', s); }, onFrame: function (s) { onRunFrame('sim', s); } });
   var TESTR = LocusRunner.create({ onChange: function (s) { onRunChange('test', s); }, onFrame: function (s) { onRunFrame('test', s); } });
-  state.sel = {}; state.animOn = true; state.preview = null; state.stageOpen = false; state.simSel = null; state.stage = { sim: null, test: null }; state.tests = null; state.testsStart = 0;
+  state.sel = {}; state.animOn = true; state.preview = null; state.stageOpen = false; state.forceMotion = false; state.simSel = null; state.stage = { sim: null, test: null }; state.tests = null; state.testsStart = 0;
   var STAGE_LABEL = { pending: 'Pendiente', current: 'En curso', done: 'Completada', warn: 'Con advertencias', error: 'Con errores', skipped: 'Omitida' };
   var STAGE_ICON = { pending: '○', current: '●', done: '✓', warn: '!', error: '✕', skipped: '–' };
   var ST_LABEL = { pending: 'Pendiente', queued: 'En cola', running: 'En ejecución', done: 'Completada', warn: 'Con observaciones', error: 'Fallida', skipped: 'Omitida', stale: 'Desactualizada' };
@@ -2293,7 +2294,10 @@ canvas{border-radius:12px}
   var ST_PILL = { done: 'ok', warn: 'warn', error: 'bad', stale: 'warn' };
   var palCache = null, palAt = 0, lastAnnounce = '';
 
-  function reduced() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  function osReduced() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  function reduced() { return osReduced() && !state.forceMotion; }
+  function motionNote() { return osReduced() && !state.forceMotion ? '<div class="motion-note" role="note"><span>Tu sistema tiene desactivadas las animaciones, por eso la escena se ve quieta.</span><button type="button" class="btn small-btn" id="forceMotion" data-keep="forceMotion">Activar movimiento</button></div>' : ''; }
+  function wireMotion(render) { var b = $('#forceMotion'); if (b) b.onclick = function () { state.forceMotion = true; palCache = null; render(); }; }
   function durMs() { return reduced() ? 1500 : 5000; }
   function palette() {
     var t = Date.now(); if (palCache && t - palAt < 400) return palCache;
@@ -2499,7 +2503,7 @@ canvas{border-radius:12px}
     var id = simShownId(snap), s = id && scen(id);
     if (!s) return '<section class="stagecard" id="execPanel"><h3>Escena de la prueba</h3><p>No hay escenarios para simular.</p></section>';
     var st = scenState(id, snap), it = snap.items.filter(function (i) { return i.id === id; })[0], pos = it ? snap.items.indexOf(it) + 1 : 0, running = st.st === 'running', pv = state.preview && state.preview.id === id;
-    return '<section class="stagecard" id="execPanel"><div class="stage-h"><div><span class="eyebrow">' + (running ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : pv ? 'Vista previa de la escena' : 'Escena de la prueba') + '</span><h3>' + esc(s.name) + '</h3></div>' +
+    return '<section class="stagecard" id="execPanel">' + motionNote() + '<div class="stage-h"><div><span class="eyebrow">' + (running ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : pv ? 'Vista previa de la escena' : 'Escena de la prueba') + '</span><h3>' + esc(s.name) + '</h3></div>' +
       '<div class="stage-s"><span class="pill ' + (ST_PILL[st.st] || (running ? 'ok live' : '')) + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span>' + (!running && !reduced() ? '<button type="button" class="btn small-btn" id="prevBtn" data-keep="prevBtn">▶ Ver escena</button>' : '') + '</div></div>' +
       pchips(s.vars) +
       '<canvas id="stage" class="stage" data-kind="scenario" role="img" aria-label="Escena animada de «' + esc(s.name) + '»: ' + nf(s.vars.users, 0) + ' turistas con celular entran a la página de Locus y sus solicitudes llegan a las tres arquitecturas, que consultan OpenStreetMap. Es una ilustración, no una medición."></canvas>' +
@@ -2534,7 +2538,6 @@ canvas{border-radius:12px}
       (running ? '<button class="btn" id="simSkip" type="button" data-keep="simSkip">Saltar animación</button><button class="btn" id="simStop" type="button" data-keep="simStop"' + (snap.stopping ? ' disabled' : '') + '>' + (snap.stopping ? 'Se detendrá tras esta' : 'Detener tras esta') + '</button>' : '<button class="btn ghost" id="simClear" type="button" data-keep="simClear">Limpiar resultados</button>');
     var list = '<section class="wb-list" aria-label="Pruebas a ejecutar"><div class="wb-lh"><h3>Pruebas</h3><span class="small">' + sel.length + ' de ' + state.scenarios.length + ' seleccionadas</span></div>' + scenCards(snap) +
       '<label class="switch"><input type="checkbox" id="animOn"' + (state.animOn ? ' checked' : '') + (running ? ' disabled' : '') + '><span>Animación de ≈ ' + (reduced() ? '1,5' : '5') + ' s por prueba</span></label>' +
-      (reduced() ? '<p class="small">Tu sistema pide menos movimiento: la escena es más breve y se muestra quieta.</p>' : '') +
       (!sel.length ? '<p class="small bad-note">Selecciona al menos una prueba para poder ejecutar.</p>' : good.length < sel.length ? '<p class="small bad-note">Hay pruebas con valores inválidos. Corrígelas en Escenarios.</p>' : '') + '</section>';
     $('#v-simulacion').innerHTML = vheadHtml('Simulación en vivo', 'Cada escenario se ejecuta de verdad en el modelo mientras ves la escena que lo representa.', chip, act) +
       timelineHtml(stages, state.stage.sim, 'sim') + '<div class="wb">' + list + '<div class="wb-main">' + simPanelHtml(snap) + '</div></div>';
@@ -2547,6 +2550,7 @@ canvas{border-radius:12px}
     root.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     root.querySelectorAll('input[data-sel]').forEach(function (c) { c.onchange = function () { state.sel[c.getAttribute('data-sel')] = c.checked; state.stage.sim = null; keepFocus(renderSim); updateNav(); }; });
     root.querySelectorAll('.sc-main').forEach(function (b) { b.onclick = function () { state.simSel = b.getAttribute('data-view'); stopPreview(); keepFocus(renderSim); startPreview(state.simSel, 'sim'); }; });
+    wireMotion(renderSim);
     var pb = $('#prevBtn'); if (pb) pb.onclick = function () { startPreview(simShownId(SIMR.snapshot()), 'sim'); };
     var run = $('#simRun'); if (run) run.onclick = function () { stopPreview(); startSim(selectedIds()); };
     var sk = $('#simSkip'); if (sk) sk.onclick = function () { SIMR.skip(); };
@@ -2662,7 +2666,7 @@ canvas{border-radius:12px}
     if (st === 'done' || st === 'error') { var r = it.result; res = '<div class="resbox ' + (st === 'done' ? 'done' : 'error') + '"><div class="row"><span class="pill ' + (st === 'done' ? 'ok' : 'bad') + '">' + icon + ' ' + label + '</span><b>' + (st === 'done' ? 'Lo obtenido coincide con lo esperado' : 'Lo obtenido NO coincide con lo esperado') + '</b></div><div class="tcmp"><div><span>Esperado</span><p>' + esc(r.expected) + '</p></div><div><span>Obtenido</span><p>' + esc(r.obtained) + '</p></div></div></div>'; }
     else if (run) res = '<div class="resbox wait"><b>El resultado aparecerá aquí cuando el modelo termine y la escena concluya.</b></div>';
     else res = '<div class="resbox idle"><p>' + (st === 'skipped' ? 'Omitida: la secuencia se detuvo antes de esta prueba.' : 'Todavía no se ha ejecutado. Pulsa «▶ Ver escena» para ver qué comprueba, o «Ejecutar las pruebas ahora».') + '</p></div>';
-    return '<section class="stagecard" id="execPanel"><div class="stage-h"><div><span class="eyebrow">' + (run ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : pv ? 'Vista previa de la escena' : 'Escena de la prueba') + '</span><h3>' + esc(id) + ' · ' + esc(meta.name) + '</h3></div>' +
+    return '<section class="stagecard" id="execPanel">' + motionNote() + '<div class="stage-h"><div><span class="eyebrow">' + (run ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : pv ? 'Vista previa de la escena' : 'Escena de la prueba') + '</span><h3>' + esc(id) + ' · ' + esc(meta.name) + '</h3></div>' +
       '<div class="stage-s"><span class="pill ' + (st === 'done' ? 'ok' : st === 'error' ? 'bad' : run ? 'ok live' : '') + '">' + icon + ' ' + label + '</span>' + (!run && !reduced() ? '<button type="button" class="btn small-btn" id="tPrev" data-keep="tPrev">▶ Ver escena</button>' : '') + '</div></div>' +
       '<p class="stage-d">' + esc(TMEAN[id] || meta.desc) + '</p>' +
       '<canvas id="tstage" class="stage" data-kind="test" role="img" aria-label="Escena animada de la prueba ' + esc(id) + ': ' + esc(meta.name) + '. ' + esc(window.LocusScenes.CAPTION[id] || '') + ' Es una ilustración: el resultado lo da el modelo."></canvas>' +
@@ -2730,6 +2734,7 @@ canvas{border-radius:12px}
     var tm = $('#tlMore-test'); if (tm) tm.ontoggle = function () { state.stageOpen = tm.open; };
     root.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     root.querySelectorAll('[data-test]').forEach(function (b) { b.onclick = function () { state.testSel = b.getAttribute('data-test'); stopPreview(); keepFocus(renderPruebas); startPreview(state.testSel, 'test'); }; });
+    wireMotion(renderPruebas);
     var tp = $('#tPrev'); if (tp) tp.onclick = function () { startPreview(testShownId(TESTR.snapshot()), 'test'); };
     $('#runTests').onclick = function () { stopPreview(); startTests(); };
     var sk = $('#tSkip'); if (sk) sk.onclick = function () { TESTR.skip(); };

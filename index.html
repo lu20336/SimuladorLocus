@@ -154,7 +154,7 @@ svg .muted{fill:var(--muted)}
   .brand h1{font-size:20px}
   .side .iconbtn{width:auto;align-self:flex-start;padding:8px 14px;min-height:40px}
   .navlabel{display:none}
-  #tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;background:var(--surface);border-top:1px solid var(--line);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  #tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;background:var(--surface);border-top:1px solid var(--line);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
   #tabs .navgroup{display:contents}
   .navgroup+.navgroup{margin-top:0}
   .tab{flex-direction:column;gap:3px;padding:6px 2px;text-align:center;font-size:11px;min-height:56px;justify-content:center;border-radius:8px}
@@ -228,6 +228,84 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
 .tcmp span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .tcmp p{margin-top:2px;overflow-wrap:anywhere}
 @media (max-width:600px){.tbody{padding-left:14px}.ring{width:110px;height:110px}.thero-txt h3{font-size:21px}}
+
+/* ---- simulación en vivo ---- */
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.tlcard{gap:12px}
+.tl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:0}
+.tl-s{position:relative;min-width:0}
+.tl-s::before{content:"";position:absolute;top:21px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.tl-s:first-child::before{display:none}
+.tl-s.done::before,.tl-s.warn::before,.tl-s.error::before,.tl-s.current::before{background:var(--teal)}
+.tl-b{position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;background:transparent;border:0;cursor:pointer;padding:0 4px 6px;color:var(--ink);text-align:center;border-radius:10px;min-height:44px}
+.tl-b:hover{background:var(--surface2)}
+.tl-b[aria-pressed="true"]{background:var(--surface2)}
+.tl-ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px;background:var(--surface);border:3px solid var(--line);color:var(--muted)}
+.tl-s.done .tl-ic{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.tl-s.warn .tl-ic{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.tl-s.error .tl-ic{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.tl-s.current .tl-ic{background:var(--navy);border-color:var(--navy);color:var(--bg);animation:tlpulse 1.4s ease-in-out infinite}
+.tl-s.skipped .tl-ic{border-style:dashed}
+.tl-n{font-size:13px;font-weight:600;line-height:1.25;display:flex;flex-direction:column;align-items:center}
+.tl-n small{font-size:10.5px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tl-t{font-size:11.5px;color:var(--muted)}
+.tl-s.done .tl-t{color:var(--ok)} .tl-s.warn .tl-t{color:var(--warn)} .tl-s.error .tl-t{color:var(--bad)} .tl-s.current .tl-t{color:var(--navy);font-weight:700}
+@keyframes tlpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,51,102,.35)}50%{box-shadow:0 0 0 8px rgba(0,51,102,0)}}
+.tl-detail{background:var(--surface2);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.tl-dh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.tl-grid span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tl-grid p{margin-top:2px;font-size:13.5px}
+.sim-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:start}
+.sim-left,.sim-right{display:flex;flex-direction:column;gap:16px;min-width:0}
+.sim-right{position:sticky;top:12px}
+.scards{display:flex;flex-direction:column;gap:8px}
+.scard{display:flex;gap:4px;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.scard.shown{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
+.scard.invalid{border-color:var(--bad)}
+.sc-check{display:grid;place-items:center;padding:0 4px 0 12px;cursor:pointer;min-width:44px}
+.sc-check input{width:20px;height:20px;accent-color:var(--teal)}
+.sc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left;background:transparent;border:0;cursor:pointer;padding:10px 12px 10px 4px;color:var(--ink)}
+.sc-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sc-par{font-size:12px;color:var(--muted)}
+.sc-note{font-size:12px;color:var(--ink)} .sc-note.bad{color:var(--bad)}
+.switch,label.switch{display:flex;flex-direction:row;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;font-weight:500}
+.switch input{width:18px;height:18px;accent-color:var(--teal)}
+.bad-note{color:var(--bad)}
+.sumcard{gap:10px}
+.sum-h{justify-content:space-between}
+.sum-pct{font-size:24px;font-variant-numeric:tabular-nums}
+.sumgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sumgrid div{background:var(--surface2);border-radius:8px;padding:8px;display:flex;flex-direction:column;align-items:center}
+.sumgrid b{font-size:20px;font-variant-numeric:tabular-nums} .sumgrid span{font-size:11px;color:var(--muted);text-align:center}
+.exec-h{justify-content:space-between;align-items:flex-start}
+.exec h3{font-family:var(--f-display);font-size:20px;color:var(--navy)}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{background:var(--surface2);border-radius:8px;padding:5px 10px;display:flex;flex-direction:column}
+.pchip small{font-size:10.5px;color:var(--muted)} .pchip b{font-size:13.5px;font-variant-numeric:tabular-nums}
+.stage{display:block;width:100%;border-radius:12px;background:var(--surface2)}
+.caption{min-height:1.4em;font-size:13.5px;color:var(--ink);font-weight:500}
+.prog{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--navy);border-radius:99px}
+.muted-note{color:var(--muted)}
+.resbox{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:var(--surface2)}
+.resbox.done{background:var(--ok-bg)} .resbox.warn{background:var(--warn-bg)} .resbox.error{background:var(--bad-bg)}
+.resbox.wait{background:var(--surface2);border:1px dashed var(--line)}
+.kpis-s{grid-template-columns:repeat(3,minmax(0,1fr))} .kpis-s .kpi{background:var(--surface)} .kpis-s .kpi b{font-size:17px}
+.pill.live{animation:livedot 1.2s ease-in-out infinite}
+@keyframes livedot{50%{opacity:.55}}
+.titem.pend .tsum{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.titem.pend .tmark{background:var(--surface2);color:var(--muted)} .titem.pend.running .tmark{background:var(--navy);color:var(--bg)}
+@media (max-width:1100px){.sim-grid{grid-template-columns:minmax(0,1fr)}.sim-right{position:static;order:-1}}
+@media (max-width:720px){
+  .tl{grid-template-columns:minmax(0,1fr);gap:2px}
+  .tl-s::before{top:-6px;left:22px;width:3px;height:14px}
+  .tl-b{flex-direction:row;align-items:center;gap:12px;text-align:left;padding:4px 8px}
+  .tl-ic{width:34px;height:34px;font-size:15px;flex:none}
+  .tl-n{align-items:flex-start;flex:1} .tl-t{white-space:nowrap}
+  .sumgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){.tl-s.current .tl-ic,.pill.live{animation:none}}
 </style>
 
 <div class="wrap">
@@ -242,12 +320,14 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
       <section class="view" id="v-proyecto" role="tabpanel" aria-labelledby="tab-proyecto"></section>
       <section class="view" id="v-alternativas" role="tabpanel" aria-labelledby="tab-alternativas"></section>
       <section class="view" id="v-escenarios" role="tabpanel" aria-labelledby="tab-escenarios"></section>
+      <section class="view" id="v-simulacion" role="tabpanel" aria-labelledby="tab-simulacion"></section>
       <section class="view" id="v-resultados" role="tabpanel" aria-labelledby="tab-resultados"></section>
       <section class="view" id="v-pruebas" role="tabpanel" aria-labelledby="tab-pruebas"></section>
       <section class="view" id="v-documentacion" role="tabpanel" aria-labelledby="tab-documentacion"></section>
       <nav class="pager" id="pager" aria-label="Navegación entre pasos"></nav>
     </main>
   </div>
+  <div id="liveMsg" class="sr" role="status" aria-live="polite"></div>
   <div id="printReport" aria-hidden="true"></div>
 </div>
 
@@ -868,11 +948,330 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
 
 </script>
 <script>
+/* Orquestador de ejecución del simulador de Locus.
+ * Separa tres cosas: (1) la ejecución real (item.execute), (2) la duración visual (minMs) y (3) el resultado.
+ * La animación nunca decide el resultado: un ítem solo pasa a «completada / con observaciones / fallida»
+ * cuando existe el resultado real Y ya transcurrió la duración visual (si la animación está activa).
+ * Funciona en Node (pruebas con reloj falso) y en el navegador (requestAnimationFrame). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.LocusRunner = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  function create(env) {
+    env = env || {};
+    var now = env.now || function () { return Date.now(); };
+    var raf = env.raf || function (f) { return setTimeout(function () { f(now()); }, 16); };
+    var caf = env.caf || function (h) { clearTimeout(h); };
+    var onChange = env.onChange || function () {};
+    var onFrame = env.onFrame || function () {};
+    var st = null, handle = null, runSeq = 0;
+
+    function emitChange() { try { onChange(snapshot()); } catch (e) { /* la interfaz no debe romper la ejecución */ } }
+    function emitFrame() { try { onFrame(snapshot()); } catch (e) { /* idem */ } }
+
+    function snapshot() {
+      if (!st) return { runId: 0, status: 'idle', items: [], counts: counts([]), idx: -1, percent: 0, animate: true, minMs: 5000, stopping: false };
+      var items = st.items.map(function (it) {
+        return { id: it.id, label: it.label, meta: it.meta, state: it.state, summary: it.summary, result: it.result, error: it.error,
+          startedAt: it.startedAt, doneAt: it.doneAt, t01: it.t01, waiting: it.waiting };
+      });
+      var c = counts(items), total = items.length - c.skipped;
+      return { runId: st.runId, status: st.status, items: items, counts: c, idx: st.idx, animate: st.animate, minMs: st.minMs, stopping: st.stopRequested,
+        percent: total > 0 ? Math.round(100 * (c.done + c.warn + c.error) / total) : 0 };
+    }
+    function counts(items) {
+      var c = { total: items.length, pending: 0, running: 0, done: 0, warn: 0, error: 0, skipped: 0 };
+      items.forEach(function (i) { c[i.state] = (c[i.state] || 0) + 1; });
+      return c;
+    }
+
+    function schedule() { if (!handle && st && st.status === 'running') handle = raf(tick); }
+    function cancelFrame() { if (handle) { caf(handle); handle = null; } }
+
+    function begin(i) {
+      var token = st.runId, it = st.items[i];
+      st.idx = i;
+      it.state = 'running'; it.startedAt = now(); it.t01 = 0; it.waiting = false;
+      var out;
+      try { out = it.execute(); } catch (e) { it._err = e; out = undefined; }
+      if (it._err) { /* se revelará como error en el siguiente cuadro */ }
+      else if (out && typeof out.then === 'function') {
+        out.then(function (r) { if (st && st.runId === token) { it._res = r; it.ready = true; } },
+                 function (e) { if (st && st.runId === token) { it._err = e || new Error('Error desconocido'); } });
+      } else { it._res = out; it.ready = true; }
+      emitChange();
+      schedule();
+    }
+
+    function reveal(it) {
+      var c;
+      if (it._err) {
+        it.state = 'error'; it.error = String(it._err && it._err.message || it._err); it.summary = 'Falló la ejecución: ' + it.error;
+      } else {
+        try { c = it.classify ? it.classify(it._res) : { state: 'done' }; } catch (e) { c = { state: 'error', summary: 'No se pudo interpretar el resultado: ' + e.message }; }
+        it.state = c.state === 'warn' || c.state === 'error' ? c.state : 'done';
+        it.summary = c.summary || '';
+        it.result = it._res;
+        if (it.commit) { try { it.commit(it._res); } catch (e) { it.state = 'error'; it.error = e.message; it.summary = 'No se pudo guardar el resultado: ' + e.message; } }
+      }
+      it.t01 = 1; it.waiting = false; it.doneAt = now();
+    }
+
+    function finish() {
+      st.status = 'finished'; st.finishedAt = now();
+      cancelFrame();
+      emitChange();
+    }
+
+    function advance() {
+      var i = st.idx + 1;
+      if (st.stopRequested) {
+        for (var k = i; k < st.items.length; k++) { st.items[k].state = 'skipped'; st.items[k].summary = 'Omitida: la secuencia se detuvo antes de empezar esta prueba.'; }
+        return finish();
+      }
+      if (i >= st.items.length) return finish();
+      begin(i);
+    }
+
+    function tick() {
+      handle = null;
+      if (!st || st.status !== 'running') return;
+      var it = st.items[st.idx];
+      if (!it || it.state !== 'running') return;
+      if (it._err) { reveal(it); emitChange(); return advance(); }
+      var el = now() - it.startedAt;
+      it.t01 = st.animate ? Math.min(1, el / st.minMs) : 1;
+      if (it.t01 >= 1 && it.ready) { reveal(it); emitChange(); return advance(); }
+      if (it.t01 >= 1 && !it.waiting) { it.waiting = true; emitChange(); }
+      else emitFrame();
+      schedule();
+    }
+
+    return {
+      /* items: [{id,label,meta,execute(),classify(result)->{state,summary},commit(result)}] */
+      start: function (items, opts) {
+        if (!items || !items.length || (st && st.status === 'running')) return false;
+        opts = opts || {};
+        st = { runId: ++runSeq, status: 'running', idx: -1, animate: opts.animate !== false, minMs: opts.minMs || 5000, stopRequested: false,
+          startedAt: now(), items: items.map(function (x) {
+            return { id: x.id, label: x.label, meta: x.meta, execute: x.execute, classify: x.classify, commit: x.commit, state: 'pending', summary: '', result: null,
+              error: null, startedAt: null, doneAt: null, t01: 0, waiting: false, ready: false, _res: undefined, _err: null };
+          }) };
+        begin(0);
+        return true;
+      },
+      /* Acorta la animación de la prueba actual y de las siguientes; el resultado real no cambia. */
+      skip: function () { if (st && st.status === 'running') { st.animate = false; cancelFrame(); tick(); } },
+      /* No hay cancelación real del cálculo: solo evita que empiecen las pruebas siguientes. */
+      stopAfterCurrent: function () { if (st && st.status === 'running') { st.stopRequested = true; emitChange(); } },
+      reset: function () { cancelFrame(); st = null; runSeq++; emitChange(); },
+      snapshot: snapshot,
+      isRunning: function () { return !!st && st.status === 'running'; },
+      hasFrameHandle: function () { return !!handle; }
+    };
+  }
+  return { create: create };
+});
+
+</script>
+<script>
+/* Animaciones del simulador de Locus (canvas 2D, sin dependencias).
+ * Son una REPRESENTACIÓN visual: dibujan los parámetros configurados (usuarios, solicitudes, caché, red, lugares)
+ * y nunca calculan ni anticipan resultados. El veredicto de cada alternativa solo se pinta cuando llega `reveal`,
+ * que proviene de la ejecución real del modelo. Las funciones son puras respecto al estado de la aplicación. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.LocusAnim = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var clamp = function (x, a, b) { return Math.min(b, Math.max(a, x)); };
+  var frac = function (x) { return x - Math.floor(x); };
+  var hash = function (i, k, seed) { return frac(Math.sin(i * 127.1 + k * 311.7 + (seed || 0) * 74.7) * 43758.5453); };
+
+  function rrect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function text(ctx, s, x, y, o) {
+    o = o || {};
+    ctx.font = (o.weight || 500) + ' ' + (o.size || 12) + 'px Inter, system-ui, -apple-system, "Segoe UI", sans-serif';
+    ctx.textAlign = o.align || 'left'; ctx.textBaseline = o.base || 'middle';
+    ctx.fillStyle = o.color || '#000';
+    ctx.fillText(s, x, y);
+  }
+  function fit(ctx, s, maxW) { /* recorta con «…» si no cabe */
+    if (ctx.measureText(s).width <= maxW) return s;
+    while (s.length > 2 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+    return s + '…';
+  }
+
+  /* ---------- Escenario: usuarios → solicitudes → alternativas → OpenStreetMap ---------- */
+  var LANES = [
+    { k: 'A', name: 'Cliente directo', nodes: [{ x: 0.44, l: 'Celular', cache: true }] },
+    { k: 'B', name: 'Monolito con caché', nodes: [{ x: 0.36, l: 'Servidor' }, { x: 0.58, l: 'Caché', cache: true }] },
+    { k: 'C', name: 'Microservicios', nodes: [{ x: 0.30, l: 'Gateway' }, { x: 0.45, l: 'Servicios' }, { x: 0.60, l: 'Caché', cache: true }] }
+  ];
+
+  function layout(W, H) {
+    var small = W < 520, top = 50, laneH = (H - top - 8) / 3;
+    return { small: small, top: top, laneH: laneH, uz: { x0: 10, x1: Math.round(W * (small ? 0.2 : 0.17)), y0: top + 8, y1: H - 12 },
+      osm: { x: W - (small ? 62 : 100), w: small ? 54 : 92 }, nodeW: small ? 46 : 64, nodeH: small ? 22 : 26 };
+  }
+
+  function lanePath(L, W, lane, idx) {
+    var cy = L.top + L.laneH * (idx + 0.5), pts = [{ x: L.uz.x1 + 4, y: cy }];
+    lane.nodes.forEach(function (n) { pts.push({ x: Math.round(W * n.x), y: cy, cache: !!n.cache }); });
+    pts.push({ x: L.osm.x, y: cy, osm: true });
+    return pts;
+  }
+
+  /* p: {t01, durMs, users, reqPerMin, hit, rtt, pois, selfHost, reduced, static, reveal} */
+  function drawScenario(ctx, W, H, p, pal) {
+    var L = layout(W, H), t = clamp(p.t01, 0, 1) * p.durMs, lambda = p.users * p.reqPerMin / 60;
+    var animated = !p.static && !p.reduced;
+    ctx.clearRect(0, 0, W, H);
+    rrect(ctx, 0.5, 0.5, W - 1, H - 1, 12); ctx.fillStyle = pal.surface2; ctx.fill();
+
+    /* cabecera con los parámetros configurados */
+    var shownFrac = p.static || p.reduced ? 1 : clamp(t / (p.durMs * 0.6), 0, 1);
+    var nDots = Math.min(p.users, 60), per = Math.ceil(p.users / Math.max(1, nDots)), shownDots = Math.round(nDots * shownFrac);
+    var usersNow = Math.min(p.users, Math.round(p.users * shownFrac));
+    text(ctx, 'Usuarios simultáneos: ' + usersNow.toLocaleString('es-CO') + ' de ' + p.users.toLocaleString('es-CO'), 14, 14, { size: 12, weight: 700, color: pal.ink });
+    var l2 = 'Aciertos de caché ' + Math.round(p.hit * 100) + ' %  ·  ' + p.reqPerMin + ' solic./min  ·  celular ' + p.rtt + ' ms  ·  ' + p.pois + ' lugares';
+    if (L.small) { text(ctx, 'Caché ' + Math.round(p.hit * 100) + ' % · ' + p.reqPerMin + ' sol./min', 14, 30, { size: 11, color: pal.muted }); text(ctx, p.rtt + ' ms · ' + p.pois + ' lugares', 14, 43, { size: 11, color: pal.muted }); }
+    else text(ctx, l2, 14, 31, { size: 11.5, color: pal.muted });
+    if (nDots < p.users && !L.small) text(ctx, 'cada punto ≈ ' + per + ' usuarios', W - 14, 14, { size: 11, color: pal.muted, align: 'right' });
+
+    /* usuarios: cuadrícula de puntos que se incorporan */
+    var zw = L.uz.x1 - L.uz.x0, zh = L.uz.y1 - L.uz.y0, cols = Math.max(2, Math.round(Math.sqrt(nDots * zw / zh))), rows = Math.ceil(nDots / cols);
+    var dx = zw / cols, dy = Math.min(zh / rows, dx * 1.6), r = Math.max(2, Math.min(5, dx * 0.32));
+    for (var i = 0; i < nDots; i++) {
+      var cx = L.uz.x0 + dx * (i % cols + 0.5), cy0 = L.uz.y0 + (zh - dy * rows) / 2 + dy * (Math.floor(i / cols) + 0.5);
+      ctx.beginPath(); ctx.arc(cx, cy0, r, 0, 6.2832);
+      if (i < shownDots) { ctx.fillStyle = pal.ink; ctx.globalAlpha = 0.85; ctx.fill(); ctx.globalAlpha = 1; }
+      else { ctx.strokeStyle = pal.line; ctx.lineWidth = 1; ctx.stroke(); }
+    }
+
+    /* OpenStreetMap */
+    rrect(ctx, L.osm.x, L.top + 4, L.osm.w, H - L.top - 12, 10); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = pal.muted; ctx.lineWidth = 1.2; ctx.stroke();
+    text(ctx, L.small ? 'OSM' : 'OpenStreetMap', L.osm.x + L.osm.w / 2, L.top + 20, { size: L.small ? 9 : 11, weight: 700, color: pal.ink, align: 'center' });
+    text(ctx, p.selfHost ? 'Overpass propio' : 'API pública', L.osm.x + L.osm.w / 2, L.top + 34, { size: L.small ? 9 : 10, color: pal.muted, align: 'center' });
+
+    var rate = clamp(lambda * 4, 2, 32), gap = 1000 / rate, rttExtra = p.rtt * 1.2;
+    LANES.forEach(function (lane, li) {
+      var pts = lanePath(L, W, lane, li), cy = pts[0].y, cacheIdx = pts.length - 2;
+      var eff = lane.k === 'A' ? p.hit * 0.35 : p.hit;
+      /* pista y nodos */
+      ctx.beginPath(); ctx.moveTo(pts[0].x, cy); ctx.lineTo(L.osm.x, cy); ctx.setLineDash([4, 4]); ctx.strokeStyle = pal.line; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
+      text(ctx, lane.k + ' · ' + lane.name, pts[0].x + 4, cy - L.laneH * 0.5 + 9, { size: L.small ? 10 : 11, weight: 700, color: pal[lane.k] });
+      /* paquetes de solicitudes */
+      if (animated) {
+        var segLen = [], tot = 0; for (var s = 0; s < pts.length - 1; s++) { var d = Math.abs(pts[s + 1].x - pts[s].x); segLen.push(d); tot += d; }
+        var vel = (W * 0.6) / 1700, maxT = 2 * (tot / vel) + 2 * rttExtra + 100;
+        var i0 = Math.max(0, Math.floor((t - maxT) / gap) - 1), i1 = Math.floor(t / gap) + 1;
+        for (var n = i0; n <= i1; n++) {
+          var sp = (n + hash(n, li, 1) * 0.8) * gap, rel = t - sp;
+          if (rel < 0 || hash(n, li, 2) > clamp(sp / (p.durMs * 0.6), 0, 1)) continue;
+          var hitP = hash(n, li, 3) < eff, stop = hitP ? cacheIdx : pts.length - 1, px = null, color = pal[lane.k];
+          var legs = []; for (var q = 0; q < stop; q++) legs.push({ a: pts[q], b: pts[q + 1], ms: segLen[q] / vel + (q === 0 ? rttExtra : 0) });
+          var back = legs.slice().reverse().map(function (g) { return { a: g.b, b: g.a, ms: g.ms }; });
+          var all = legs.concat(back), acc = 0;
+          for (var g = 0; g < all.length; g++) {
+            if (rel <= acc + all[g].ms) { var u = (rel - acc) / all[g].ms; px = { x: all[g].a.x + (all[g].b.x - all[g].a.x) * u, y: cy }; if (g >= legs.length) color = hitP ? pal.ok : pal.muted; break; }
+            acc += all[g].ms;
+          }
+          if (!px) continue;
+          ctx.beginPath(); ctx.arc(px.x, px.y, 2.6 + p.pois / 18, 0, 6.2832); ctx.fillStyle = color; ctx.fill();
+        }
+      } else {
+        ctx.beginPath(); ctx.moveTo(pts[0].x + 6, cy); ctx.lineTo(L.osm.x - 8, cy); ctx.strokeStyle = pal[lane.k]; ctx.globalAlpha = 0.5; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1;
+      }
+      lane.nodes.forEach(function (nd, ni) {
+        var x = pts[ni + 1].x - L.nodeW / 2;
+        rrect(ctx, x, cy - L.nodeH / 2, L.nodeW, L.nodeH, 7); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = pal[lane.k]; ctx.lineWidth = nd.cache ? 2 : 1.2; ctx.stroke();
+        ctx.font = '600 ' + (L.small ? 9.5 : 11) + 'px Inter, system-ui, sans-serif';
+        text(ctx, fit(ctx, nd.l, L.nodeW - 6), pts[ni + 1].x, cy, { size: L.small ? 9.5 : 11, weight: 600, color: pal.ink, align: 'center' });
+      });
+      /* veredicto real (solo cuando llega del modelo) */
+      var rv = p.reveal && p.reveal[lane.k], bx = L.osm.x - 8;
+      if (rv) {
+        var star = p.reveal.best === lane.k ? '★ ' : '';
+        text(ctx, star + (rv.short || rv.txt), bx, cy - L.laneH * 0.5 + 9, { size: L.small ? 9.5 : 11, weight: 700, color: rv.ok ? pal.ok : pal.bad, align: 'right' });
+        if (p.reveal.best === lane.k) { rrect(ctx, 4, L.top + L.laneH * li + 2, W - L.osm.w - 18, L.laneH - 4, 8); ctx.strokeStyle = pal.ok; ctx.lineWidth = 1.5; ctx.stroke(); }
+      } else if (!p.static) text(ctx, 'evaluando…', bx, cy - L.laneH * 0.5 + 9, { size: L.small ? 9.5 : 10.5, color: pal.muted, align: 'right' });
+    });
+    /* leyenda mínima */
+    if (animated && !L.small) text(ctx, '● solicitud   ● respuesta del caché   ● respuesta del mapa  (escala visual)', 14, H - 5, { size: 10, color: pal.muted, base: 'alphabetic' });
+  }
+
+  /* ---------- Pruebas del modelo: 4 variantes según lo que comprueban ---------- */
+  var TEST_TITLES = {
+    calc: ['Entradas', 'Fórmula del modelo', 'Cálculo a mano'],
+    beh: ['Cambia una variable', 'El modelo recalcula', 'Se compara el efecto'],
+    req: ['Latencia', 'Disponibilidad', 'Capacidad', 'Costo', 'Esfuerzo'],
+    dec: ['A', 'B', 'C']
+  };
+  /* p: {group, t01, durMs, reveal: null|'pass'|'fail', name, reduced, static} */
+  function drawTest(ctx, W, H, p, pal) {
+    var t = clamp(p.t01, 0, 1) * p.durMs, animated = !p.static && !p.reduced, small = W < 520;
+    ctx.clearRect(0, 0, W, H);
+    rrect(ctx, 0.5, 0.5, W - 1, H - 1, 12); ctx.fillStyle = pal.surface2; ctx.fill();
+    var titles = TEST_TITLES[p.group] || TEST_TITLES.calc, cy = H * 0.5, i;
+    var pulse = animated ? (t / 900) % titles.length : -1;
+    if (p.group === 'req') {
+      var gw = (W - 40) / titles.length;
+      titles.forEach(function (tt, k) {
+        var cx = 20 + gw * (k + 0.5), on = animated && Math.floor(pulse) === k;
+        rrect(ctx, cx - gw * 0.42, cy - 30, gw * 0.84, 60, 10); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = on ? pal.teal : pal.line; ctx.lineWidth = on ? 2.5 : 1.2; ctx.stroke();
+        text(ctx, tt, cx, cy - 6, { size: small ? 9.5 : 12, weight: 600, color: pal.ink, align: 'center' });
+        text(ctx, on ? 'revisando…' : p.reveal ? '' : '·', cx, cy + 14, { size: 10.5, color: pal.muted, align: 'center' });
+      });
+    } else if (p.group === 'dec') {
+      var bw = Math.min(90, (W - 60) / 3), colors = [pal.A, pal.B, pal.C];
+      titles.forEach(function (tt, k) {
+        var cx = W / 2 + (k - 1) * (bw + 24), hgt = 30 + (animated ? (Math.sin(t / 420 + k * 2.1) * 0.5 + 0.5) * 60 : 45);
+        ctx.fillStyle = colors[k]; ctx.globalAlpha = 0.85; rrect(ctx, cx - bw / 2, cy + 40 - hgt, bw, hgt, 6); ctx.fill(); ctx.globalAlpha = 1;
+        text(ctx, tt, cx, cy + 54, { size: 13, weight: 700, color: pal.ink, align: 'center' });
+      });
+      text(ctx, 'Se compara el puntaje de cada alternativa', W / 2, 20, { size: 11.5, color: pal.muted, align: 'center' });
+    } else {
+      var bwid = Math.min(150, (W - 60) / 3.2), xs = [W * 0.2, W * 0.5, W * 0.8];
+      titles.forEach(function (tt, k) {
+        var on = animated && Math.floor(pulse) === k;
+        rrect(ctx, xs[k] - bwid / 2, cy - 26, bwid, 52, 10); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = on ? pal.teal : pal.line; ctx.lineWidth = on ? 2.5 : 1.2; ctx.stroke();
+        ctx.font = '600 ' + (small ? 10 : 12) + 'px Inter, system-ui, sans-serif';
+        text(ctx, fit(ctx, tt, bwid - 10), xs[k], cy, { size: small ? 10 : 12, weight: 600, color: pal.ink, align: 'center' });
+        if (k < 2) {
+          var x0 = xs[k] + bwid / 2 + 4, x1 = xs[k + 1] - bwid / 2 - 4;
+          ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x1, cy); ctx.strokeStyle = pal.muted; ctx.lineWidth = 1.5; ctx.stroke();
+          if (animated) { var u = frac(t / 900 + k * 0.33); ctx.beginPath(); ctx.arc(x0 + (x1 - x0) * u, cy, 3.5, 0, 6.2832); ctx.fillStyle = pal.teal; ctx.fill(); }
+        }
+      });
+      if (p.group === 'calc') text(ctx, 'D, ρ y R se recalculan con las fórmulas del documento', W / 2, 20, { size: 11.5, color: pal.muted, align: 'center' });
+      else text(ctx, 'Se mueve una variable y se observa qué hace el modelo', W / 2, 20, { size: 11.5, color: pal.muted, align: 'center' });
+    }
+    if (p.reveal) {
+      var ok = p.reveal === 'pass', rx = W - 34, ry = 28;
+      ctx.beginPath(); ctx.arc(rx, ry, 16, 0, 6.2832); ctx.fillStyle = ok ? pal.ok : pal.bad; ctx.fill();
+      text(ctx, ok ? '✓' : '✕', rx, ry + 1, { size: 18, weight: 700, color: '#fff', align: 'center' });
+    } else if (!p.static) text(ctx, 'ejecutando…', W - 14, 20, { size: 11, color: pal.muted, align: 'right' });
+    text(ctx, p.name || '', 14, H - 12, { size: 11.5, weight: 600, color: pal.ink });
+  }
+
+  return { drawScenario: drawScenario, drawTest: drawTest, LANES: LANES };
+});
+
+</script>
+<script>
 (function () {
   'use strict';
   var M = window.LocusModel, TS = window.LocusTests;
   var P = M.PARAMS, C = P.common, ARCHS = M.ARCHS;
-  var VIEWS = [['proyecto', 'Proyecto'], ['alternativas', 'Alternativas'], ['escenarios', 'Escenarios'], ['resultados', 'Resultados'], ['pruebas', 'Pruebas'], ['documentacion', 'Documentación']];
+  var VIEWS = [['proyecto', 'Proyecto'], ['alternativas', 'Alternativas'], ['escenarios', 'Escenarios'], ['simulacion', 'Simulación'], ['resultados', 'Resultados'], ['pruebas', 'Pruebas'], ['documentacion', 'Documentación']];
   var WLABEL = { lat: 'Latencia', av: 'Disponibilidad', cost: 'Costo', scal: 'Escalabilidad', simp: 'Simplicidad para el equipo' };
   var state = { pdfScope: 'one', proj: M.defaultProject(), scenarios: M.defaultScenarios(), active: 'ref', runs: {}, runView: 'ref', sweepVar: 'users', sweepMetric: 'p95', view: 'proyecto' };
 
@@ -896,7 +1295,7 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
 
   /* ---------- navegación ---------- */
   var NAV = {
-    proyecto: { n: 1, short: 'Proyecto' }, alternativas: { n: 2, short: 'Opciones' }, escenarios: { n: 3, short: 'Escenarios' }, resultados: { n: 4, short: 'Resultados' },
+    proyecto: { n: 1, short: 'Proyecto' }, alternativas: { n: 2, short: 'Opciones' }, escenarios: { n: 3, short: 'Escenarios' }, simulacion: { n: 4, short: 'Simular' }, resultados: { n: 5, short: 'Resultados' },
     pruebas: { short: 'Pruebas', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.8"/></svg>' },
     documentacion: { short: 'Docs', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/></svg>' }
   };
@@ -906,7 +1305,7 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
   }
   function buildTabs() {
     var t = $('#tabs');
-    t.innerHTML = '<div class="navgroup"><div class="navlabel">Flujo de trabajo</div>' + VIEWS.slice(0, 4).map(tabHtml).join('') + '</div><div class="navgroup"><div class="navlabel">Consulta</div>' + VIEWS.slice(4).map(tabHtml).join('') + '</div>';
+    t.innerHTML = '<div class="navgroup"><div class="navlabel">Flujo de trabajo</div>' + VIEWS.slice(0, 5).map(tabHtml).join('') + '</div><div class="navgroup"><div class="navlabel">Consulta</div>' + VIEWS.slice(5).map(tabHtml).join('') + '</div>';
     t.addEventListener('click', function (e) { var b = e.target.closest('.tab'); if (b) go(b.dataset.v); });
   }
   function updateNav() {
@@ -914,6 +1313,8 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
     var set = function (id, txt, warn) { var b = $('#badge-' + id); if (!b) return; b.hidden = !txt; b.textContent = txt || ''; b.className = 'badge' + (warn ? ' warn' : ''); b.title = warn ? 'Hay resultados desactualizados' : ''; };
     set('escenarios', String(state.scenarios.length), false);
     set('resultados', ran.length ? (stale ? '!' : String(ran.length)) : '', stale);
+    var sn = SIMR.snapshot(); set('simulacion', sn.status === 'running' ? (sn.counts.done + sn.counts.warn + sn.counts.error) + '/' + (sn.counts.total - sn.counts.skipped) : '', false);
+    var tn = TESTR.snapshot(); set('pruebas', tn.status === 'running' ? (tn.counts.done + tn.counts.error) + '/' + (tn.counts.total - tn.counts.skipped) : '', false);
   }
   function renderPager(v) {
     var idx = VIEWS.map(function (x) { return x[0]; }).indexOf(v), p = idx > 0 ? VIEWS[idx - 1] : null, n = idx < VIEWS.length - 1 ? VIEWS[idx + 1] : null;
@@ -933,7 +1334,7 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
     window.scrollTo(0, 0);
   }
   function render(v) {
-    ({ proyecto: renderProyecto, alternativas: renderAlternativas, escenarios: renderEscenarios, resultados: renderResultados, pruebas: renderPruebas, documentacion: renderDoc })[v]();
+    ({ proyecto: renderProyecto, alternativas: renderAlternativas, escenarios: renderEscenarios, simulacion: renderSim, resultados: renderResultados, pruebas: renderPruebas, documentacion: renderDoc })[v]();
   }
 
   /* ---------- 1. Proyecto ---------- */
@@ -1081,7 +1482,7 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
     if (modified) { $('#modNote').textContent = 'Este escenario tiene valores distintos a los iniciales (' + Object.keys(def0.vars).filter(function (k) { return k !== 'selfHost'; }).map(function (k) { return M.VARS[k].label.toLowerCase() + ' ' + def0.vars[k]; }).join(', ') + (def0.vars.selfHost ? ', Overpass propio' : '') + ').'; $('#resetScen').hidden = false; }
     $('#resetScen').onclick = function () { state.scenarios = M.defaultScenarios(); state.runs = {}; state.active = 'ref'; state.runView = 'ref'; updateNav(); renderEscenarios(); };
     $('#selfHost').onchange = function (e) { s.vars.selfHost = e.target.checked; upd(); };
-    $('#runOne').onclick = function () { runScenario(s.id); state.runView = s.id; go('resultados'); };
+    $('#runOne').onclick = function () { startSim([s.id]); };
     var d = $('#delScen'); if (d) d.onclick = function () { state.scenarios = state.scenarios.filter(function (x) { return x.id !== s.id; }); delete state.runs[s.id]; state.active = state.scenarios[0].id; save(); renderEscenarios(); };
     upd();
   }
@@ -1290,7 +1691,7 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
     var el = $('#v-resultados'), ran = state.scenarios.filter(function (s) { return state.runs[s.id]; });
     if (!ran.length) {
       el.innerHTML = '<div><h2>Resultados</h2></div><div class="card"><p>Aún no se ha ejecutado ningún escenario en esta sesión. Los resultados salen del cálculo con las variables de tus escenarios.</p><div class="row"><button class="btn primary" id="goRun" type="button">Ejecutar todos los escenarios</button></div></div>';
-      $('#goRun').onclick = function () { state.scenarios.forEach(function (x) { runScenario(x.id); }); state.runView = state.scenarios[0].id; renderResultados(); };
+      $('#goRun').onclick = function () { startSim(state.scenarios.map(function (x) { return x.id; })); };
       return;
     }
     if (!state.runs[state.runView]) state.runView = ran[0].id;
@@ -1361,14 +1762,10 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
       Object.keys(pr.vars).forEach(function (k) { sc.vars[k] = pr.vars[k]; });
       state.proj = pr.proj; save(); runScenario(id); renderResultados();
     };
-    var rab = $('#runAllRes'); if (rab) rab.onclick = function () {
-      var bad = state.scenarios.filter(function (x) { return M.validate(x.vars, state.proj).length; });
-      if (bad.length) { $('#pdfHint').textContent = 'Corrige los valores inválidos de: ' + bad.map(function (x) { return x.name; }).join(', ') + '.'; return; }
-      state.scenarios.forEach(function (x) { runScenario(x.id); }); renderResultados();
-    };
+    var rab = $('#runAllRes'); if (rab) rab.onclick = function () { startSim(state.scenarios.map(function (x) { return x.id; })); };
     $('#pdfScope').onchange = function (e) { state.pdfScope = e.target.value; };
     $('#pdfBtn').onclick = function () { exportPdf($('#pdfScope').value, id, $('#pdfHint')); };
-    var rr = $('#rerun'); if (rr) rr.onclick = function () { runScenario(id); renderResultados(); };
+    var rr = $('#rerun'); if (rr) rr.onclick = function () { startSim([id]); };
     var drawSweep = function () {
       var key = state.sweepVar, vals = SWEEP[key].slice(), v0 = JSON.parse(entry.vars);
       if (vals.indexOf(v0[key]) < 0) vals.push(v0[key]); vals.sort(function (a, b) { return a - b; });
@@ -1441,6 +1838,297 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
     }, 900);
   }
 
+  /* ---------- Simulación en vivo: ejecución real + representación visual ---------- */
+  var SIMR = LocusRunner.create({ onChange: function (s) { onRunChange('sim', s); }, onFrame: function (s) { onRunFrame('sim', s); } });
+  var TESTR = LocusRunner.create({ onChange: function (s) { onRunChange('test', s); }, onFrame: function (s) { onRunFrame('test', s); } });
+  state.sel = {}; state.animOn = true; state.simSel = null; state.stage = { sim: null, test: null }; state.tests = null; state.testsStart = 0;
+  var STAGE_LABEL = { pending: 'Pendiente', current: 'En curso', done: 'Completada', warn: 'Con advertencias', error: 'Con errores', skipped: 'Omitida' };
+  var STAGE_ICON = { pending: '○', current: '●', done: '✓', warn: '!', error: '✕', skipped: '–' };
+  var ST_LABEL = { pending: 'Pendiente', queued: 'En cola', running: 'En ejecución', done: 'Completada', warn: 'Con observaciones', error: 'Fallida', skipped: 'Omitida', stale: 'Desactualizada' };
+  var ST_ICON = { pending: '○', queued: '○', running: '●', done: '✓', warn: '!', error: '✕', skipped: '–', stale: '↻' };
+  var ST_PILL = { done: 'ok', warn: 'warn', error: 'bad', stale: 'warn' };
+  var palCache = null, palAt = 0, lastAnnounce = '';
+
+  function reduced() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  function durMs() { return reduced() ? 1500 : 5000; }
+  function palette() {
+    var t = Date.now(); if (palCache && t - palAt < 400) return palCache;
+    var cs = getComputedStyle(document.documentElement), g = function (n) { return cs.getPropertyValue(n).trim() || '#888'; };
+    palAt = t; palCache = { surface: g('--surface'), surface2: g('--surface2'), ink: g('--ink'), muted: g('--muted'), line: g('--line'), A: g('--cA'), B: g('--cB'), C: g('--cC'), ok: g('--ok'), bad: g('--bad'), teal: g('--teal') };
+    return palCache;
+  }
+  function paint(id, draw) {
+    var cv = $('#' + id); if (!cv) return;
+    var w = Math.max(280, Math.round(cv.clientWidth || (cv.parentNode && cv.parentNode.clientWidth) || 600)), isTest = cv.getAttribute('data-kind') === 'test';
+    var h = isTest ? (w < 520 ? 170 : 160) : (w < 520 ? 340 : 300), dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + 'px'; }
+    var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); draw(ctx, w, h, palette());
+  }
+  function announce(msg) { var el = $('#liveMsg'); if (el && msg !== lastAnnounce) { lastAnnounce = msg; el.textContent = msg; } }
+  function keepFocus(fn) {
+    var a = document.activeElement, key = a && (a.id || a.getAttribute && a.getAttribute('data-keep')), sc = window.pageYOffset;
+    fn();
+    if (key) { var n = document.getElementById(key) || document.querySelector('[data-keep="' + key + '"]'); if (n && n !== document.activeElement) { try { n.focus({ preventScroll: true }); } catch (e) { n.focus(); } } }
+    window.scrollTo(0, sc);
+  }
+
+  /* ----- escenarios como pruebas ----- */
+  function selectedIds() { return state.scenarios.filter(function (s) { return state.sel[s.id] !== false; }).map(function (s) { return s.id; }); }
+  function validIds(ids) { return ids.filter(function (id) { return scen(id) && M.validate(scen(id).vars, state.proj).length === 0; }); }
+  function scenItems(ids) {
+    return ids.map(function (id) {
+      var s = scen(id);
+      return {
+        id: id, label: s.name,
+        execute: function () { /* lógica real del modelo; no guarda nada hasta terminar la animación */
+          var errs = M.validate(s.vars, state.proj); if (errs.length) throw new Error(errs[0]);
+          var vars = JSON.stringify(s.vars), ps = sig(), r = M.runScenario(s.vars, state.proj);
+          if (!r.ok) throw new Error((r.errors || ['El modelo no pudo calcular el escenario.'])[0]);
+          return { run: r, vars: vars, proj: ps, name: s.name };
+        },
+        classify: function (x) {
+          var rc = x.run.recommendation;
+          if (!rc.best) return { state: 'error', summary: 'Ninguna alternativa cumple los requisitos con estas entradas.' };
+          if (rc.status === 'ok') return { state: 'done', summary: 'Correcta: se recomienda «' + P[rc.best].label + '».' };
+          return { state: 'warn', summary: 'Con observaciones: ninguna alternativa cumple tal cual; el simulador propone ajustes sobre «' + P[rc.best].label + '».' };
+        },
+        commit: function (x) { state.runs[id] = x; save(); state.simSel = id; }
+      };
+    });
+  }
+  function startSim(ids) {
+    if (!SIMR.isRunning()) {
+      var ok = validIds(ids);
+      if (ok.length) { state.simSel = ok[0]; state.stage.sim = null; SIMR.start(scenItems(ok), { animate: state.animOn, minMs: durMs() }); }
+    }
+    go('simulacion');
+    var p = $('#execPanel'); if (p && p.scrollIntoView) { try { p.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); } catch (e) { /* sin desplazamiento */ } }
+  }
+  function scenState(id, snap) {
+    var it = snap.items.filter(function (i) { return i.id === id; })[0], e = state.runs[id];
+    if (it && it.state === 'running') return { st: 'running', note: 'El modelo calcula mientras se muestra la animación.' };
+    if (it && it.state === 'pending') return { st: 'queued', note: 'Espera su turno.' };
+    if (it && it.state === 'skipped') return { st: 'skipped', note: it.summary };
+    if (it && it.state === 'error' && !e) return { st: 'error', note: it.summary };
+    if (e) {
+      if (isStale(id)) return { st: 'stale', note: 'Cambiaste valores después de ejecutar: este resultado ya no corresponde a la configuración actual.' };
+      var rc = e.run.recommendation, st = rc.best ? (rc.status === 'ok' ? 'done' : 'warn') : 'error';
+      return { st: st, note: it ? it.summary : 'Resultado de una ejecución anterior de esta sesión.' };
+    }
+    return { st: 'pending', note: '' };
+  }
+  function globalBest(ids) {
+    var best = null;
+    ARCHS.forEach(function (k) {
+      var ok = 0; ids.forEach(function (id) { if (state.runs[id].run.results[k].feasible) ok++; });
+      if (!best || ok > best.ok) best = { k: k, ok: ok };
+    });
+    return best;
+  }
+  function scenReveal(id) {
+    var e = state.runs[id]; if (!e || isStale(id)) return null;
+    var run = e.run, rev = { best: run.recommendation.best };
+    ARCHS.forEach(function (k) {
+      var r = run.results[k];
+      if (r.feasible) rev[k] = { ok: true, txt: 'Cumple 5 de 5', short: 'Cumple' };
+      else if (run.recommendation.best === k) rev[k] = { ok: false, txt: 'Cumple solo con ajustes', short: 'Con ajustes' };
+      else rev[k] = { ok: false, txt: 'No cumple: ' + r.checks.filter(function (c) { return !c.ok; }).map(function (c) { return CHECK_SHORT[c.key]; }).join(', '), short: 'No cumple' };
+    });
+    return rev;
+  }
+  function scenParams(id) { var v = scen(id).vars; return { users: v.users, reqPerMin: v.reqPerMin, hit: v.hit, rtt: v.rtt, pois: v.pois, selfHost: !!v.selfHost }; }
+
+  /* ----- línea de tiempo (genérica) ----- */
+  function timelineHtml(stages, selId, kind) {
+    var cur = stages.filter(function (s) { return s.id === selId; })[0] || stages[0];
+    var list = '<ol class="tl" aria-label="Recorrido del proceso">' + stages.map(function (s, i) {
+      return '<li class="tl-s ' + s.status + '"><button type="button" class="tl-b" data-stage="' + s.id + '" data-kind="' + kind + '" data-keep="tl-' + kind + '-' + s.id + '" aria-pressed="' + (s.id === cur.id) + '"' + (s.status === 'current' ? ' aria-current="step"' : '') + '>' +
+        '<span class="tl-ic" aria-hidden="true">' + STAGE_ICON[s.status] + '</span><span class="tl-n"><small>Etapa ' + (i + 1) + '</small>' + esc(s.name) + '</span><span class="tl-t">' + STAGE_LABEL[s.status] + '</span></button></li>';
+    }).join('') + '</ol>';
+    var d = cur.detail || {};
+    var det = '<div class="tl-detail" aria-live="polite"><div class="tl-dh"><b>' + esc(cur.name) + '</b><span class="pill ' + (ST_PILL[cur.status] || '') + '">' + STAGE_ICON[cur.status] + ' ' + STAGE_LABEL[cur.status] + '</span></div>' +
+      '<p>' + d.means + '</p>' +
+      '<div class="tl-grid"><div><span>Condiciones</span><p>' + d.cond + '</p></div><div><span>' + (d.listLabel || 'Pruebas de esta etapa') + '</span><p>' + (d.tests || '—') + '</p></div>' +
+      '<div><span>Resultado actual</span><p>' + (d.result || '—') + '</p></div><div><span>Qué falta para continuar</span><p>' + (d.missing || 'Nada: esta etapa está lista.') + '</p></div></div>' +
+      (d.action ? '<div class="row"><button class="btn" type="button" data-go="' + d.action.view + '" data-keep="tl-go">' + d.action.label + '</button></div>' : '') + '</div>';
+    return '<div class="card tlcard"><h3>Mapa del recorrido</h3><p class="small">El estado de cada etapa se calcula con lo que realmente ocurre en esta sesión: no avanza por tiempo ni por una animación.</p>' + list + det + '</div>';
+  }
+  function simStages(snap) {
+    var sel = selectedIds(), projErr = M.validate(null, state.proj), bad = sel.filter(function (id) { return M.validate(scen(id).vars, state.proj).length; });
+    var good = validIds(sel), fresh = sel.filter(function (id) { return state.runs[id] && !isStale(id); }), stale = sel.filter(function (id) { return state.runs[id] && isStale(id); });
+    var names = function (ids) { return ids.length ? ids.map(function (id) { return esc(scen(id).name); }).join(', ') : ''; };
+    var running = snap.status === 'running', allFresh = sel.length > 0 && fresh.length === sel.length;
+    var recs = fresh.map(function (id) { return state.runs[id].run.recommendation; });
+    var worst = recs.some(function (r) { return !r.best; }) ? 'error' : recs.some(function (r) { return r.status !== 'ok'; }) ? 'warn' : 'done';
+    var execSt = running ? 'current' : (snap.status === 'finished' && snap.counts.skipped > 0 && !allFresh) ? 'warn' : (snap.status === 'finished' && snap.counts.error > 0 && !allFresh) ? 'error' : allFresh ? 'done' : 'pending';
+    var best = allFresh && sel.length >= 2 ? globalBest(fresh) : null;
+    var runMissing = !sel.length ? 'Selecciona al menos una prueba.' : projErr.length ? 'Corrige el proyecto.' : bad.length ? 'Corrige los valores inválidos de: ' + names(bad) + '.' : stale.length ? 'Cambiaste valores en: ' + names(stale) + '. Vuelve a ejecutar.' : '';
+    return [
+      { id: 'config', name: 'Configuración', status: projErr.length ? 'error' : 'done', detail: {
+        means: 'Se definen los requisitos, el presupuesto, el equipo y los pesos con que se comparan las arquitecturas.', cond: 'Todos los valores dentro de su rango y los pesos con suma mayor que 0.', listLabel: 'Qué incluye', tests: 'Latencia, disponibilidad, presupuesto, equipo y pesos.',
+        result: projErr.length ? esc(projErr.join(' ')) : 'Proyecto válido: p95 ≤ ' + nf(state.proj.latMaxMs / 1000, 1) + ' s, disponibilidad ≥ ' + state.proj.availMinPct + ' %, presupuesto ' + nf(state.proj.budgetUsd, 0) + ' USD al mes.', missing: projErr.length ? 'Corregir los valores del proyecto.' : '', action: { label: 'Ir a Proyecto', view: 'proyecto' } } },
+      { id: 'valid', name: 'Validación', status: projErr.length || !sel.length ? 'pending' : bad.length ? 'error' : 'done', detail: {
+        means: 'Se comprueba que cada prueba elegida tenga valores válidos antes de ejecutarla.', cond: 'Usuarios, solicitudes, caché, red y lugares dentro de sus rangos.', tests: names(sel) || 'Ninguna seleccionada.',
+        result: !sel.length ? 'Sin pruebas seleccionadas.' : bad.length ? 'Con errores: ' + names(bad) + '.' : good.length + ' de ' + sel.length + ' pruebas válidas.', missing: !sel.length ? 'Selecciona al menos una prueba.' : bad.length ? 'Corregir ' + names(bad) + ' en Escenarios.' : '', action: { label: 'Ir a Escenarios', view: 'escenarios' } } },
+      { id: 'prep', name: 'Pruebas preparadas', status: sel.length && !bad.length && !projErr.length ? 'done' : 'pending', detail: {
+        means: 'Las pruebas elegidas quedan en cola y se ejecutan una a una en el orden de los escenarios.', cond: 'Al menos una prueba válida seleccionada y el proyecto sin errores.', tests: names(good) || '—',
+        result: good.length ? good.length + ' pruebas listas para ejecutar.' : 'Nada preparado todavía.', missing: runMissing && !stale.length ? runMissing : '' } },
+      { id: 'exec', name: 'Ejecución', status: execSt, detail: {
+        means: 'El modelo calcula cada prueba de verdad; mientras tanto se muestra ≈5 s de animación que representa los parámetros. La prueba se da por terminada solo cuando existe el resultado real.', cond: 'Pruebas preparadas y ninguna otra ejecución en curso.', tests: names(sel) || '—',
+        result: running ? 'En curso: ' + (snap.counts.done + snap.counts.warn + snap.counts.error) + ' de ' + (snap.counts.total - snap.counts.skipped) + ' terminadas.' : snap.status === 'finished' ? 'Última ejecución: ' + snap.counts.done + ' correctas, ' + snap.counts.warn + ' con observaciones, ' + snap.counts.error + ' fallidas' + (snap.counts.skipped ? ', ' + snap.counts.skipped + ' omitidas' : '') + '.' : 'Aún no se ha ejecutado nada en esta sesión.',
+        missing: running ? 'Esperar a que terminen las pruebas en cola.' : runMissing || (allFresh ? '' : 'Pulsar «Ejecutar pruebas seleccionadas».') } },
+      { id: 'res', name: 'Resultados', status: allFresh ? worst : 'pending', detail: {
+        means: 'Cada prueba terminada guarda su resultado real: recomendación, requisitos e indicadores.', cond: 'Pruebas ejecutadas con la configuración actual.', tests: names(fresh) || '—',
+        result: allFresh ? recs.map(function (r, i) { return esc(scen(fresh[i]).name) + ': ' + (r.best ? 'recomendada «' + P[r.best].label + '»' + (r.status === 'ok' ? '' : ' (con ajustes)') : 'ninguna cumple'); }).join('<br>') : fresh.length ? fresh.length + ' de ' + sel.length + ' listos.' : 'Sin resultados vigentes.',
+        missing: allFresh ? '' : (stale.length ? 'Hay resultados anteriores desactualizados en: ' + names(stale) + '.' : 'Ejecutar las pruebas.'), action: fresh.length ? { label: 'Ver resultados', view: 'resultados' } : null } },
+      { id: 'fin', name: 'Finalización', status: best ? 'done' : (allFresh && sel.length === 1) ? 'skipped' : 'pending', detail: {
+        means: 'Con dos o más pruebas se compara qué arquitectura cumple en más escenarios: el veredicto global.', cond: 'Al menos dos pruebas con resultado vigente.', tests: names(fresh) || '—',
+        result: best ? 'Veredicto global: «' + P[best.k].label + '» cumple en ' + best.ok + ' de ' + fresh.length + ' escenarios.' : (allFresh && sel.length === 1) ? 'Con una sola prueba no hay veredicto global.' : 'Todavía no hay veredicto.', missing: best || (allFresh && sel.length === 1) ? '' : 'Completar al menos dos pruebas con resultado vigente.', action: best ? { label: 'Ver veredicto', view: 'resultados' } : null } }
+    ];
+  }
+  function autoStage(stages) { var p = stages.filter(function (s) { return s.status === 'current'; })[0] || stages.filter(function (s) { return s.status !== 'done' && s.status !== 'skipped'; })[0]; return (p || stages[stages.length - 1]).id; }
+
+  /* ----- panel de ejecución ----- */
+  function simShownId(snap) {
+    var r = snap.items.filter(function (i) { return i.state === 'running'; })[0]; if (r) return r.id;
+    if (state.simSel && scen(state.simSel)) return state.simSel;
+    var s = selectedIds()[0]; return s || (state.scenarios[0] && state.scenarios[0].id);
+  }
+  function pchips(v) {
+    var c = [['Usuarios', nf(v.users, 0)], ['Solicitudes por minuto', nf(v.reqPerMin, 1)], ['Aciertos de caché', nf(v.hit * 100, 0) + ' %'], ['Red del celular', nf(v.rtt, 0) + ' ms'], ['Lugares por itinerario', nf(v.pois, 0)]];
+    if (v.selfHost) c.push(['Mapa', 'Overpass propio']);
+    return '<div class="pchips">' + c.map(function (x) { return '<span class="pchip"><small>' + x[0] + '</small><b>' + x[1] + '</b></span>'; }).join('') + '</div>';
+  }
+  function progressBlock(snap, id) {
+    var it = snap.items.filter(function (i) { return i.id === id; })[0];
+    if (!it || it.state === 'pending') return '';
+    var run = it.state === 'running', pct = run ? Math.round(it.t01 * 100) : 100, secs = (it.t01 * snap.minMs / 1000);
+    var txt = run ? (it.waiting ? 'La animación terminó; esperando el resultado real del modelo…' : 'Animación: ' + nf(secs, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s') : 'Animación completada';
+    return '<div class="prog" role="progressbar" aria-label="Duración de la animación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" id="progBar"><i id="progFill" style="width:' + pct + '%"></i></div>' +
+      '<p class="small" id="progTxt">' + txt + '</p><p class="small muted-note">La barra mide la duración de la animación, no el avance del cálculo: el modelo ya lo calcula por separado y su resultado se muestra al terminar.</p>';
+  }
+  function captionFor(it, v) {
+    if (!it || it.state !== 'running') return '';
+    if (it.waiting) return 'Esperando el resultado real del modelo…';
+    if (it.t01 < 0.6) return 'Se incorporan usuarios: ' + nf(Math.min(v.users, Math.round(v.users * Math.min(1, it.t01 / 0.6))), 0) + ' de ' + nf(v.users, 0) + ' conectados a la vez.';
+    return 'Las solicitudes llegan a cada arquitectura: el caché responde parte (verde) y el resto consulta OpenStreetMap.';
+  }
+  function resultBox(id, st) {
+    var e = state.runs[id];
+    if (st.st === 'running') return '<div class="resbox wait"><b>El resultado aparecerá aquí cuando termine la animación.</b><p class="small">El modelo ya está calculando esta prueba; no se muestra nada hasta que concluya.</p></div>';
+    if (!e || st.st === 'stale' || st.st === 'pending' || st.st === 'queued' || st.st === 'skipped') {
+      var msg = st.st === 'stale' ? st.note : st.st === 'queued' ? 'Esta prueba espera su turno.' : st.st === 'skipped' ? st.note : 'Esta prueba todavía no se ha ejecutado. Selecciónala y pulsa «Ejecutar».';
+      return '<div class="resbox idle"><span class="pill ' + (ST_PILL[st.st] || '') + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span><p>' + esc(msg) + '</p></div>';
+    }
+    var rc = e.run.recommendation, b = rc.best, r = b && e.run.results[b];
+    return '<div class="resbox ' + st.st + '"><div class="row"><span class="pill ' + (ST_PILL[st.st] || '') + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span><b>' + (b ? 'Recomendada: ' + tag(b) + ' ' + P[b].label + (rc.status === 'ok' ? '' : ' (con ajustes)') : 'Ninguna alternativa cumple') + '</b></div>' +
+      (r ? '<div class="kpis kpis-s"><div class="kpi"><b>' + ms(r.latencyP95) + '</b><span>latencia p95</span></div><div class="kpi"><b>' + nf(r.cost, 0) + ' USD</b><span>costo mensual</span></div><div class="kpi"><b>' + nf(r.availability * 100, 2) + ' %</b><span>disponibilidad</span></div></div>' : '') +
+      (rc.status !== 'ok' && b ? '<p class="small">Ninguna alternativa cumple los 5 requisitos tal cual con estas entradas; el simulador propone ajustes (se explican en Resultados).</p>' : '') +
+      '<div class="row"><button class="btn" type="button" id="seeRes" data-keep="seeRes">Ver resultados completos</button></div></div>';
+  }
+  function simPanelHtml(snap) {
+    var id = simShownId(snap), s = id && scen(id);
+    if (!s) return '<div class="card" id="execPanel"><h3>Panel de ejecución</h3><p>No hay escenarios para simular.</p></div>';
+    var st = scenState(id, snap), it = snap.items.filter(function (i) { return i.id === id; })[0], pos = it ? snap.items.indexOf(it) + 1 : 0;
+    return '<div class="card exec" id="execPanel"><div class="row exec-h"><div><span class="eyebrow">' + (st.st === 'running' ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : 'Panel de ejecución') + '</span><h3>' + esc(s.name) + '</h3></div>' +
+      '<span class="pill ' + (ST_PILL[st.st] || (st.st === 'running' ? 'ok live' : '')) + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span></div>' +
+      pchips(s.vars) +
+      '<canvas id="stage" class="stage" data-kind="scenario" role="img" aria-label="Representación visual de la prueba «' + esc(s.name) + '»: ' + nf(s.vars.users, 0) + ' usuarios envían solicitudes a las tres arquitecturas, que consultan OpenStreetMap. Es una ilustración, no una medición."></canvas>' +
+      '<p class="caption" id="capt">' + esc(captionFor(it, s.vars)) + '</p>' + progressBlock(snap, id) + resultBox(id, st) +
+      '<p class="small">Qué se representa: los usuarios, el ritmo de solicitudes, el caché, la latencia del celular y el tamaño de la respuesta configurados. Es una <b>simulación visual</b>; las cifras reales las calcula el modelo y se muestran en el resultado.</p></div>';
+  }
+  function paintSim(snap) {
+    snap = snap || SIMR.snapshot(); var id = simShownId(snap); if (!id || !scen(id)) return;
+    var it = snap.items.filter(function (i) { return i.id === id; })[0], running = !!it && it.state === 'running';
+    var reveal = running ? null : scenReveal(id), p = scenParams(id);
+    paint('stage', function (ctx, w, h, pal) {
+      window.LocusAnim.drawScenario(ctx, w, h, { t01: running ? it.t01 : 1, durMs: snap.minMs || durMs(), users: p.users, reqPerMin: p.reqPerMin, hit: p.hit, rtt: p.rtt, pois: p.pois, selfHost: p.selfHost,
+        reduced: reduced(), static: !running, reveal: reveal }, pal);
+    });
+  }
+
+  /* ----- vista Simulación ----- */
+  function summaryBlock(sel, snap) {
+    if (!sel.length) return '<div class="card sumcard empty"><h3>Aún no hay pruebas seleccionadas</h3><p>Marca al menos un escenario de la lista para ejecutarlo. Verás aquí cuántas se completan y cuántas faltan.</p></div>';
+    var c = { done: 0, warn: 0, error: 0, pending: 0, stale: 0, skipped: 0, running: 0 };
+    sel.forEach(function (id) { var s = scenState(id, snap).st; if (s === 'queued') s = 'pending'; c[s] = (c[s] || 0) + 1; });
+    var fin = c.done + c.warn + c.error, pct = Math.round(100 * fin / sel.length);
+    return '<div class="card sumcard"><div class="row sum-h"><h3>Avance de la sesión</h3><b class="sum-pct">' + pct + ' %</b></div>' +
+      '<div class="tbar" role="img" aria-label="' + fin + ' de ' + sel.length + ' pruebas seleccionadas terminadas"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="sumgrid"><div><b>' + sel.length + '</b><span>seleccionadas</span></div><div><b>' + fin + '</b><span>terminadas</span></div><div><b>' + (c.pending + c.running + c.stale + c.skipped) + '</b><span>pendientes</span></div><div><b>' + c.error + '</b><span>fallidas</span></div></div>' +
+      '<p class="small">El porcentaje cuenta pruebas terminadas con la configuración actual entre las seleccionadas. No es una medida de carga ni de rendimiento.</p></div>';
+  }
+  function scenCards(snap) {
+    var running = snap.status === 'running';
+    return '<div class="scards">' + state.scenarios.map(function (s) {
+      var st = scenState(s.id, snap), errs = M.validate(s.vars, state.proj), on = state.sel[s.id] !== false, shown = simShownId(snap) === s.id, v = s.vars;
+      return '<div class="scard' + (shown ? ' shown' : '') + (errs.length ? ' invalid' : '') + '"><label class="sc-check"><input type="checkbox" data-sel="' + s.id + '"' + (on ? ' checked' : '') + (running ? ' disabled' : '') + '><span class="sr">Incluir «' + esc(s.name) + '» en la ejecución</span></label>' +
+        '<button type="button" class="sc-main" data-view="' + s.id + '" data-keep="sc-' + s.id + '" aria-pressed="' + shown + '"><span class="sc-top"><b>' + esc(s.name) + '</b><span class="pill ' + (ST_PILL[st.st] || (st.st === 'running' ? 'ok live' : '')) + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span></span>' +
+        '<span class="sc-par">' + nf(v.users, 0) + ' usuarios · ' + nf(v.reqPerMin, 1) + ' sol./min · caché ' + nf(v.hit * 100, 0) + ' % · ' + nf(v.rtt, 0) + ' ms · ' + nf(v.pois, 0) + ' lugares' + (v.selfHost ? ' · Overpass propio' : '') + '</span>' +
+        (errs.length ? '<span class="sc-note bad">' + esc(errs[0]) + '</span>' : st.note ? '<span class="sc-note">' + esc(st.note) + '</span>' : '') + '</button></div>';
+    }).join('') + '</div>';
+  }
+  function renderSim() {
+    var snap = SIMR.snapshot(), sel = selectedIds(), good = validIds(sel), running = snap.status === 'running', stages = simStages(snap);
+    if (!state.stage.sim || !stages.some(function (s) { return s.id === state.stage.sim; })) state.stage.sim = autoStage(stages);
+    var fin = snap.status === 'finished', allFresh = sel.length > 0 && sel.every(function (id) { return state.runs[id] && !isStale(id); });
+    var ctl = '<div class="card ctlcard"><h3>Pruebas a ejecutar</h3><p class="small">Cada escenario es una prueba: se ejecuta una a la vez y su resultado real queda guardado.</p>' + scenCards(snap) +
+      '<div class="row"><button class="btn primary" id="simRun" type="button" data-keep="simRun"' + (running || !good.length || good.length < sel.length ? ' disabled' : '') + '>' + (sel.length ? 'Ejecutar ' + sel.length + (sel.length === 1 ? ' prueba seleccionada' : ' pruebas seleccionadas') : 'Ejecutar pruebas seleccionadas') + '</button>' +
+      (running ? '<button class="btn" id="simSkip" type="button" data-keep="simSkip">Saltar animación</button><button class="btn" id="simStop" type="button" data-keep="simStop"' + (snap.stopping ? ' disabled' : '') + '>' + (snap.stopping ? 'Se detendrá tras esta prueba' : 'Detener tras esta prueba') + '</button>' : '') +
+      '<button class="btn" id="simClear" type="button" data-keep="simClear"' + (running ? ' disabled' : '') + '>Limpiar resultados</button></div>' +
+      '<label class="switch"><input type="checkbox" id="animOn"' + (state.animOn ? ' checked' : '') + (running ? ' disabled' : '') + '><span>Mostrar animación (≈ ' + (reduced() ? '1,5' : '5') + ' s por prueba)</span></label>' +
+      (reduced() ? '<p class="small">Tu sistema pide menos movimiento: la animación es más breve y discreta.</p>' : '') +
+      (!sel.length ? '<p class="small bad-note">Selecciona al menos una prueba para poder ejecutar.</p>' : good.length < sel.length ? '<p class="small bad-note">Hay pruebas con valores inválidos. Corrígelas en Escenarios para poder ejecutar.</p>' : '') + '</div>';
+    var done = fin && snap.counts.running === 0 ? '<div class="banner ' + (snap.counts.error || snap.counts.skipped ? 'none' : 'ok') + '" role="status"><h3>Ejecución terminada</h3><p>' + snap.counts.done + ' correctas, ' + snap.counts.warn + ' con observaciones, ' + snap.counts.error + ' fallidas' + (snap.counts.skipped ? ', ' + snap.counts.skipped + ' omitidas' : '') + '.' + (allFresh ? ' Los resultados corresponden a la configuración actual.' : '') + '</p>' + (allFresh ? '<div class="row"><button class="btn primary" type="button" id="goRes" data-keep="goRes">Ver resultados</button></div>' : '') + '</div>' : '';
+    $('#v-simulacion').innerHTML = '<div><h2>Simulación en vivo</h2><p class="lead">Elige las pruebas, ejecútalas y observa qué representa cada una. La animación ilustra los parámetros; el resultado siempre viene del modelo.</p></div>' +
+      timelineHtml(stages, state.stage.sim, 'sim') + '<div class="sim-grid"><div class="sim-left">' + ctl + summaryBlock(sel, snap) + done + '</div><div class="sim-right">' + simPanelHtml(snap) + '</div></div>';
+    wireSim(); paintSim(snap);
+  }
+  function wireSim() {
+    var root = $('#v-simulacion');
+    root.querySelectorAll('.tl-b').forEach(function (b) { b.onclick = function () { state.stage.sim = b.getAttribute('data-stage'); keepFocus(renderSim); }; });
+    root.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
+    root.querySelectorAll('input[data-sel]').forEach(function (c) { c.onchange = function () { state.sel[c.getAttribute('data-sel')] = c.checked; state.stage.sim = null; keepFocus(renderSim); updateNav(); }; });
+    root.querySelectorAll('.sc-main').forEach(function (b) { b.onclick = function () { state.simSel = b.getAttribute('data-view'); keepFocus(renderSim); }; });
+    var run = $('#simRun'); if (run) run.onclick = function () { startSim(selectedIds()); };
+    var sk = $('#simSkip'); if (sk) sk.onclick = function () { SIMR.skip(); };
+    var sp = $('#simStop'); if (sp) sp.onclick = function () { SIMR.stopAfterCurrent(); };
+    var cl = $('#simClear'); if (cl) cl.onclick = function () { SIMR.reset(); state.runs = {}; state.simSel = null; state.stage.sim = null; save(); renderSim(); updateNav(); announce('Resultados de la sesión limpiados.'); };
+    var an = $('#animOn'); if (an) an.onchange = function () { state.animOn = an.checked; };
+    var sr = $('#seeRes'); if (sr) sr.onclick = function () { state.runView = simShownId(SIMR.snapshot()); go('resultados'); };
+    var gr = $('#goRes'); if (gr) gr.onclick = function () { state.runView = selectedIds()[0]; go('resultados'); };
+  }
+
+  /* ----- eventos del orquestador ----- */
+  function onRunFrame(kind, snap) {
+    if (kind === 'sim' && state.view === 'simulacion') {
+      var id = simShownId(snap), it = snap.items.filter(function (i) { return i.id === id; })[0];
+      paintSim(snap);
+      var f = $('#progFill'), b = $('#progBar'), t = $('#progTxt'), c = $('#capt');
+      if (it && f) { var pct = Math.round(it.t01 * 100); f.style.width = pct + '%'; if (b) b.setAttribute('aria-valuenow', pct); if (t) t.textContent = it.waiting ? 'La animación terminó; esperando el resultado real del modelo…' : 'Animación: ' + nf(it.t01 * snap.minMs / 1000, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s'; if (c) c.textContent = captionFor(it, scen(id).vars); }
+    } else if (kind === 'test' && state.view === 'pruebas') paintTestStage(snap);
+  }
+  function onRunChange(kind, snap) {
+    if (kind === 'sim') {
+      var run = snap.items.filter(function (i) { return i.state === 'running'; })[0];
+      if (run) announce('Ejecutando la prueba ' + (snap.items.indexOf(run) + 1) + ' de ' + snap.items.length + ': ' + run.label + '.');
+      else if (snap.status === 'finished') announce('Ejecución terminada: ' + snap.counts.done + ' correctas, ' + snap.counts.warn + ' con observaciones, ' + snap.counts.error + ' fallidas.');
+      updateNav();
+      if (state.view === 'simulacion') keepFocus(renderSim);
+    } else {
+      if (snap.status === 'finished' && snap.runId !== state.testsDone) {
+        state.testsDone = snap.runId;
+        var res = snap.items.filter(function (i) { return i.result; }).map(function (i) { return i.result; });
+        state.tests = { res: res, total: snap.items.length, skipped: snap.counts.skipped, at: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), ms: Date.now() - state.testsStart };
+        announce('Pruebas del modelo terminadas: ' + res.filter(function (r) { return r.pass; }).length + ' de ' + res.length + ' pasan.');
+      } else {
+        var rt = snap.items.filter(function (i) { return i.state === 'running'; })[0];
+        if (rt) announce('Ejecutando la prueba ' + rt.id + ' de ' + snap.items.length + '.');
+      }
+      updateNav();
+      if (state.view === 'pruebas') keepFocus(renderPruebas);
+    }
+  }
   /* ---------- 5. Pruebas ---------- */
   var TGROUPS = [
     { id: 'calc', name: 'Los números están bien calculados', ids: ['P1', 'P8'], bad: 'Los números no son confiables: no uses los resultados hasta corregir el cálculo.' },
@@ -1468,51 +2156,116 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
       '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + (ok === n ? 'var(--ok)' : 'var(--warn)') + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + (c * f).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 60 60)"/>' +
       '<text x="60" y="58" text-anchor="middle" font-size="26" font-weight="700" style="fill:var(--ink)">' + ok + '/' + n + '</text><text x="60" y="78" text-anchor="middle" font-size="11" style="fill:var(--muted)">pruebas</text></svg>';
   }
+  var TESTMETA = null;
+  function testMeta() { if (!TESTMETA) TESTMETA = TS.suite(M).map(function (t) { return { id: t.id, name: t.name, desc: t.desc }; }); return TESTMETA; }
+  function groupOf(id) { var g = TGROUPS.filter(function (x) { return x.ids.indexOf(id) >= 0; })[0]; return g ? g.id : 'calc'; }
+  function testItems() {
+    return TS.suite(M).map(function (t) {
+      return {
+        id: t.id, label: t.name,
+        execute: function () { /* la lógica real de cada prueba; el resultado se publica al terminar la animación */
+          var r; try { r = t.run(); } catch (e) { r = { expected: '', obtained: 'Error: ' + e.message, pass: false }; }
+          return { id: t.id, name: t.name, desc: t.desc, expected: r.expected, obtained: r.obtained, pass: r.pass };
+        },
+        classify: function (x) { return x.pass ? { state: 'done', summary: 'Pasa' } : { state: 'error', summary: 'Falla: ' + x.obtained }; }
+      };
+    });
+  }
+  function startTests() {
+    if (TESTR.isRunning()) return;
+    state.testsStart = Date.now(); state.tests = null; state.testSel = null; state.stage.test = null;
+    TESTR.start(testItems(), { animate: state.animOn, minMs: durMs() });
+  }
+  function testStages(snap) {
+    var n = testMeta().length, c = snap.counts, running = snap.status === 'running', fin = snap.status === 'finished', t = state.tests;
+    var fails = t ? t.res.filter(function (r) { return !r.pass; }) : [];
+    return [
+      { id: 'prep', name: 'Pruebas preparadas', status: 'done', detail: { means: 'El simulador tiene listas ' + n + ' pruebas sobre el modelo, agrupadas en cuatro objetivos.', cond: 'Ninguna: siempre están disponibles.', listLabel: 'Grupos', tests: TGROUPS.map(function (g) { return esc(g.name); }).join('<br>'), result: n + ' pruebas listas.', missing: '' } },
+      { id: 'exec', name: 'Ejecución', status: running ? 'current' : fin ? (c.skipped ? 'warn' : 'done') : 'pending', detail: { means: 'Cada prueba corre sobre el modelo real, una tras otra; mientras tanto se muestra ≈5 s de animación que ilustra qué se comprueba.', cond: 'Pulsar «Ejecutar las pruebas ahora». No puede haber otra ejecución de pruebas en curso.', tests: 'P1 a P' + n,
+        result: running ? (c.done + c.error) + ' de ' + (c.total - c.skipped) + ' terminadas.' : fin ? (c.done + c.error) + ' de ' + c.total + ' ejecutadas' + (c.skipped ? '; ' + c.skipped + ' omitidas porque la secuencia se detuvo.' : '.') : 'Aún no se ha ejecutado nada.', missing: running ? 'Esperar a que terminen.' : fin ? '' : 'Pulsar «Ejecutar las pruebas ahora».' } },
+      { id: 'res', name: 'Resultados', status: !fin ? 'pending' : fails.length ? 'error' : 'done', detail: { means: 'Cada prueba compara lo esperado con lo obtenido. Pasa o falla; la animación no influye.', cond: 'Ejecución terminada.', tests: fin ? 'Con fallas: ' + (fails.map(function (r) { return r.id; }).join(', ') || 'ninguna') : '—',
+        result: fin ? (t.res.length - fails.length) + ' pasan, ' + fails.length + ' fallan.' : 'Sin resultados todavía.', missing: fin ? '' : 'Ejecutar las pruebas.' } },
+      { id: 'ana', name: 'Análisis', status: !fin ? 'pending' : fails.length ? 'warn' : 'done', detail: { means: 'Se interpreta qué significa el resultado y qué tan confiable es el simulador.', cond: 'Resultados disponibles.', listLabel: 'Dónde verlo', tests: 'Sección «Qué significan estos resultados».',
+        result: fin ? (fails.length ? 'Hay pruebas fallidas: no uses todavía las recomendaciones.' : 'El modelo es confiable para comparar arquitecturas.') : 'Pendiente.', missing: fin ? '' : 'Terminar la ejecución.' } }
+    ];
+  }
+  function testShownId(snap) {
+    var r = snap.items.filter(function (i) { return i.state === 'running'; })[0]; if (r) return r.id;
+    if (state.testSel) return state.testSel;
+    var last = snap.items.filter(function (i) { return i.doneAt; }).pop(); return last ? last.id : testMeta()[0].id;
+  }
+  function testStatusOf(id, snap) { var it = snap.items.filter(function (i) { return i.id === id; })[0]; return it ? it.state : 'pending'; }
+  function testPanelHtml(snap) {
+    var id = testShownId(snap), meta = testMeta().filter(function (m) { return m.id === id; })[0], it = snap.items.filter(function (i) { return i.id === id; })[0], st = it ? it.state : 'pending';
+    var label = { pending: 'Pendiente', running: 'En ejecución', done: 'Pasa', error: 'Falla', skipped: 'Omitida' }[st], icon = { pending: '○', running: '●', done: '✓', error: '✕', skipped: '–' }[st];
+    var pos = it ? snap.items.indexOf(it) + 1 : 0, run = st === 'running', pct = it ? (run ? Math.round(it.t01 * 100) : 100) : 0;
+    var prog = it && st !== 'pending' ? '<div class="prog" role="progressbar" aria-label="Duración de la animación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" id="tProgBar"><i id="tProgFill" style="width:' + pct + '%"></i></div><p class="small" id="tProgTxt">' + (run ? (it.waiting ? 'La animación terminó; esperando el resultado real…' : 'Animación: ' + nf(it.t01 * snap.minMs / 1000, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s') : 'Animación completada') + '</p><p class="small muted-note">La barra mide la duración de la animación, no el cálculo de la prueba.</p>' : '';
+    var res = '';
+    if (st === 'done' || st === 'error') { var r = it.result; res = '<div class="resbox ' + (st === 'done' ? 'done' : 'error') + '"><div class="row"><span class="pill ' + (st === 'done' ? 'ok' : 'bad') + '">' + icon + ' ' + label + '</span><b>' + (st === 'done' ? 'Lo obtenido coincide con lo esperado' : 'Lo obtenido NO coincide con lo esperado') + '</b></div><div class="tcmp"><div><span>Esperado</span><p>' + esc(r.expected) + '</p></div><div><span>Obtenido</span><p>' + esc(r.obtained) + '</p></div></div></div>'; }
+    else if (st === 'running') res = '<div class="resbox wait"><b>El resultado aparecerá aquí cuando termine la animación.</b></div>';
+    else res = '<div class="resbox idle"><p>' + (st === 'skipped' ? 'Omitida: la secuencia se detuvo antes de esta prueba.' : 'Esta prueba todavía no se ha ejecutado.') + '</p></div>';
+    return '<div class="card exec" id="execPanel"><div class="row exec-h"><div><span class="eyebrow">' + (run ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : 'Panel de ejecución') + '</span><h3>' + esc(id) + ' · ' + esc(meta.name) + '</h3></div><span class="pill ' + (st === 'done' ? 'ok' : st === 'error' ? 'bad' : run ? 'ok live' : '') + '">' + icon + ' ' + label + '</span></div>' +
+      '<p>' + esc(TMEAN[id] || meta.desc) + '</p>' +
+      '<canvas id="tstage" class="stage" data-kind="test" role="img" aria-label="Ilustración de la prueba ' + esc(id) + ': ' + esc(meta.name) + '. No muestra resultados."></canvas>' + prog + res + '</div>';
+  }
+  function paintTestStage(snap) {
+    snap = snap || TESTR.snapshot(); var id = testShownId(snap), meta = testMeta().filter(function (m) { return m.id === id; })[0], it = snap.items.filter(function (i) { return i.id === id; })[0];
+    var running = !!it && it.state === 'running', rv = it && (it.state === 'done' || it.state === 'error') ? (it.result && it.result.pass ? 'pass' : 'fail') : null;
+    paint('tstage', function (ctx, w, h, pal) { window.LocusAnim.drawTest(ctx, w, h, { group: groupOf(id), t01: running ? it.t01 : 1, durMs: snap.minMs || durMs(), name: id + ' · ' + meta.name, reveal: rv, reduced: reduced(), static: !running }, pal); });
+    var f = $('#tProgFill'), b = $('#tProgBar'), t = $('#tProgTxt');
+    if (running && f) { var pct = Math.round(it.t01 * 100); f.style.width = pct + '%'; if (b) b.setAttribute('aria-valuenow', pct); if (t) t.textContent = it.waiting ? 'La animación terminó; esperando el resultado real…' : 'Animación: ' + nf(it.t01 * snap.minMs / 1000, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s'; }
+  }
   function renderPruebas() {
-    var t = state.tests, head = '<div><h2>Validación y pruebas</h2><p class="lead">Estas pruebas comprueban que el modelo calcula bien y se comporta con sentido común. Corren sobre el mismo modelo que genera los resultados; el archivo <code>tests.js</code> corre las mismas con Node.</p></div>';
-    var btn = '<button class="btn primary" id="runTests" type="button">' + (t ? 'Volver a ejecutar las pruebas' : 'Ejecutar las pruebas ahora') + '</button>';
-    var body;
-    if (!t) {
-      body = '<div class="card tests-empty"><div class="te-ic" aria-hidden="true">✓</div><div><h3>Aún no se han ejecutado las pruebas</h3><p>Pulsa el botón para correr las 12 pruebas. Verás cuántas pasan, qué significa cada una y qué tan confiable es el simulador.</p></div>' + btn + '</div>' +
-        '<div class="grid tgrid">' + TGROUPS.map(function (g) { return '<div class="card tgroup"><h3>' + g.name + '</h3><p class="small">' + g.ids.length + ' pruebas: ' + g.ids.join(', ') + '</p></div>'; }).join('') + '</div>';
-    } else {
+    var snap = TESTR.snapshot(), t = state.tests, running = snap.status === 'running', meta = testMeta(), stages = testStages(snap);
+    if (!state.stage.test || !stages.some(function (s) { return s.id === state.stage.test; })) state.stage.test = autoStage(stages);
+    var head = '<div><h2>Validación y pruebas</h2><p class="lead">Estas pruebas comprueban que el modelo calcula bien y se comporta con sentido común. Corren sobre el mismo modelo que genera los resultados; el archivo <code>tests.js</code> corre las mismas con Node.</p></div>';
+    var started = running || !!t;
+    var ctl = '<div class="card ctlcard"><div class="row"><button class="btn primary" id="runTests" type="button" data-keep="runTests"' + (running ? ' disabled' : '') + '>' + (running ? 'Ejecutando…' : t ? 'Volver a ejecutar las pruebas' : 'Ejecutar las pruebas ahora') + '</button>' +
+      (running ? '<button class="btn" id="tSkip" type="button" data-keep="tSkip">Saltar animación</button><button class="btn" id="tStop" type="button" data-keep="tStop"' + (snap.stopping ? ' disabled' : '') + '>' + (snap.stopping ? 'Se detendrá tras esta prueba' : 'Detener tras esta prueba') + '</button>' : '') +
+      (t ? '<span class="small" role="status">Última ejecución: ' + esc(t.at) + ' · ' + nf(t.ms / 1000, 1) + ' s</span>' : '') + '</div>' +
+      '<label class="switch"><input type="checkbox" id="tAnim"' + (state.animOn ? ' checked' : '') + (running ? ' disabled' : '') + '><span>Mostrar animación (≈ ' + (reduced() ? '1,5' : '5') + ' s por prueba; ' + meta.length + ' pruebas)</span></label></div>';
+    var fin = snap.counts.done + snap.counts.error, tot = snap.counts.total - snap.counts.skipped, pct = tot ? Math.round(100 * fin / tot) : 0;
+    var prog = started ? '<div class="card sumcard"><div class="row sum-h"><h3>Avance de la ejecución</h3><b class="sum-pct">' + pct + ' %</b></div><div class="tbar" role="img" aria-label="' + fin + ' de ' + tot + ' pruebas terminadas"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="sumgrid"><div><b>' + snap.counts.total + '</b><span>seleccionadas</span></div><div><b>' + snap.counts.done + '</b><span>pasan</span></div><div><b>' + (snap.counts.pending + snap.counts.running + snap.counts.skipped) + '</b><span>pendientes</span></div><div><b>' + snap.counts.error + '</b><span>fallan</span></div></div></div>' : '';
+    var panel = started ? testPanelHtml(snap) : '<div class="card tests-empty"><div class="te-ic" aria-hidden="true">✓</div><div><h3>Aún no se han ejecutado las pruebas</h3><p>Pulsa «Ejecutar las pruebas ahora». Verás qué comprueba cada una mientras corre, cuántas pasan y qué significa el resultado.</p></div></div>';
+    var hero = '';
+    if (t && !running) {
       var byId = {}; t.res.forEach(function (r) { byId[r.id] = r; });
-      var ok = t.res.filter(function (r) { return r.pass; }).length, n = t.res.length, all = ok === n;
-      var fails = t.res.filter(function (r) { return !r.pass; });
-      var gst = TGROUPS.map(function (g) { var rs = g.ids.map(function (i) { return byId[i]; }).filter(Boolean); return { g: g, n: rs.length, ok: rs.filter(function (r) { return r.pass; }).length }; });
-      body = '<div class="card thero ' + (all ? 'good' : 'warn') + '">' + ring(ok, n) +
-        '<div class="thero-txt"><span class="eyebrow">Resultado</span><h3>' + (all ? 'Todas las pruebas pasan' : fails.length + (fails.length === 1 ? ' prueba falla' : ' pruebas fallan')) + '</h3>' +
-        '<p>' + (all ? 'El simulador calcula bien, reacciona con sentido común y aplica los requisitos como se definió.' : 'Hay comportamientos que no coinciden con lo esperado. Revisa el análisis de abajo antes de usar los resultados.') + '</p>' +
-        '<div class="row">' + btn + '<span class="small" role="status">Última ejecución: ' + esc(t.at) + ' · ' + t.ms + ' ms</span></div></div></div>' +
+      var ok = t.res.filter(function (r) { return r.pass; }).length, n = t.res.length, all = ok === n && !t.skipped, fails = t.res.filter(function (r) { return !r.pass; });
+      var gst = TGROUPS.map(function (g) { var rs = g.ids.map(function (i) { return byId[i]; }).filter(Boolean); return { g: g, n: rs.length, ok: rs.filter(function (r) { return r.pass; }).length, tot: g.ids.length }; });
+      hero = '<div class="card thero ' + (all ? 'good' : 'warn') + '">' + ring(ok, t.total) + '<div class="thero-txt"><span class="eyebrow">Resultado</span><h3>' + (all ? 'Todas las pruebas pasan' : fails.length ? fails.length + (fails.length === 1 ? ' prueba falla' : ' pruebas fallan') : 'Ejecución incompleta') + '</h3>' +
+        '<p>' + (all ? 'El simulador calcula bien, reacciona con sentido común y aplica los requisitos como se definió.' : fails.length ? 'Hay comportamientos que no coinciden con lo esperado. Revisa el análisis de abajo antes de usar los resultados.' : 'La secuencia se detuvo: faltan pruebas por ejecutar, así que no se puede concluir nada todavía.') + '</p></div></div>' +
         '<div class="grid tgrid">' + gst.map(function (x) {
-          var good = x.ok === x.n;
-          return '<div class="card tgroup ' + (good ? 'good' : 'warn') + '"><div class="tg-top"><span class="pill ' + (good ? 'ok' : 'bad') + '">' + (good ? 'Correcto' : 'Revisar') + '</span><b>' + x.ok + ' de ' + x.n + '</b></div><h3>' + x.g.name + '</h3>' +
-            '<div class="tbar" aria-hidden="true"><i style="width:' + Math.round(100 * x.ok / x.n) + '%"></i></div><p class="small">' + x.g.ids.map(function (i) { return '<b>' + i + '</b> ' + esc(byId[i] ? byId[i].name : ''); }).join('<br>') + '</p></div>';
+          var none = x.n === 0, good = !none && x.ok === x.n && x.n === x.tot;
+          return '<div class="card tgroup ' + (good ? 'good' : 'warn') + '"><div class="tg-top"><span class="pill ' + (good ? 'ok' : 'bad') + '">' + (none ? 'No ejecutada' : good ? 'Correcto' : x.n < x.tot && x.ok === x.n ? 'Incompleto' : 'Revisar') + '</span><b>' + x.ok + ' de ' + x.tot + '</b></div><h3>' + x.g.name + '</h3>' +
+            '<div class="tbar" aria-hidden="true"><i style="width:' + Math.round(100 * x.ok / x.tot) + '%"></i></div><p class="small">' + x.g.ids.map(function (i) { return '<b>' + i + '</b> ' + esc(byId[i] ? byId[i].name : 'No ejecutada'); }).join('<br>') + '</p></div>';
         }).join('') + '</div>' +
         '<div class="card tanalysis"><h3>Qué significan estos resultados</h3>' +
-        (all
-          ? '<p class="easy-sum"><b>El modelo es confiable para comparar arquitecturas.</b> Pasaron las ' + n + ' pruebas: las cuentas coinciden con el cálculo a mano, los resultados se repiten, cada variable mueve los indicadores en la dirección correcta y la recomendación siempre sigue las reglas del equipo.</p>'
-          : '<p class="easy-sum"><b>No uses todavía las recomendaciones.</b> ' + fails.length + ' de ' + n + ' pruebas no dieron lo esperado, así que el simulador podría estar equivocándose en algo que el equipo dio por cierto.</p><ul class="plain">' +
-            gst.filter(function (x) { return x.ok < x.n; }).map(function (x) { return '<li><b>' + x.g.name + ':</b> ' + x.g.bad + '</li>'; }).join('') + '</ul>') +
+        (all ? '<p class="easy-sum"><b>El modelo es confiable para comparar arquitecturas.</b> Pasaron las ' + n + ' pruebas: las cuentas coinciden con el cálculo a mano, los resultados se repiten, cada variable mueve los indicadores en la dirección correcta y la recomendación siempre sigue las reglas del equipo.</p>'
+          : fails.length ? '<p class="easy-sum"><b>No uses todavía las recomendaciones.</b> ' + fails.length + ' de ' + n + ' pruebas no dieron lo esperado, así que el simulador podría estar equivocándose en algo que el equipo dio por cierto.</p><ul class="plain">' + gst.filter(function (x) { return x.ok < x.n; }).map(function (x) { return '<li><b>' + x.g.name + ':</b> ' + x.g.bad + '</li>'; }).join('') + '</ul>'
+          : '<p class="easy-sum"><b>Todavía no hay conclusión.</b> Se ejecutaron ' + n + ' de ' + t.total + ' pruebas y todas pasaron, pero faltan ' + (t.total - n) + '. Vuelve a ejecutar sin detener la secuencia.</p>') +
         '<div class="two-col"><div><h4>Lo que sí demuestran</h4><ul class="plain"><li>El modelo es <b>coherente</b>: no se contradice ni cambia al repetirlo.</li><li>Los <b>5 requisitos</b> descartan de verdad a las opciones que no cumplen.</li><li>Ante cualquier entrada válida, hay una <b>recomendación o una propuesta de ajuste</b>.</li></ul></div>' +
-        '<div><h4>Lo que no demuestran</h4><ul class="plain"><li>No prueban que Locus rinda así en producción: las cifras son <b>estimaciones</b> con supuestos documentados.</li><li>Para confirmarlo haría falta una <b>prueba de carga</b> con usuarios reales y el servicio desplegado.</li><li>Si cambian los supuestos (costos, latencias), conviene volver a ejecutar las pruebas.</li></ul></div></div></div>' +
-        '<div class="card"><h3>Detalle de cada prueba</h3><p class="small">Abre una prueba para ver qué se comparó, qué se esperaba y qué se obtuvo.</p><div class="tlist">' +
-        t.res.map(function (r) {
-          return '<details class="titem ' + (r.pass ? 'good' : 'bad') + '"' + (r.pass ? '' : ' open') + '><summary><span class="tmark" aria-hidden="true">' + (r.pass ? '✓' : '✕') + '</span><span class="tname"><b>' + r.id + '</b> ' + esc(r.name) + '<small>' + esc(TMEAN[r.id] || r.desc) + '</small></span><span class="pill ' + (r.pass ? 'ok' : 'bad') + '">' + (r.pass ? 'Pasa' : 'Falla') + '</span></summary>' +
-            '<div class="tbody"><p><b>Qué se comparó.</b> ' + esc(r.desc) + '</p><div class="tcmp"><div><span>Esperado</span><p>' + esc(r.expected) + '</p></div><div><span>Obtenido</span><p>' + esc(r.obtained) + '</p></div></div></div></details>';
-        }).join('') + '</div></div>';
+        '<div><h4>Lo que no demuestran</h4><ul class="plain"><li>No prueban que Locus rinda así en producción: las cifras son <b>estimaciones</b> con supuestos documentados.</li><li>Para confirmarlo haría falta una <b>prueba de carga</b> con usuarios reales y el servicio desplegado.</li><li>Si cambian los supuestos (costos, latencias), conviene volver a ejecutar las pruebas.</li></ul></div></div></div>';
     }
-    $('#v-pruebas').innerHTML = head + body +
+    var list = '<div class="card"><h3>Detalle de cada prueba</h3><p class="small">Cada fila muestra su estado real. Abre una prueba terminada para ver qué se comparó, qué se esperaba y qué se obtuvo.</p><div class="tlist">' +
+      meta.map(function (m) {
+        var it = snap.items.filter(function (i) { return i.id === m.id; })[0], st = it ? it.state : 'pending', done = st === 'done' || st === 'error';
+        var pillc = st === 'done' ? 'ok' : st === 'error' ? 'bad' : st === 'running' ? 'ok live' : '', lab = { pending: 'Pendiente', running: 'En ejecución', done: 'Pasa', error: 'Falla', skipped: 'Omitida' }[st], ic = { pending: '○', running: '●', done: '✓', error: '✕', skipped: '–' }[st];
+        var inner = '<span class="tmark" aria-hidden="true">' + ic + '</span><span class="tname"><b>' + m.id + '</b> ' + esc(m.name) + '<small>' + esc(TMEAN[m.id] || m.desc) + '</small></span><span class="pill ' + pillc + '">' + ic + ' ' + lab + '</span>';
+        if (!done) return '<div class="titem pend ' + st + '"><div class="tsum" tabindex="-1">' + inner + '</div></div>';
+        var r = it.result;
+        return '<details class="titem ' + (st === 'done' ? 'good' : 'bad') + '"' + (st === 'error' ? ' open' : '') + '><summary>' + inner + '</summary><div class="tbody"><p><b>Qué se comparó.</b> ' + esc(r.desc) + '</p><div class="tcmp"><div><span>Esperado</span><p>' + esc(r.expected) + '</p></div><div><span>Obtenido</span><p>' + esc(r.obtained) + '</p></div></div></div></details>';
+      }).join('') + '</div></div>';
+    $('#v-pruebas').innerHTML = head + timelineHtml(stages, state.stage.test, 'test') + ctl + (started ? '<div class="sim-grid"><div class="sim-left">' + prog + '</div><div class="sim-right">' + panel + '</div></div>' : panel) + hero + list +
       '<div class="card"><h3>Controles de entradas inválidas</h3><p>Cada campo valida tipo, rango y entero cuando corresponde. Mientras haya un error el botón de ejecutar queda desactivado y el mensaje dice qué corregir. Los pesos no pueden ser negativos ni sumar cero.</p></div>';
-    $('#runTests').onclick = function () {
-      var b = this; b.disabled = true; b.textContent = 'Ejecutando…';
-      setTimeout(function () {
-        var t0 = Date.now(), res = TS.runAll(M);
-        state.tests = { res: res, at: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), ms: Date.now() - t0 };
-        renderPruebas();
-        var f = $('#runTests'); if (f) f.focus();
-      }, 60);
-    };
+    var root = $('#v-pruebas');
+    root.querySelectorAll('.tl-b').forEach(function (b) { b.onclick = function () { state.stage.test = b.getAttribute('data-stage'); keepFocus(renderPruebas); }; });
+    root.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
+    $('#runTests').onclick = function () { startTests(); if (state.view === 'pruebas') { var p = $('#execPanel'); if (p && p.scrollIntoView) { try { p.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); } catch (e) { /* sin desplazamiento */ } } } };
+    var sk = $('#tSkip'); if (sk) sk.onclick = function () { TESTR.skip(); };
+    var sp = $('#tStop'); if (sp) sp.onclick = function () { TESTR.stopAfterCurrent(); };
+    var an = $('#tAnim'); if (an) an.onchange = function () { state.animOn = an.checked; };
+    if (started) paintTestStage(snap);
   }
 
   /* ---------- 6. Documentación ---------- */

@@ -22,7 +22,7 @@ node run_tests.js      # corre las pruebas
 python3 build.py       # regenera index.html
 ```
 
-Abre `index.html` en el navegador. La pestaña **Simulación** ejecuta los escenarios uno a uno con un mapa del recorrido y una animación de ≈5 s por prueba; la animación solo ilustra los parámetros y el resultado siempre lo calcula el modelo (`runner.js` coordina ambos; `anim.js` dibuja). En la pestaña Resultados, «Exportar informe en PDF» abre el diálogo de impresión: elige «Guardar como PDF».
+Abre `index.html` en el navegador. La pestaña **Simulación** ejecuta los escenarios uno a uno con un mapa del recorrido y una animación de ≈5 s por prueba; la animación solo ilustra los parámetros y el resultado siempre lo calcula el modelo (`runner.js` coordina ambos; `scenes.js` dibuja las escenas animadas, una distinta para cada prueba). En la pestaña Resultados, «Exportar informe en PDF» abre el diálogo de impresión: elige «Guardar como PDF».
 
 ## Publicar en GitHub Pages
 

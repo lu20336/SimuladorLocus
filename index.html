@@ -340,6 +340,110 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
 canvas{border-radius:12px}
 .pill{font-weight:600;letter-spacing:.01em}
 @media (prefers-reduced-motion:reduce){.tab:hover,.btn:hover,.scard:hover{transform:none}}
+
+/* ===== Composición v3: encabezado, mapa compacto, banco de trabajo (lista + escena) ===== */
+.vhead{display:flex;gap:16px 24px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.vhead-t{min-width:0;flex:1 1 380px}
+.vhead-t h2{font-size:30px}
+.vhead-t .lead{margin-top:4px;font-size:15px}
+.vhead-a{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vhead-a .btn{min-height:44px}
+.btn.ghost{border-color:transparent;color:var(--muted);background:transparent}
+.btn.ghost:hover:not(:disabled){background:var(--surface2);box-shadow:none;transform:none;color:var(--ink)}
+.chip{padding:7px 14px;font-size:13px}
+.steps{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;box-shadow:var(--sh1)}
+.tl.compact{display:flex;gap:0;align-items:center;overflow-x:auto;padding:2px 0;scrollbar-width:thin}
+.tl.compact .tl-s{flex:1 1 0;min-width:max-content;display:flex;align-items:center;background:none!important;border-radius:0}
+.tl.compact .tl-s::before{display:none}
+.tl.compact .tl-s:not(:last-child)::after{content:"";flex:1 1 16px;min-width:14px;height:2px;background:var(--line);margin:0 6px;border-radius:2px}
+.tl.compact .tl-s.done:not(:last-child)::after,.tl.compact .tl-s.warn:not(:last-child)::after,.tl.compact .tl-s.error:not(:last-child)::after{background:var(--teal)}
+.tl.compact .tl-b{flex-direction:row;width:auto;gap:9px;padding:6px 10px;border-radius:10px;text-align:left;align-items:center}
+.tl.compact .tl-b:hover{background:var(--surface2)}
+.tl.compact .tl-b[aria-pressed="true"]{background:var(--surface2)}
+.tl.compact .tl-ic{width:26px;height:26px;font-size:13px;border-width:2px;flex:none;animation:none}
+.tl.compact .tl-s.current .tl-ic{animation:tlpulse 1.4s ease-in-out infinite}
+.tl.compact .tl-n{display:flex;flex-direction:column;line-height:1.2;font-size:13.5px;font-weight:600;white-space:nowrap}
+.tl.compact .tl-t{font-size:11.5px;font-weight:500;text-transform:none;letter-spacing:0}
+.tl-more>summary{cursor:pointer;font-size:12.5px;color:var(--muted);padding:2px 4px;list-style:none;width:max-content}
+.tl-more>summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+.tl-more[open]>summary::before{transform:rotate(90deg)}
+.tl-more>summary::-webkit-details-marker{display:none}
+.tl-more .tl-detail{margin-top:8px}
+.wb{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:20px;align-items:start}
+.wb-list{display:flex;flex-direction:column;gap:12px;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.wb-lh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.wb-lh h3{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-family:var(--f-body);font-weight:700}
+.wb-main{min-width:0;display:flex;flex-direction:column;gap:16px}
+.trows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.trows.tt{max-height:none}
+.trow{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:12px;transition:border-color .15s,box-shadow .15s,background .15s;overflow:hidden}
+.trow:hover{border-color:var(--teal)}
+.trow.shown{border-color:var(--navy);box-shadow:0 0 0 2px color-mix(in srgb,var(--navy) 22%,transparent);background:color-mix(in srgb,var(--navy) 4%,var(--surface))}
+.trow.invalid{border-color:var(--bad)}
+.trow-check{display:grid;place-items:center;padding:0 2px 0 12px;cursor:pointer;min-width:42px}
+.trow-check input{width:19px;height:19px;accent-color:var(--teal)}
+.trow-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left;background:transparent;border:0;cursor:pointer;padding:10px 12px;color:var(--ink);position:relative}
+.trow-main:disabled{cursor:default;opacity:.85}
+.trow-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.trow-top b{font-size:14px}
+.trow-par{font-size:12px;color:var(--muted)}
+.trow-note{font-size:12px} .trow-note.bad{color:var(--bad)}
+.trows.tt .trow-main{flex-direction:row;align-items:center;gap:10px;padding:8px 10px}
+.trows.tt .trow-top{flex:1;min-width:0}
+.trows.tt .trow-name{font-size:13px;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+.trows.tt .trow-top .pill{flex:none;font-size:11px;padding:2px 8px}
+.tgh{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:10px 2px 2px}
+.tgh:first-child{padding-top:0}
+.tmark{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--surface2);color:var(--muted)}
+.t-done .tmark{background:var(--ok-bg);color:var(--ok)} .t-error .tmark{background:var(--bad-bg);color:var(--bad)} .t-running .tmark{background:var(--navy);color:var(--bg)}
+.stagecard{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--teal);border-radius:var(--r);box-shadow:var(--sh2);padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.stage-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.stage-h h3{font-family:var(--f-display);font-size:22px;color:var(--navy);margin-top:2px}
+.stage-s{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.small-btn{min-height:36px;padding:6px 12px;font-size:13px}
+.stage-d{color:var(--muted);font-size:14px;max-width:70ch}
+.stagecard .stage{width:100%;display:block;border-radius:14px;background:var(--surface2)}
+.stagecard .caption{font-size:14px;color:var(--ink);min-height:2.6em}
+.stagecard .muted-note{color:var(--muted);font-size:12.5px;font-weight:400}
+.progrow{display:flex;align-items:center;gap:12px}
+.progrow .prog{flex:1;height:8px}
+.progrow .small{white-space:nowrap;color:var(--muted)}
+.stagecard .pchips{gap:6px}
+.stagecard .resbox{margin:0}
+.note-d{padding:14px 18px}
+.note-d>summary{cursor:pointer;font-weight:600;font-size:14px}
+.note-d p{margin-top:8px}
+@media (max-width:1000px){
+  .wb{grid-template-columns:minmax(0,1fr)}
+  .wb-main{order:-1}
+  .wb-list{position:static}
+}
+@media (max-width:640px){
+  .vhead-t h2{font-size:24px}
+  .vhead-a{width:100%}
+  .vhead-a .btn.primary{flex:1 1 100%}
+  .stagecard{padding:14px 12px 16px}
+  .progrow{flex-direction:column;align-items:stretch;gap:4px}
+}
+@media (prefers-reduced-motion:reduce){.trow,.tl.compact .tl-s.current .tl-ic{transition:none;animation:none}}
+
+.tl-more{border:0;background:none;padding:0;border-radius:0}
+.tl-more>summary{padding:4px 2px;font-weight:500}
+.wb-list{position:static}
+@media (min-width:1001px) and (min-height:820px){.wb-main{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}}
+
+@media (max-width:640px){
+  .view>*{order:5} .view>.vhead{order:0} .view>.wb{order:1} .view>.steps{order:2}
+  .vhead-t .lead{display:none}
+  .vhead{gap:10px}
+  .vhead-a .btn{flex:1 1 auto}
+  .stagecard .stage-d{font-size:13px}
+}
+
+@media (max-width:640px){
+  .stagecard .pchips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+  .stagecard .pchip{flex:none}
+}
 </style>
 
 <div class="wrap">
@@ -1111,195 +1215,498 @@ canvas{border-radius:12px}
 
 </script>
 <script>
-/* Animaciones del simulador de Locus (canvas 2D, sin dependencias).
- * Son una REPRESENTACIÓN visual: dibujan los parámetros configurados (usuarios, solicitudes, caché, red, lugares)
- * y nunca calculan ni anticipan resultados. El veredicto de cada alternativa solo se pinta cuando llega `reveal`,
- * que proviene de la ejecución real del modelo. Las funciones son puras respecto al estado de la aplicación. */
+/* Escenas animadas del simulador de Locus (canvas 2D, sin dependencias).
+ * Cada prueba tiene su PROPIA escena: personajes, objetos y acciones distintas.
+ * Las escenas ilustran QUÉ se comprueba; nunca deciden ni inventan el resultado:
+ * el veredicto (✓ / ✕) solo aparece cuando llega `p.reveal` desde el modelo.
+ *
+ * draw(kind, ctx, W, H, p, pal)
+ *   kind: 'users' (escenarios) | 'P1'…'P12' (pruebas del modelo)
+ *   p: { ms, durMs, waiting, static, reduced, reveal, params }
+ *      ms      tiempo real transcurrido desde que empezó la prueba
+ *      waiting la animación ya duró lo previsto y se espera el resultado real
+ *      static  prueba terminada o sin ejecutar: se dibuja la pose final, sin movimiento
+ *      reveal  tests: 'pass' | 'fail' | null · escenarios: {best, A:{ok,short}, B:…, C:…} | null */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.LocusAnim = factory();
+  else root.LocusScenes = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
+  var TAU = 6.2832, VH = 420;
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function seg(u, a, b) { return clamp((u - a) / (b - a), 0, 1); }
+  function ease(x) { return x * x * (3 - 2 * x); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function hash(n, k) { var x = Math.sin(n * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); }
+  function rr(c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  function txt(c, s, x, y, o) { o = o || {}; c.font = (o.w || 600) + ' ' + (o.s || 14) + 'px Inter,system-ui,sans-serif'; c.fillStyle = o.c || '#000'; c.textAlign = o.a || 'left'; c.textBaseline = o.b || 'middle'; c.fillText(s, x, y); }
+  function circ(c, x, y, r, f, s, lw) { c.beginPath(); c.arc(x, y, r, 0, TAU); if (f) { c.fillStyle = f; c.fill(); } if (s) { c.strokeStyle = s; c.lineWidth = lw || 1.5; c.stroke(); } }
+  function line(c, x1, y1, x2, y2, col, lw, dash) { c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.strokeStyle = col; c.lineWidth = lw || 1.5; c.setLineDash(dash || []); c.stroke(); c.setLineDash([]); }
+  function alpha(c, a, fn) { c.save(); c.globalAlpha = a; fn(); c.restore(); }
+  function pos(a, b, t) { return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) }; }
 
-  var clamp = function (x, a, b) { return Math.min(b, Math.max(a, x)); };
-  var frac = function (x) { return x - Math.floor(x); };
-  var hash = function (i, k, seed) { return frac(Math.sin(i * 127.1 + k * 311.7 + (seed || 0) * 74.7) * 43758.5453); };
+  var SKIN = ['#F1C9A5', '#D9A47A', '#B9805A', '#8D5A3B'], SHIRT = ['#E8484E', '#00796F', '#5256C8', '#C85A14', '#1E6FD9', '#D4A017', '#7A4FB3', '#2E8B57'], HAIR = ['#2B1B12', '#5A3A22', '#111111', '#8A5A2B', '#C9A25A'];
 
-  function rrect(ctx, x, y, w, h, r) {
-    ctx.beginPath(); ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  /* Personaje: pies en (x,y), unos 44 px de alto con sc = 1. o: {walk, face, arm:'phone'|'wave'|'point'|'none', bag, still, shirt} */
+  function person(G, x, y, sc, i, o) {
+    o = o || {}; var c = G.c, w = o.walk || 0, sk = SKIN[i % 4], sh = o.shirt || SHIRT[i % 8], hr = HAIR[(i * 3) % 5];
+    var bob = o.still ? 0 : Math.abs(Math.sin(w)) * 2 * sc, lx = o.still ? 0 : Math.sin(w) * 5 * sc;
+    c.save(); c.translate(x, y); if (o.face < 0) c.scale(-1, 1);
+    c.fillStyle = 'rgba(0,0,0,.13)'; c.beginPath(); c.ellipse(0, 1, 9 * sc, 3 * sc, 0, 0, TAU); c.fill();
+    c.strokeStyle = '#27405F'; c.lineWidth = 4 * sc; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-3 * sc, -14 * sc - bob); c.lineTo(-3 * sc + lx, 0); c.moveTo(3 * sc, -14 * sc - bob); c.lineTo(3 * sc - lx, 0); c.stroke();
+    c.fillStyle = sh; rr(c, -7 * sc, -32 * sc - bob, 14 * sc, 19 * sc, 5 * sc); c.fill();
+    if (o.bag) { c.fillStyle = 'rgba(0,0,0,.28)'; rr(c, -11 * sc, -30 * sc - bob, 6 * sc, 13 * sc, 2 * sc); c.fill(); }
+    c.strokeStyle = sk; c.lineWidth = 3.2 * sc; c.beginPath(); c.moveTo(5 * sc, -29 * sc - bob);
+    if (o.arm === 'phone') { c.lineTo(11 * sc, -26 * sc - bob); c.lineTo(11 * sc, -36 * sc - bob); c.stroke(); c.fillStyle = '#12263F'; rr(c, 9 * sc, -43 * sc - bob, 5.5 * sc, 9.5 * sc, 1.5 * sc); c.fill(); c.fillStyle = '#7FD6FF'; c.fillRect(10 * sc, -41.5 * sc - bob, 3.5 * sc, 6 * sc); }
+    else if (o.arm === 'wave') { c.lineTo(10 * sc, (-40 + (o.still ? 0 : Math.sin(G.L / 130 + i) * 4)) * sc - bob); c.stroke(); }
+    else if (o.arm === 'point') { c.lineTo(15 * sc, (-30 + (o.still ? 0 : Math.sin(G.L / 260 + i) * 2)) * sc - bob); c.stroke(); }
+    else { c.lineTo(8 * sc, (-20 + (o.still ? 0 : Math.sin(w + 3) * 3)) * sc - bob); c.stroke(); }
+    c.fillStyle = sk; c.beginPath(); c.arc(0, -40 * sc - bob, 7 * sc, 0, TAU); c.fill();
+    c.fillStyle = hr; c.beginPath(); c.arc(0, -42 * sc - bob, 7.3 * sc, Math.PI, TAU); c.fill();
+    c.restore();
   }
-  function text(ctx, s, x, y, o) {
-    o = o || {};
-    ctx.font = (o.weight || 500) + ' ' + (o.size || 12) + 'px Inter, system-ui, -apple-system, "Segoe UI", sans-serif';
-    ctx.textAlign = o.align || 'left'; ctx.textBaseline = o.base || 'middle';
-    ctx.fillStyle = o.color || '#000';
-    ctx.fillText(s, x, y);
-  }
-  function fit(ctx, s, maxW) { /* recorta con «…» si no cabe */
-    if (ctx.measureText(s).width <= maxW) return s;
-    while (s.length > 2 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
-    return s + '…';
-  }
-
-  /* ---------- Escenario: usuarios → solicitudes → alternativas → OpenStreetMap ---------- */
-  var LANES = [
-    { k: 'A', name: 'Cliente directo', nodes: [{ x: 0.44, l: 'Celular', cache: true }] },
-    { k: 'B', name: 'Monolito con caché', nodes: [{ x: 0.36, l: 'Servidor' }, { x: 0.58, l: 'Caché', cache: true }] },
-    { k: 'C', name: 'Microservicios', nodes: [{ x: 0.30, l: 'Gateway' }, { x: 0.45, l: 'Servicios' }, { x: 0.60, l: 'Caché', cache: true }] }
-  ];
-
-  function layout(W, H) {
-    var small = W < 520, top = 50, laneH = (H - top - 8) / 3;
-    return { small: small, top: top, laneH: laneH, uz: { x0: 10, x1: Math.round(W * (small ? 0.2 : 0.17)), y0: top + 8, y1: H - 12 },
-      osm: { x: W - (small ? 62 : 100), w: small ? 54 : 92 }, nodeW: small ? 46 : 64, nodeH: small ? 22 : 26 };
-  }
-
-  function lanePath(L, W, lane, idx) {
-    var cy = L.top + L.laneH * (idx + 0.5), pts = [{ x: L.uz.x1 + 4, y: cy }];
-    lane.nodes.forEach(function (n) { pts.push({ x: Math.round(W * n.x), y: cy, cache: !!n.cache }); });
-    pts.push({ x: L.osm.x, y: cy, osm: true });
-    return pts;
-  }
-
-  /* p: {t01, durMs, users, reqPerMin, hit, rtt, pois, selfHost, reduced, static, reveal} */
-  function drawScenario(ctx, W, H, p, pal) {
-    var L = layout(W, H), t = clamp(p.t01, 0, 1) * p.durMs, lambda = p.users * p.reqPerMin / 60;
-    var animated = !p.static && !p.reduced;
-    ctx.clearRect(0, 0, W, H);
-    rrect(ctx, 0.5, 0.5, W - 1, H - 1, 12); ctx.fillStyle = pal.surface2; ctx.fill();
-
-    /* cabecera con los parámetros configurados */
-    var shownFrac = p.static || p.reduced ? 1 : clamp(t / (p.durMs * 0.6), 0, 1);
-    var nDots = Math.min(p.users, 60), per = Math.ceil(p.users / Math.max(1, nDots)), shownDots = Math.round(nDots * shownFrac);
-    var usersNow = Math.min(p.users, Math.round(p.users * shownFrac));
-    text(ctx, 'Usuarios simultáneos: ' + usersNow.toLocaleString('es-CO') + ' de ' + p.users.toLocaleString('es-CO'), 14, 14, { size: 12, weight: 700, color: pal.ink });
-    var l2 = 'Aciertos de caché ' + Math.round(p.hit * 100) + ' %  ·  ' + p.reqPerMin + ' solic./min  ·  celular ' + p.rtt + ' ms  ·  ' + p.pois + ' lugares';
-    if (L.small) { text(ctx, 'Caché ' + Math.round(p.hit * 100) + ' % · ' + p.reqPerMin + ' sol./min', 14, 30, { size: 11, color: pal.muted }); text(ctx, p.rtt + ' ms · ' + p.pois + ' lugares', 14, 43, { size: 11, color: pal.muted }); }
-    else text(ctx, l2, 14, 31, { size: 11.5, color: pal.muted });
-    if (nDots < p.users && !L.small) text(ctx, 'cada punto ≈ ' + per + ' usuarios', W - 14, 14, { size: 11, color: pal.muted, align: 'right' });
-
-    /* usuarios: cuadrícula de puntos que se incorporan */
-    var zw = L.uz.x1 - L.uz.x0, zh = L.uz.y1 - L.uz.y0, cols = Math.max(2, Math.round(Math.sqrt(nDots * zw / zh))), rows = Math.ceil(nDots / cols);
-    var dx = zw / cols, dy = Math.min(zh / rows, dx * 1.6), r = Math.max(2, Math.min(5, dx * 0.32));
-    for (var i = 0; i < nDots; i++) {
-      var cx = L.uz.x0 + dx * (i % cols + 0.5), cy0 = L.uz.y0 + (zh - dy * rows) / 2 + dy * (Math.floor(i / cols) + 0.5);
-      ctx.beginPath(); ctx.arc(cx, cy0, r, 0, 6.2832);
-      if (i < shownDots) { ctx.fillStyle = pal.ink; ctx.globalAlpha = 0.85; ctx.fill(); ctx.globalAlpha = 1; }
-      else { ctx.strokeStyle = pal.line; ctx.lineWidth = 1; ctx.stroke(); }
+  function serverBox(G, x, y, w, h, col, load, label) {
+    var c = G.c, P = G.pal; rr(c, x, y, w, h, 8); c.fillStyle = P.surface; c.fill(); c.strokeStyle = col; c.lineWidth = 2; c.stroke();
+    var rows = 3, rh = (h - 14) / rows;
+    for (var i = 0; i < rows; i++) {
+      rr(c, x + 6, y + 6 + i * rh, w - 12, rh - 4, 3); c.fillStyle = P.surface2; c.fill();
+      var on = load > 0 && (G.anim ? Math.sin(G.L / (120 + i * 40) + i * 2) > -0.2 : true);
+      circ(c, x + w - 13, y + 6 + i * rh + (rh - 4) / 2, 2.6, on ? col : P.line);
+      c.fillStyle = P.line; c.fillRect(x + 11, y + 6 + i * rh + (rh - 4) / 2 - 1, w * 0.34, 2);
     }
+    if (label) txt(c, label, x + w / 2, y + h + 13, { s: 13, c: P.ink, a: 'center', w: 700 });
+  }
+  function globe(G, x, y, r, label) {
+    var c = G.c, P = G.pal; circ(c, x, y, r, P.surface, P.muted, 2);
+    c.save(); c.beginPath(); c.arc(x, y, r, 0, TAU); c.clip();
+    c.strokeStyle = P.line; c.lineWidth = 1.2;
+    c.beginPath(); c.ellipse(x, y, r * 0.45, r, 0, 0, TAU); c.stroke(); c.beginPath(); c.moveTo(x - r, y); c.lineTo(x + r, y); c.moveTo(x - r, y - r * 0.5); c.lineTo(x + r, y - r * 0.5); c.moveTo(x - r, y + r * 0.5); c.lineTo(x + r, y + r * 0.5); c.stroke();
+    c.restore();
+    if (label) txt(c, label, x, y + r + 14, { s: 13, c: P.ink, a: 'center', w: 700 });
+  }
+  function phoneIcon(G, x, y, w, h, screenFn) {
+    var c = G.c; rr(c, x, y, w, h, 7); c.fillStyle = '#12263F'; c.fill(); rr(c, x + 3, y + 8, w - 6, h - 16, 3); c.fillStyle = G.pal.surface; c.fill();
+    if (screenFn) { c.save(); rr(c, x + 3, y + 8, w - 6, h - 16, 3); c.clip(); screenFn(x + 3, y + 8, w - 6, h - 16); c.restore(); }
+  }
+  function badge(G, x, y, ok, label) {
+    var c = G.c, P = G.pal, col = ok ? P.ok : P.bad; c.font = '700 14px Inter,system-ui,sans-serif';
+    var s = (ok ? '✓ ' : '✕ ') + label, w = c.measureText(s).width + 20;
+    rr(c, x - w / 2, y - 12, w, 24, 12); c.globalAlpha = 0.16; c.fillStyle = col; c.fill(); c.globalAlpha = 1; c.strokeStyle = col; c.lineWidth = 1.5; c.stroke();
+    txt(c, s, x, y + 1, { s: 14, c: col, a: 'center', w: 700 });
+  }
+  function bars(G, x, y, n, on, col) { var c = G.c; for (var i = 0; i < 4; i++) { var h = 5 + i * 4; c.fillStyle = i < n ? col : G.pal.line; rr(c, x + i * 7, y - h, 5, h, 1.5); c.fill(); } }
+  function coin(G, x, y, r) { var c = G.c; circ(c, x, y, r, '#E7B416', '#B88708', 1.5); txt(c, '$', x, y + 1, { s: r * 1.2, c: '#7A5A00', a: 'center', w: 800 }); }
+  function ground(G, y) { var c = G.c, P = G.pal; c.fillStyle = P.line; c.globalAlpha = 0.45; c.fillRect(0, y, G.vw, VH - y); c.globalAlpha = 1; line(c, 0, y, G.vw, y, P.line, 2); }
+  function cloud(G, x, y, s) { var c = G.c; c.fillStyle = G.pal.surface; c.beginPath(); c.arc(x, y, 12 * s, 0, TAU); c.arc(x + 14 * s, y - 6 * s, 15 * s, 0, TAU); c.arc(x + 30 * s, y, 12 * s, 0, TAU); c.fill(); }
+  function browser(G, x, y, w, h, url) {
+    var c = G.c, P = G.pal; rr(c, x, y, w, h, 10); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.muted; c.lineWidth = 1.5; c.stroke();
+    c.save(); rr(c, x, y, w, h, 10); c.clip(); c.fillStyle = P.surface2; c.fillRect(x, y, w, 22); c.restore();
+    circ(c, x + 11, y + 11, 3.2, '#E8484E'); circ(c, x + 22, y + 11, 3.2, '#E7B416'); circ(c, x + 33, y + 11, 3.2, '#2E8B57');
+    rr(c, x + 46, y + 5, w - 56, 12, 6); c.fillStyle = P.surface; c.fill(); txt(c, url || 'locus.app', x + 54, y + 11.5, { s: 10, c: P.muted, w: 500 });
+  }
+  function stopwatch(G, x, y, r, a) { var c = G.c, P = G.pal; circ(c, x, y, r, P.surface, P.ink, 2.5); rr(c, x - 4, y - r - 7, 8, 6, 2); c.fillStyle = P.ink; c.fill(); for (var i = 0; i < 12; i++) { var an = i / 12 * TAU; line(c, x + Math.sin(an) * (r - 4), y - Math.cos(an) * (r - 4), x + Math.sin(an) * (r - 1), y - Math.cos(an) * (r - 1), P.muted, 1.2); } line(c, x, y, x + Math.sin(a) * (r - 6), y - Math.cos(a) * (r - 6), P.bad, 2.4); circ(c, x, y, 2.5, P.ink); }
+  function lock(G, x, y, s, col) { var c = G.c; c.strokeStyle = col; c.lineWidth = 2.4 * s; c.beginPath(); c.arc(x, y - 4 * s, 5 * s, Math.PI, 0); c.stroke(); rr(c, x - 7 * s, y - 4 * s, 14 * s, 11 * s, 2.5 * s); c.fillStyle = col; c.fill(); }
+  function envelope(G, x, y, col) { var c = G.c; c.fillStyle = col; rr(c, x - 6, y - 4.5, 12, 9, 2); c.fill(); c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x - 5.5, y - 3.5); c.lineTo(x, y + 1); c.lineTo(x + 5.5, y - 3.5); c.stroke(); }
+  function trail(G, a, b, col, dash) { line(G.c, a.x, a.y, b.x, b.y, col || G.pal.line, 2, dash || [5, 5]); }
 
-    /* OpenStreetMap */
-    rrect(ctx, L.osm.x, L.top + 4, L.osm.w, H - L.top - 12, 10); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = pal.muted; ctx.lineWidth = 1.2; ctx.stroke();
-    text(ctx, L.small ? 'OSM' : 'OpenStreetMap', L.osm.x + L.osm.w / 2, L.top + 20, { size: L.small ? 9 : 11, weight: 700, color: pal.ink, align: 'center' });
-    text(ctx, p.selfHost ? 'Overpass propio' : 'API pública', L.osm.x + L.osm.w / 2, L.top + 34, { size: L.small ? 9 : 10, color: pal.muted, align: 'center' });
+  /* ---------- reloj de la historia ---------- */
+  function clock(p) {
+    var d = p.durMs || 5000, ms = p.ms || 0;
+    if (p.static) return { u: 1, L: 0, anim: false };
+    if (p.reduced) return { u: 0.62, L: 0, anim: false };
+    if (ms < d) return { u: ms / d, L: ms, anim: true };
+    return { u: 0.28 + (((ms - d) / (d * 0.75)) % 1) * 0.5, L: ms, anim: true };
+  }
 
-    var rate = clamp(lambda * 4, 2, 32), gap = 1000 / rate, rttExtra = p.rtt * 1.2;
-    LANES.forEach(function (lane, li) {
-      var pts = lanePath(L, W, lane, li), cy = pts[0].y, cacheIdx = pts.length - 2;
-      var eff = lane.k === 'A' ? p.hit * 0.35 : p.hit;
-      /* pista y nodos */
-      ctx.beginPath(); ctx.moveTo(pts[0].x, cy); ctx.lineTo(L.osm.x, cy); ctx.setLineDash([4, 4]); ctx.strokeStyle = pal.line; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
-      text(ctx, lane.k + ' · ' + lane.name, pts[0].x + 4, cy - L.laneH * 0.5 + 9, { size: L.small ? 10 : 11, weight: 700, color: pal[lane.k] });
-      /* paquetes de solicitudes */
-      if (animated) {
-        var segLen = [], tot = 0; for (var s = 0; s < pts.length - 1; s++) { var d = Math.abs(pts[s + 1].x - pts[s].x); segLen.push(d); tot += d; }
-        var vel = (W * 0.6) / 1700, maxT = 2 * (tot / vel) + 2 * rttExtra + 100;
-        var i0 = Math.max(0, Math.floor((t - maxT) / gap) - 1), i1 = Math.floor(t / gap) + 1;
-        for (var n = i0; n <= i1; n++) {
-          var sp = (n + hash(n, li, 1) * 0.8) * gap, rel = t - sp;
-          if (rel < 0 || hash(n, li, 2) > clamp(sp / (p.durMs * 0.6), 0, 1)) continue;
-          var hitP = hash(n, li, 3) < eff, stop = hitP ? cacheIdx : pts.length - 1, px = null, color = pal[lane.k];
-          var legs = []; for (var q = 0; q < stop; q++) legs.push({ a: pts[q], b: pts[q + 1], ms: segLen[q] / vel + (q === 0 ? rttExtra : 0) });
-          var back = legs.slice().reverse().map(function (g) { return { a: g.b, b: g.a, ms: g.ms }; });
-          var all = legs.concat(back), acc = 0;
-          for (var g = 0; g < all.length; g++) {
-            if (rel <= acc + all[g].ms) { var u = (rel - acc) / all[g].ms; px = { x: all[g].a.x + (all[g].b.x - all[g].a.x) * u, y: cy }; if (g >= legs.length) color = hitP ? pal.ok : pal.muted; break; }
-            acc += all[g].ms;
-          }
-          if (!px) continue;
-          ctx.save(); ctx.shadowColor = color; ctx.shadowBlur = 7; ctx.beginPath(); ctx.arc(px.x, px.y, 2.6 + p.pois / 18, 0, 6.2832); ctx.fillStyle = color; ctx.fill(); ctx.restore();
-        }
-      } else {
-        ctx.beginPath(); ctx.moveTo(pts[0].x + 6, cy); ctx.lineTo(L.osm.x - 8, cy); ctx.strokeStyle = pal[lane.k]; ctx.globalAlpha = 0.5; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1;
+  /* ================= ESCENARIOS: usuarios entran a la página de viajes ================= */
+  function sceneUsers(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u, par = p.params || { users: 100, reqPerMin: 2, hit: 0.4, rtt: 80, pois: 20 };
+    var wide = vw > 650, gY = 322; ground(G, gY);
+    var bx = vw * 0.31, bw = vw * (wide ? 0.27 : 0.3), by = 36, bh = 238, ex = bx + bw;
+    cloud(G, vw * 0.1, 96, 0.8); cloud(G, vw * 0.52, 20, 0.6);
+    /* calle y cartel */
+    
+    /* página de viajes */
+    browser(G, bx, by, bw, bh, 'locus.app/itinerario');
+    var cx = bx + 10, cw = bw - 20;
+    c.fillStyle = P.teal; c.beginPath(); c.arc(cx + 9, by + 38, 7, 0, TAU); c.fill(); txt(c, 'Locus', cx + 22, by + 38, { s: 14, c: P.ink, w: 800 });
+    rr(c, cx, by + 52, cw, 24, 12); c.fillStyle = P.surface2; c.fill(); c.strokeStyle = P.line; c.lineWidth = 1; c.stroke();
+    var dests = ['Cartagena', 'Salento', 'Santa Marta', 'Medellín'], di = Math.floor((G.L / 1600)) % 4, tl = Math.floor(((G.L % 1600) / 1600) * 22);
+    var typed = G.anim ? dests[di].slice(0, Math.min(dests[di].length, tl)) : 'Cartagena';
+    txt(c, '🔍', cx + 9, by + 64.5, { s: 11 }); txt(c, typed + (G.anim && Math.floor(G.L / 350) % 2 ? '|' : ''), cx + 26, by + 64.5, { s: 12, c: P.ink, w: 500 });
+    var nCards = clamp(Math.round(par.pois / 5), 2, 6), cols = 2, cw2 = (cw - 8) / cols, ch = 40;
+    for (var k = 0; k < nCards; k++) {
+      var col = k % cols, row = Math.floor(k / cols), x0 = cx + col * (cw2 + 8), y0 = by + 88 + row * (ch + 8), ap = ease(seg(u, 0.1 + k * 0.06, 0.2 + k * 0.06)), sel = G.anim && Math.floor(G.L / 700) % nCards === k;
+      alpha(c, ap, function () { rr(c, x0, y0 + (1 - ap) * 8, cw2, ch, 7); c.fillStyle = P.surface; c.fill(); c.strokeStyle = sel ? P.teal : P.line; c.lineWidth = sel ? 2.2 : 1; c.stroke(); c.fillStyle = [P.A, P.B, P.C][k % 3]; rr(c, x0 + 5, y0 + 5 + (1 - ap) * 8, 30, 30, 5); c.globalAlpha = ap * 0.35; c.fill(); c.globalAlpha = ap; c.fillStyle = P.line; c.fillRect(x0 + 41, y0 + 12 + (1 - ap) * 8, cw2 - 50, 4); c.fillRect(x0 + 41, y0 + 22 + (1 - ap) * 8, (cw2 - 50) * 0.6, 4); });
+    }
+    txt(c, nCards * 5 >= par.pois ? par.pois + ' lugares' : par.pois + ' lugares (se muestran ' + nCards + ')', cx, by + bh - 12, { s: 11, c: P.muted, w: 500 });
+    /* personas */
+    var N = Math.min(12, Math.max(2, par.users)), per = Math.ceil(par.users / N), ramp = G.anim || G.u > 0.9 ? 1 : 1, arrived = 0;
+    var slotsX0 = vw * 0.04, slotsW = bx - vw * 0.04 - 8;
+    for (var i = 0; i < N; i++) {
+      var tIn = 0.04 + 0.52 * Math.pow(i / N, 0.85), walkDur = 0.2, w = seg(u, tIn, tIn + walkDur), row = i % 2, col2 = Math.floor(i / 2), maxCols = Math.ceil(N / 2);
+      var tx = slotsX0 + 10 + (maxCols > 1 ? (col2 / (maxCols - 1)) : 0.5) * (slotsW - 26) + row * 12, ty = gY + 28 + row * 36;
+      var sx = -24, x = lerp(sx, tx, ease(w)), moving = w > 0 && w < 1;
+      if (w >= 1) arrived++;
+      if (w <= 0) continue;
+      var walk = moving ? G.L / 85 + i : 0;
+      person(G, x, ty, 1.2, i, { walk: walk, still: !moving, arm: moving ? 'none' : 'phone', bag: i % 3 === 0 });
+      if (!moving && G.anim) { var tap = (G.L / 900 + hash(i, 3) * 5) % 3; if (tap < 0.5) { circ(c, x + 15, ty - 62, 4 + tap * 14, null, P.teal, 1.6); } }
+    }
+    var connected = Math.min(par.users, Math.round(par.users * arrived / N));
+    rr(c, 8, 8, 168, 26, 13); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.line; c.lineWidth = 1; c.stroke();
+    txt(c, '👥 ' + connected.toLocaleString('es-CO') + ' de ' + par.users.toLocaleString('es-CO') + ' conectados', 18, 21.5, { s: 12.5, c: P.ink, w: 700 });
+    if (per > 1) txt(c, 'cada persona dibujada ≈ ' + per, 12, 48, { s: 11, c: P.muted, w: 500 });
+    /* arquitecturas */
+    var lanes = [{ k: 'A', y: 90, col: P.A, name: 'A · Cliente directo' }, { k: 'B', y: 182, col: P.B, name: 'B · Monolito + caché' }, { k: 'C', y: 274, col: P.C, name: 'C · Microservicios' }];
+    var nodeX = ex + (vw - ex) * 0.32, gx = vw - 28, gy = 182, hitEff = par.hit;
+    var lam = par.users * par.reqPerMin / 60, vr = clamp(2 + Math.log10(1 + lam) * 4.5, 2, 13) * (G.anim ? 1 : 0);
+    lanes.forEach(function (ln, li) {
+      alpha(c, 0.08, function () { rr(c, ex + 8, ln.y - 40, vw - ex - 8 - 4, 80, 10); c.fillStyle = ln.col; c.fill(); });
+      txt(c, ln.name, ex + 16, ln.y - 31, { s: 11.5, c: ln.col, w: 800 });
+      var nx = nodeX;
+      if (ln.k === 'A') { phoneIcon(G, nx - 11, ln.y - 24, 22, 40, null); txt(c, 'sin servidor', nx, ln.y + 28, { s: 11, c: P.muted, a: 'center' }); }
+      else if (ln.k === 'B') serverBox(G, nx - 18, ln.y - 24, 36, 44, ln.col, 1, null);
+      else { serverBox(G, nx - 34, ln.y - 22, 30, 40, ln.col, 1, null); serverBox(G, nx + 4, ln.y - 22, 30, 40, ln.col, 1, null); }
+      line(c, ex, 150, ex + 10, ln.y, P.line, 1.5);
+      line(c, nx + (ln.k === 'C' ? 34 : 20), ln.y, gx - 17, gy + (ln.y - gy) * 0.35, P.line, 1.4, [4, 4]);
+      /* solicitudes */
+      var T = u * p.durMs;
+      for (var n = 0; vr > 0 && n < 90; n++) {
+        var st = (n + hash(n, li)) / vr * 1000, rel = (G.L - st), eff = ln.k === 'A' ? hitEff * 0.35 : hitEff;
+        if (rel < 0 || rel > 3200 || hash(n, li + 7) > clamp(st / (p.durMs * 0.5), 0.15, 1)) continue;
+        var hit = hash(n, li + 3) < eff, from = { x: ex, y: 140 + li * 10 }, node = { x: nx, y: ln.y }, far = { x: gx - 20, y: gy + (ln.y - gy) * 0.35 };
+        var leg1 = 520, leg2 = hit ? 0 : 560 + par.rtt * 0.8, leg3 = hit ? 0 : 560 + par.rtt * 0.8, leg4 = 520, tot = leg1 + leg2 + leg3 + leg4;
+        if (rel > tot) continue;
+        var pp, colr = ln.col;
+        if (rel < leg1) pp = pos(from, node, rel / leg1);
+        else if (rel < leg1 + leg2) { pp = pos(node, far, (rel - leg1) / leg2); }
+        else if (rel < leg1 + leg2 + leg3) { pp = pos(far, node, (rel - leg1 - leg2) / leg3); colr = P.muted; }
+        else { pp = pos(node, from, (rel - leg1 - leg2 - leg3) / leg4); colr = hit ? P.ok : P.muted; }
+        if (hit && rel > leg1) { pp = pos(node, from, (rel - leg1) / (tot - leg1)); colr = P.ok; }
+        c.save(); c.shadowColor = colr; c.shadowBlur = 6; circ(c, pp.x, pp.y, 3.2, colr); c.restore();
       }
-      rrect(ctx, 4, L.top + L.laneH * li + 2, W - L.osm.w - 18, L.laneH - 4, 8); ctx.globalAlpha = 0.07; ctx.fillStyle = pal[lane.k]; ctx.fill(); ctx.globalAlpha = 1;
-      lane.nodes.forEach(function (nd, ni) {
-        var x = pts[ni + 1].x - L.nodeW / 2;
-        rrect(ctx, x, cy - L.nodeH / 2, L.nodeW, L.nodeH, 7); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = pal[lane.k]; ctx.lineWidth = nd.cache ? 2 : 1.2; ctx.stroke();
-        ctx.font = '600 ' + (L.small ? 9.5 : 11) + 'px Inter, system-ui, sans-serif';
-        text(ctx, fit(ctx, nd.l, L.nodeW - 6), pts[ni + 1].x, cy, { size: L.small ? 9.5 : 11, weight: 600, color: pal.ink, align: 'center' });
-      });
-      /* veredicto real (solo cuando llega del modelo) */
-      var rv = p.reveal && p.reveal[lane.k], bx = L.osm.x - 8;
-      if (rv) {
-        var star = p.reveal.best === lane.k ? '★ ' : '';
-        var lbl = star + (rv.short || rv.txt); ctx.font = '700 ' + (L.small ? 9.5 : 11) + 'px Inter, system-ui, sans-serif';
-        var lw = ctx.measureText(lbl).width + 14; rrect(ctx, bx - lw + 4, cy - L.laneH * 0.5 + 1, lw, 18, 9); ctx.globalAlpha = 0.14; ctx.fillStyle = rv.ok ? pal.ok : pal.bad; ctx.fill(); ctx.globalAlpha = 1;
-        text(ctx, lbl, bx - 3, cy - L.laneH * 0.5 + 10, { size: L.small ? 9.5 : 11, weight: 700, color: rv.ok ? pal.ok : pal.bad, align: 'right' });
-        if (p.reveal.best === lane.k) { rrect(ctx, 4, L.top + L.laneH * li + 2, W - L.osm.w - 18, L.laneH - 4, 8); ctx.strokeStyle = pal.ok; ctx.lineWidth = 1.5; ctx.stroke(); }
-      } else if (!p.static) text(ctx, 'evaluando…', bx, cy - L.laneH * 0.5 + 9, { size: L.small ? 9.5 : 10.5, color: pal.muted, align: 'right' });
+      var rv = p.reveal && p.reveal[ln.k];
+      if (rv) { badge(G, ex + (vw - ex) * 0.63, ln.y + 24, rv.ok, rv.short); if (p.reveal.best === ln.k) txt(c, '★ Recomendada', ex + (vw - ex) * 0.63, ln.y - 8, { s: 11.5, c: P.ok, a: 'center', w: 800 }); }
     });
-    /* leyenda mínima */
-    if (animated && !L.small) text(ctx, '● solicitud   ● respuesta del caché   ● respuesta del mapa  (escala visual)', 14, H - 5, { size: 10, color: pal.muted, base: 'alphabetic' });
+    globe(G, gx, gy, 17, 'OSM');
+    /* caché compartido: etiqueta */
+    txt(c, 'caché ' + Math.round(par.hit * 100) + ' % · celular ' + par.rtt + ' ms', vw * 0.03, VH - 8, { s: 11.5, c: P.muted, w: 600 });
+    txt(c, '● solicitud   ● respuesta del caché   ● respuesta del mapa', vw - 12, VH - 10, { s: 11, c: P.muted, a: 'right', w: 500 });
   }
 
-  /* ---------- Pruebas del modelo: 4 variantes según lo que comprueban ---------- */
-  var TEST_TITLES = {
-    calc: ['Entradas', 'Fórmula del modelo', 'Cálculo a mano'],
-    beh: ['Cambia una variable', 'El modelo recalcula', 'Se compara el efecto'],
-    req: ['Latencia', 'Disponibilidad', 'Capacidad', 'Costo', 'Esfuerzo'],
-    dec: ['A', 'B', 'C']
-  };
-  /* p: {group, t01, durMs, reveal: null|'pass'|'fail', name, reduced, static} */
-  function drawTest(ctx, W, H, p, pal) {
-    var t = clamp(p.t01, 0, 1) * p.durMs, animated = !p.static && !p.reduced, small = W < 520;
-    ctx.clearRect(0, 0, W, H);
-    rrect(ctx, 0.5, 0.5, W - 1, H - 1, 12); ctx.fillStyle = pal.surface2; ctx.fill();
-    var titles = TEST_TITLES[p.group] || TEST_TITLES.calc, cy = H * 0.5, i;
-    var pulse = animated ? (t / 900) % titles.length : -1;
-    if (p.group === 'req') {
-      var gw = (W - 40) / titles.length;
-      titles.forEach(function (tt, k) {
-        var cx = 20 + gw * (k + 0.5), on = animated && Math.floor(pulse) === k;
-        rrect(ctx, cx - gw * 0.42, cy - 30, gw * 0.84, 60, 10); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = on ? pal.teal : pal.line; ctx.lineWidth = on ? 2.5 : 1.2; ctx.stroke();
-        text(ctx, tt, cx, cy - 6, { size: small ? 9.5 : 12, weight: 600, color: pal.ink, align: 'center' });
-        text(ctx, on ? 'revisando…' : p.reveal ? '' : '·', cx, cy + 14, { size: 10.5, color: pal.muted, align: 'center' });
-      });
-    } else if (p.group === 'dec') {
-      var bw = Math.min(90, (W - 60) / 3), colors = [pal.A, pal.B, pal.C];
-      titles.forEach(function (tt, k) {
-        var cx = W / 2 + (k - 1) * (bw + 24), hgt = 30 + (animated ? (Math.sin(t / 420 + k * 2.1) * 0.5 + 0.5) * 60 : 45);
-        ctx.fillStyle = colors[k]; ctx.globalAlpha = 0.85; rrect(ctx, cx - bw / 2, cy + 40 - hgt, bw, hgt, 6); ctx.fill(); ctx.globalAlpha = 1;
-        text(ctx, tt, cx, cy + 54, { size: 13, weight: 700, color: pal.ink, align: 'center' });
-      });
-      text(ctx, 'Se compara el puntaje de cada alternativa', W / 2, 20, { size: 11.5, color: pal.muted, align: 'center' });
-    } else {
-      var bwid = Math.min(150, (W - 60) / 3.2), xs = [W * 0.2, W * 0.5, W * 0.8];
-      titles.forEach(function (tt, k) {
-        var on = animated && Math.floor(pulse) === k;
-        rrect(ctx, xs[k] - bwid / 2, cy - 26, bwid, 52, 10); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = on ? pal.teal : pal.line; ctx.lineWidth = on ? 2.5 : 1.2; ctx.stroke();
-        ctx.font = '600 ' + (small ? 10 : 12) + 'px Inter, system-ui, sans-serif';
-        text(ctx, fit(ctx, tt, bwid - 10), xs[k], cy, { size: small ? 10 : 12, weight: 600, color: pal.ink, align: 'center' });
-        if (k < 2) {
-          var x0 = xs[k] + bwid / 2 + 4, x1 = xs[k + 1] - bwid / 2 - 4;
-          ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x1, cy); ctx.strokeStyle = pal.muted; ctx.lineWidth = 1.5; ctx.stroke();
-          if (animated) { var u = frac(t / 900 + k * 0.33); ctx.beginPath(); ctx.arc(x0 + (x1 - x0) * u, cy, 3.5, 0, 6.2832); ctx.fillStyle = pal.teal; ctx.fill(); }
-        }
-      });
-      if (p.group === 'calc') text(ctx, 'D, ρ y R se recalculan con las fórmulas del documento', W / 2, 20, { size: 11.5, color: pal.muted, align: 'center' });
-      else text(ctx, 'Se mueve una variable y se observa qué hace el modelo', W / 2, 20, { size: 11.5, color: pal.muted, align: 'center' });
+  /* ================= P1 · cálculo del simulador = cálculo a mano ================= */
+  function sceneP1(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 330);
+    var lx = vw * 0.06, rx = vw * 0.6, w = vw * 0.34;
+    /* simulador */
+    rr(c, lx, 90, w, 150, 12); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.teal; c.lineWidth = 2.2; c.stroke();
+    txt(c, 'El simulador', lx + w / 2, 76, { s: 14, c: P.teal, a: 'center', w: 800 });
+    var f = 'R = D / (1 − ρ)', nch = Math.floor(f.length * ease(seg(u, 0.05, 0.5)));
+    txt(c, f.slice(0, nch), lx + w / 2, 135, { s: 22, c: P.ink, a: 'center', w: 700 });
+    for (var g = 0; g < 2; g++) { var gx = lx + 40 + g * 46, gy = 200, ang = G.L / 400 * (g ? -1 : 1); c.save(); c.translate(gx, gy); c.rotate(ang); for (var t = 0; t < 8; t++) { c.rotate(TAU / 8); c.fillStyle = P.teal; c.fillRect(-3, -17, 6, 8); } circ(c, 0, 0, 12, P.teal); circ(c, 0, 0, 5, P.surface); c.restore(); }
+    rr(c, lx + w - 78, 182, 62, 38, 6); c.fillStyle = P.surface2; c.fill(); txt(c, seg(u, 0.5, 0.78) > 0 ? (u > 0.9 || G.static ? '= ✓' : '…') : '…', lx + w - 47, 201, { s: 18, c: P.ink, a: 'center', w: 800 });
+    /* a mano */
+    rr(c, rx, 90, w, 150, 12); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.A; c.lineWidth = 2.2; c.stroke();
+    txt(c, 'A mano', rx + w / 2, 76, { s: 14, c: P.A, a: 'center', w: 800 });
+    for (var l = 0; l < 4; l++) { var lw = ease(seg(u, 0.12 + l * 0.12, 0.26 + l * 0.12)) * (w - 70); c.fillStyle = P.line; c.fillRect(rx + 16, 110 + l * 22, lw, 4); }
+    var pen = ease(seg(u, 0.1, 0.58)); var penX = rx + 16 + pen * (w - 70) * (G.anim ? (0.9 + Math.sin(G.L / 120) * 0.1) : 1), penY = 110 + Math.floor(pen * 3.9) * 22;
+    line(c, penX, penY - 2, penX + 12, penY - 16, P.ink, 3); c.lineCap = 'round';
+    rr(c, rx + w - 70, 182, 54, 40, 6); c.fillStyle = '#12263F'; c.fill(); for (var k = 0; k < 9; k++) { c.fillStyle = (G.anim && Math.floor(G.L / 260) % 9 === k) ? P.teal : '#3D5878'; c.fillRect(rx + w - 65 + (k % 3) * 16, 196 + Math.floor(k / 3) * 8, 12, 5); }
+    person(G, rx + w + 14, 330, 1.45, 2, { arm: 'point', still: !G.anim });
+    /* balanza */
+    var cx = vw * 0.5, cy = 270, tilt = (G.anim && u < 0.78 ? Math.sin(G.L / 380) * 0.16 * (1 - seg(u, 0.5, 0.78)) : 0);
+    rr(c, cx - 5, cy, 10, 60, 3); c.fillStyle = P.muted; c.fill(); rr(c, cx - 30, 326, 60, 7, 3); c.fill();
+    c.save(); c.translate(cx, cy); c.rotate(tilt); line(c, -48, 0, 48, 0, P.ink, 4); [-48, 48].forEach(function (sx) { line(c, sx, 0, sx, 18, P.muted, 1.5); circ(c, sx, 0, 3, P.ink); alpha(c, 1, function () { rr(c, sx - 20, 18, 40, 8, 4); c.fillStyle = P.ink; c.fill(); rr(c, sx - 14, -8 + 18 - 22, 28, 22, 5); c.fillStyle = sx < 0 ? P.teal : P.A; c.globalAlpha = 0.9; c.fill(); c.globalAlpha = 1; txt(c, '?', sx, 18 - 19 + 0.5 - 0, { s: 15, c: '#fff', a: 'center', w: 800 }); }); }); c.restore();
+    txt(c, p.reveal ? (p.reveal === 'pass' ? '=' : '≠') : '=  ?', cx, 232, { s: 26, c: p.reveal === 'fail' ? P.bad : P.ink, a: 'center', w: 800 });
+  }
+
+  /* ================= P8 · mismo escenario, mismos números (sin azar) ================= */
+  function sceneP8(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 330);
+    var xs = [vw * 0.05, vw * 0.55], mw = vw * 0.4;
+    for (var m = 0; m < 2; m++) {
+      var x = xs[m], col = m ? P.B : P.A;
+      txt(c, 'Ejecución ' + (m + 1), x + mw / 2, 52, { s: 14, c: col, a: 'center', w: 800 });
+      rr(c, x, 150, mw, 100, 12); c.fillStyle = P.surface; c.fill(); c.strokeStyle = col; c.lineWidth = 2.2; c.stroke();
+      var gx = x + mw / 2, gy = 200; c.save(); c.translate(gx, gy); c.rotate(G.L / 350 * (m ? -1 : 1)); for (var t = 0; t < 10; t++) { c.rotate(TAU / 10); c.fillStyle = col; c.fillRect(-3.5, -24, 7, 9); } circ(c, 0, 0, 17, col); circ(c, 0, 0, 7, P.surface); c.restore();
+      circ(c, x + 14, 164, 4, G.anim && Math.floor(G.L / 250) % 2 ? P.ok : P.line);
+      /* cinta */
+      rr(c, x - 10, 262, mw + 20, 12, 6); c.fillStyle = '#34495F'; c.fill(); for (var s = 0; s < 14; s++) { var sx = x - 6 + ((s * (mw + 20) / 14 + (G.anim ? G.L / 12 : 0)) % (mw + 20)); c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(Math.min(sx, x + mw + 6), 266, 4, 4); }
+      /* tarjeta de entrada: igual en las dos */
+      var inT = ease(seg(u, 0.05, 0.4)), cardX = lerp(x - 40, x + mw * 0.3, inT);
+      if (u < 0.5) { rr(c, cardX - 22, 224, 44, 34, 5); c.fillStyle = P.surface2; c.fill(); c.strokeStyle = P.ink; c.lineWidth = 1.5; c.stroke(); for (var d = 0; d < 3; d++) circ(c, cardX - 10 + d * 10, 241, 3, P.ink); }
+      /* salida: ticket (idéntico en las dos ejecuciones) */
+      if (u >= 0.5) {
+        var e1 = ease(seg(u, 0.5, 0.74)), e2 = ease(seg(u, 0.78, 0.95)), sx0 = lerp(x + mw * 0.5, x + mw * (m ? 0.3 : 0.7), e1), sy0 = lerp(222, 244, e1);
+        var fx = vw / 2 + (m ? 34 : -34), px = lerp(sx0, fx, e2), py = lerp(sy0, 306, e2);
+        rr(c, px - 26, py - 22, 52, 44, 6); c.fillStyle = '#fff'; c.fill(); c.strokeStyle = col; c.lineWidth = 2.4; c.stroke();
+        for (var q = 0; q < 3; q++) { c.fillStyle = '#9AA9BA'; c.fillRect(px - 18, py - 14 + q * 10, 36 - q * 6, 4); } txt(c, '#', px, py + 14, { s: 12, c: col, a: 'center', w: 800 });
+      }
+      person(G, x + (m ? mw + 22 : -22) , 330, 1.5, m ? 3 : 0, { arm: 'point', face: m ? -1 : 1, still: !G.anim });
     }
-    if (p.reveal) {
-      var ok = p.reveal === 'pass', rx = W - 34, ry = 28;
-      ctx.beginPath(); ctx.arc(rx, ry, 16, 0, 6.2832); ctx.fillStyle = ok ? pal.ok : pal.bad; ctx.fill();
-      text(ctx, ok ? '✓' : '✕', rx, ry + 1, { size: 18, weight: 700, color: '#fff', align: 'center' });
-    } else if (!p.static) text(ctx, 'ejecutando…', W - 14, 20, { size: 11, color: pal.muted, align: 'right' });
-    text(ctx, p.name || '', 14, H - 12, { size: 11.5, weight: 600, color: pal.ink });
+    /* dado tachado */
+    var dx = vw / 2, dy = 70; rr(c, dx - 20, dy - 20, 40, 40, 8); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.muted; c.lineWidth = 2; c.stroke(); [[-8, -8], [8, 8], [0, 0], [-8, 8], [8, -8]].forEach(function (o) { circ(c, dx + o[0], dy + o[1], 2.6, P.muted); });
+    line(c, dx - 26, dy + 26, dx + 26, dy - 26, P.bad, 4); txt(c, 'sin azar', dx, dy + 38, { s: 12.5, c: P.muted, a: 'center', w: 700 });
+    if (u > 0.92 || G.static) txt(c, p.reveal === 'fail' ? '≠' : '=', vw / 2, 306, { s: 32, c: p.reveal === 'fail' ? P.bad : P.ok, a: 'center', w: 800 });
   }
 
-  return { drawScenario: drawScenario, drawTest: drawTest, LANES: LANES };
+  /* ================= P2 · la señal del celular empeora → la app tarda más ================= */
+  function sceneP2(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 348);
+    c.fillStyle = '#2E8B57'; c.globalAlpha = 0.22; c.beginPath(); c.moveTo(vw * 0.35, 348); c.quadraticCurveTo(vw * 0.62, 140, vw, 348); c.fill(); c.globalAlpha = 1;
+    c.fillStyle = '#2E8B57'; c.globalAlpha = 0.14; c.beginPath(); c.moveTo(vw * 0.2, 348); c.quadraticCurveTo(vw * 0.5, 200, vw * 0.8, 348); c.fill(); c.globalAlpha = 1;
+    var tx = vw * 0.08; line(c, tx, 348, tx, 150, P.ink, 4); line(c, tx - 12, 348, tx, 150, P.ink, 2); line(c, tx + 12, 348, tx, 150, P.ink, 2); circ(c, tx, 146, 6, P.bad);
+    var prog = ease(seg(u, 0.08, 0.85)), sig = Math.max(1, Math.round(lerp(4, 1, prog)));
+    for (var w = 0; w < 4; w++) { var rad = 22 + w * 16 + (G.anim ? (G.L / 22 % 16) : 0); alpha(c, clamp(sig / 4 - w * 0.08, 0.1, 0.6) * (1 - (rad - 22) / 80), function () { c.beginPath(); c.arc(tx, 146, rad, -0.9, 0.9); c.strokeStyle = P.bad; c.lineWidth = 2; c.stroke(); }); }
+    var px = lerp(vw * 0.25, vw * 0.78, prog), py = 348 - Math.sin(prog * 3.1) * 70 * 0.9 - prog * 40;
+    py = 348 - (1 - Math.pow(1 - prog, 2)) * 0 - prog * 52;
+    person(G, px, py, 1.5, 4, { walk: G.L / 140, still: !G.anim || prog >= 1, arm: 'phone', bag: true });
+    bars(G, px - 14, py - 90, sig, true, sig > 2 ? P.ok : sig > 1 ? '#D4A017' : P.bad); txt(c, sig + '/4', px + 22, py - 96, { s: 12, c: P.muted, w: 700 });
+    var period = lerp(900, 2800, prog) , ph = G.anim ? ((G.L % period) / period) : 0.5, A = { x: tx, y: 150 }, B = { x: px + 8, y: py - 70 };
+    trail(G, A, B, P.line);
+    var pp = ph < 0.5 ? pos(A, B, ph * 2) : pos(B, A, (ph - 0.5) * 2); envelope(G, pp.x, pp.y, ph < 0.5 ? P.teal : P.ok);
+    stopwatch(G, vw - 100, 74, 26, G.anim ? (G.L / period) * TAU : 4.2 * (1)); txt(c, 'tiempo de carga', vw - 100, 116, { s: 11.5, c: P.muted, a: 'center', w: 600 });
+    var barW = vw * 0.18; rr(c, vw - 100 - barW / 2, 128, barW, 10, 5); c.fillStyle = P.line; c.fill(); rr(c, vw - 100 - barW / 2, 128, Math.max(8, barW * lerp(0.25, 1, prog)), 10, 5); c.fillStyle = prog > 0.6 ? P.bad : P.teal; c.fill();
+  }
+
+  /* ================= P3 · más aciertos de caché → más rápido ================= */
+  function sceneP3(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 340);
+    var me = { x: vw * 0.1, y: 250 }, shelf = { x: vw * 0.4, y: 250 }, far = { x: vw * 0.9, y: 150 };
+    person(G, me.x, 340, 1.5, 1, { arm: 'phone', still: !G.anim });
+    /* estante de caché */
+    rr(c, shelf.x - 38, 170, 76, 92, 6); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.teal; c.lineWidth = 2.2; c.stroke(); txt(c, 'Caché', shelf.x, 156, { s: 13.5, c: P.teal, a: 'center', w: 800 });
+    for (var r = 0; r < 3; r++) line(c, shelf.x - 34, 200 + r * 30, shelf.x + 34, 200 + r * 30, P.line, 2);
+    var have = Math.floor(ease(seg(u, 0.1, 0.9)) * 6.99);
+    for (var i = 0; i < 6; i++) if (i < have) { var bxx = shelf.x - 30 + (i % 3) * 22, byy = 188 + Math.floor(i / 3) * 30 - 8 + 0; var pop = G.anim ? 1 : 1; rr(c, bxx, byy + 6, 18, 18, 3); c.fillStyle = [P.A, P.B, P.C][i % 3]; c.globalAlpha = 0.85; c.fill(); c.globalAlpha = 1; }
+    globe(G, far.x, far.y + 20, 26, 'Mapa (lejos)');
+    trail(G, { x: shelf.x + 38, y: 230 }, { x: far.x - 26, y: far.y + 30 }, P.line);
+    /* solicitudes */
+    var T0 = G.L, per = 640;
+    for (var n = Math.max(0, Math.floor((T0 - 3600) / per)); n <= Math.floor(T0 / per); n++) {
+      var rel = T0 - n * per, ts = (n * per) / p.durMs, hp = clamp(0.05 + ease(seg(ts * 0.9 + 0.1, 0.1, 0.9)) * 0.9, 0, 0.95), hit = hash(n, 5) < hp;
+      if (!G.anim) break;
+      var A = { x: me.x + 14, y: 232 }, S = { x: shelf.x - 38, y: 232 }, F = { x: far.x - 20, y: far.y + 34 }, pp, col;
+      if (hit) { var tot = 900; if (rel > tot) continue; pp = rel < tot / 2 ? pos(A, S, rel / (tot / 2)) : pos(S, A, (rel - tot / 2) / (tot / 2)); col = rel < tot / 2 ? P.teal : P.ok; }
+      else { var tot2 = 2500; if (rel > tot2) continue; var a = rel / tot2; if (a < 0.25) pp = pos(A, S, a / 0.25); else if (a < 0.5) pp = pos(S, F, (a - 0.25) / 0.25); else if (a < 0.75) pp = pos(F, S, (a - 0.5) / 0.25); else pp = pos(S, A, (a - 0.75) / 0.25); col = a < 0.5 ? P.teal : P.muted; }
+      envelope(G, pp.x, pp.y - (hit ? 0 : 0), col);
+    }
+    /* velocímetro */
+    var gx = vw * 0.62, gy = 108, ang = lerp(-0.9, 0.9, 1 - ease(seg(u, 0.1, 0.9)));
+    c.beginPath(); c.arc(gx, gy, 38, Math.PI * 1.1, Math.PI * 1.9); c.strokeStyle = P.line; c.lineWidth = 10; c.stroke();
+    c.beginPath(); c.arc(gx, gy, 38, Math.PI * 1.1, Math.PI * 1.1 + 0.8 * Math.PI * (1 - ang / 1.8 - 0.5 + 0.5)); c.strokeStyle = P.ok; c.lineWidth = 10; c.stroke();
+    line(c, gx, gy, gx + Math.sin(ang) * 32, gy - Math.cos(ang) * 32, P.ink, 3); circ(c, gx, gy, 4, P.ink); txt(c, 'qué tan rápida', gx, gy + 30, { s: 12, c: P.muted, a: 'center', w: 600 });
+    txt(c, 'cada respuesta guardada ahorra un viaje largo', vw * 0.5, 392, { s: 13, c: P.muted, a: 'center', w: 600 });
+  }
+
+  /* ================= P10 · el doble de usuarios → margen de la API pública a la mitad ================= */
+  function sceneP10(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 340);
+    var n1 = 6, n2 = 12, doubled = seg(u, 0.45, 0.62);
+    for (var i = 0; i < n2; i++) {
+      var tIn = i < n1 ? 0.02 + i * 0.05 : 0.45 + (i - n1) * 0.025, w = ease(seg(u, tIn, tIn + 0.18)); if (w <= 0) continue;
+      var col = i % 6, row = Math.floor(i / 6), tx = vw * 0.06 + col * (vw * 0.062) + row * 14, ty = 342 - row * 34, x = lerp(-20, tx, w), mv = w < 1;
+      person(G, x, ty + (row ? 0 : 0), 1.2, i + 2, { walk: mv ? G.L / 90 + i : 0, still: !mv, arm: mv ? 'none' : 'phone' });
+    }
+    if (doubled > 0 || G.static) alpha(c, ease(Math.max(doubled, G.static ? 1 : 0)), function () { rr(c, vw * 0.06, 52, 112, 30, 15); c.fillStyle = P.A; c.fill(); txt(c, '× 2 usuarios', vw * 0.06 + 56, 67.5, { s: 12.5, c: '#fff', a: 'center', w: 800 }); });
+    /* API pública */
+    var ax = vw * 0.55; line(c, ax, 340, ax, 120, P.muted, 5); rr(c, ax - 36, 78, 72, 44, 8); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.muted; c.lineWidth = 2; c.stroke(); txt(c, 'API pública', ax, 100, { s: 12.5, c: P.ink, a: 'center', w: 800 });
+    var rate = (doubled > 0.5 || G.static ? 2 : 1) * (G.anim ? 1 : 0), per = 760 / Math.max(1, rate);
+    for (var k = 0; k < 16 && rate; k++) { var st = (G.L + k * per) % (per * 8), a = (st / (per * 4)); if (a > 1) continue; var y0 = 300 - (k % 3) * 26; envelope(G, lerp(vw * 0.32, ax - 40, a), lerp(y0, 224, a) - Math.sin(a * 3.14) * 12, P.A); }
+    /* tanque de margen */
+    var tx = vw * 0.8, ty = 96, tw = 56, th = 200, level = lerp(1, 0.5, ease(Math.max(seg(u, 0.5, 0.78), G.static ? 1 : 0)));
+    rr(c, tx, ty, tw, th, 8); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.ink; c.lineWidth = 2; c.stroke();
+    c.save(); rr(c, tx, ty, tw, th, 8); c.clip(); var wave = G.anim ? Math.sin(G.L / 260) * 2 : 0; c.fillStyle = level > 0.7 ? P.ok : '#D4A017'; c.globalAlpha = 0.85; c.fillRect(tx, ty + th * (1 - level) + wave, tw, th * level); c.restore();
+    line(c, tx - 8, ty + th / 2, tx + tw + 8, ty + th / 2, P.ink, 1.5, [4, 4]); txt(c, '½', tx + tw + 14, ty + th / 2, { s: 14, c: P.ink, w: 800 });
+    txt(c, 'margen', tx + tw / 2, ty - 14, { s: 13.5, c: P.ink, a: 'center', w: 800 });
+    txt(c, 'se comprueba: ¿cae a la mitad?', tx + tw / 2, ty + th + 18, { s: 11.5, c: P.muted, a: 'center', w: 600 });
+  }
+
+  /* ================= P12 · servidor propio de mapas ================= */
+  function sceneP12(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 340);
+    var me = { x: vw * 0.1, y: 238 }, pub = { x: vw * 0.9, y: 120 }, own = { x: vw * 0.42, y: 258 };
+    person(G, me.x, 340, 1.5, 5, { arm: 'phone', still: !G.anim });
+    globe(G, pub.x, pub.y + 16, 26, 'API pública');
+    var phase2 = seg(u, 0.4, 0.58), installed = phase2 > 0.98 || G.static;
+    /* tráfico: lento y largo al principio, corto después */
+    var per = 300;
+    for (var n = Math.max(0, Math.floor((G.L - 3400) / per)); n <= Math.floor(G.L / per) && G.anim; n++) {
+      var rel = G.L - n * per, useOwn = (u > 0.52) && hash(n, 2) < 0.9;
+      var A = { x: me.x + 16, y: 230 };
+      if (useOwn) { var tot = 900; if (rel > tot) continue; var a = rel / tot, pp = a < 0.5 ? pos(A, { x: own.x - 22, y: 250 }, a * 2) : pos({ x: own.x - 22, y: 250 }, A, (a - 0.5) * 2); envelope(G, pp.x, pp.y, a < 0.5 ? P.B : P.ok); }
+      else { var tot2 = 3200; if (rel > tot2) continue; var b = rel / tot2, pp2 = b < 0.5 ? pos(A, { x: pub.x - 24, y: pub.y + 22 }, b * 2) : pos({ x: pub.x - 24, y: pub.y + 22 }, A, (b - 0.5) * 2); envelope(G, pp2.x, pp2.y, P.A); }
+    }
+    trail(G, { x: me.x + 16, y: 230 }, { x: pub.x - 24, y: pub.y + 22 }, P.line);
+    /* instalación del servidor propio */
+    if (!installed && phase2 > 0) { var wx = lerp(vw * 0.62, own.x + 44, ease(phase2)); person(G, wx, 340, 1.2, 7, { walk: G.L / 90, face: -1, arm: 'point' }); serverBox(G, wx - 46, 296, 30, 40, P.B, 0, null); }
+    if (installed) { serverBox(G, own.x - 22, own.y - 6, 44, 60, P.B, 1, 'Overpass propio'); alpha(c, 1, function () { coin(G, own.x + 44, 214 - (G.anim ? Math.abs(Math.sin(G.L / 300)) * 6 : 0), 11); txt(c, '+ costo', own.x + 62, 214, { s: 12, c: P.warn || '#8A5A00', w: 700 }); }); }
+    else if (phase2 <= 0) { rr(c, own.x - 22, own.y - 6, 44, 60, 8); c.strokeStyle = P.line; c.lineWidth = 2; c.setLineDash([5, 5]); c.stroke(); c.setLineDash([]); txt(c, '¿propio?', own.x, own.y + 24, { s: 12, c: P.muted, a: 'center', w: 600 }); }
+    txt(c, installed ? '⚡ viaje corto' : '🐢 viaje largo', vw * 0.3, 150, { s: 14, c: installed ? P.ok : P.muted, a: 'center', w: 800 });
+    txt(c, installed ? 'respuestas más cortas y menos carga externa' : 'todas las consultas viajan lejos y se acumulan', vw * 0.5, 392, { s: 13, c: P.muted, a: 'center', w: 600 });
+  }
+
+  /* ================= P4 · poco dinero, no se pueden pagar servidores ================= */
+  function sceneP4(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 340);
+    person(G, vw * 0.1, 340, 1.6, 3, { arm: 'point', still: !G.anim });
+    /* billetera */
+    var wx = vw * 0.17, wy = 250; rr(c, wx, wy, 64, 48, 8); c.fillStyle = '#8A5A2B'; c.fill(); rr(c, wx + 40, wy + 14, 24, 20, 6); c.fillStyle = '#6B431C'; c.fill(); circ(c, wx + 52, wy + 24, 3, '#E7B416');
+    var left = 1 - ease(seg(u, 0.18, 0.8)), nCoins = Math.ceil(5 * left + 0.0001); for (var i = 0; i < nCoins; i++) coin(G, wx + 22 + (i % 3) * 8, wy - 4 - Math.floor(i / 3) * 10 - i * 0, 9);
+    txt(c, 'presupuesto', wx + 32, wy + 66, { s: 12, c: P.muted, a: 'center', w: 600 });
+    /* servidores con precio */
+    var sx = vw * 0.5, labels = ['Servidor 1', 'Servidor 2', 'Servidor 3'];
+    for (var s = 0; s < 3; s++) {
+      var x = sx + s * (vw * 0.14), t0 = 0.12 + s * 0.2, ap = ease(seg(u, t0, t0 + 0.12)), paid = u > t0 + 0.2 || G.static ? (s < 1 ? true : false) : false;
+      if (ap <= 0) continue; var hasMoney = s < 1 || (G.static ? false : u < t0 + 0.1);
+      alpha(c, ap, function () {
+        serverBox(G, x, 140 + (1 - ap) * 14, 50, 70, s === 0 ? P.B : P.muted, s === 0 ? 1 : 0, labels[s]);
+        rr(c, x + 6, 110 + (1 - ap) * 14, 38, 20, 10); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.line; c.lineWidth = 1; c.stroke(); txt(c, '$$', x + 25, 120.5 + (1 - ap) * 14, { s: 12.5, c: '#8A5A00', a: 'center', w: 800 });
+        if (s > 0 && u > t0 + 0.14) { lock(G, x + 25, 168, 1.3, P.bad); alpha(c, 1, function () { txt(c, '✕ sin fondos', x + 25, 242, { s: 11.5, c: P.bad, a: 'center', w: 800 }); }); }
+        if (s === 0 && u > t0 + 0.14) txt(c, '✓ pagado', x + 25, 242, { s: 11.5, c: P.ok, a: 'center', w: 800 });
+      });
+    }
+    /* monedas volando */
+    if (G.anim) for (var k = 0; k < 4; k++) { var a = ((G.L / 900) + k * 0.25) % 1, sIdx = Math.min(2, Math.floor(u * 3.2)); if (u > 0.15 && u < 0.85) { var tx = sx + 25 + sIdx * (vw * 0.14); coin(G, lerp(wx + 40, tx, a), lerp(wy, 180, a) - Math.sin(a * 3.14) * 40, 7); } }
+    txt(c, 'cuando el dinero se acaba, ya no se pueden agregar servidores', vw * 0.5, 392, { s: 13, c: P.muted, a: 'center', w: 600 });
+  }
+
+  /* ================= P5 · la recomendada es la de mayor puntaje entre las que cumplen ================= */
+  function sceneP5(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 350);
+    var cols = [P.A, P.B, P.C], names = ['A', 'B', 'C'], target = [0.64, 0.86, 0.96], elig = [true, true, false], base = 350, mh = 220, bw = vw * 0.12, x0 = vw * 0.34, gap = vw * 0.17;
+    for (var i = 0; i < 3; i++) {
+      var x = x0 + i * gap, grow = ease(seg(u, 0.06 + i * 0.07, 0.5 + i * 0.05)), wob = G.anim && u < 0.55 ? Math.sin(G.L / 230 + i * 2) * 8 * (1 - grow) : 0, h = Math.max(3, target[i] * mh * grow + wob);
+      rr(c, x, base - h, bw, h, 6); c.fillStyle = elig[i] ? cols[i] : P.line; c.fill();
+      if (!elig[i]) { c.save(); rr(c, x, base - h, bw, h, 6); c.clip(); for (var s = -h; s < bw + h; s += 14) line(c, x + s, base, x + s + h, base - h, 'rgba(180,35,49,.45)', 3); c.restore(); }
+      txt(c, names[i], x + bw / 2, base - 14 - (h > 30 ? 0 : 0), { s: 18, c: '#fff', a: 'center', w: 800 });
+      if (!elig[i] && grow > 0.9) { lock(G, x + bw / 2, base - h - 20, 1.3, P.bad); txt(c, 'no cumple', x + bw / 2, base - h - 42, { s: 11.5, c: P.bad, a: 'center', w: 800 }); }
+    }
+    /* juez */
+    var jx = lerp(vw * 0.08, x0 - 44, ease(seg(u, 0.1, 0.6))), jy = 350;
+    var jp = G.anim && u < 0.85 ? G.L / 120 : 0; person(G, jx, jy, 1.7, 6, { walk: u > 0.1 && u < 0.6 ? jp : 0, still: u <= 0.1 || u >= 0.6, arm: 'point' });
+    rr(c, vw * 0.04, 70, 150, 24, 12); c.fillStyle = P.surface; c.fill(); txt(c, 'mayor puntaje que cumple', vw * 0.04 + 75, 82.5, { s: 12, c: P.ink, a: 'center', w: 700 });
+    var drop = ease(seg(u, 0.78, 0.95)), crownY = lerp(40, base - target[1] * mh - 30, drop); txt(c, '👑', x0 + gap + bw / 2, crownY, { s: 30, a: 'center' });
+    if (G.anim && u >= 0.95) { for (var q = 0; q < 6; q++) { var an = G.L / 300 + q; circ(c, x0 + gap + bw / 2 + Math.cos(an) * 26, base - target[1] * mh - 30 + Math.sin(an) * 16, 2.2, '#E7B416'); } }
+  }
+
+  /* ================= P6 · situación extrema: siempre hay propuesta ================= */
+  function sceneP6(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 340);
+    /* multitud densa */
+    var rows = 4, cols = Math.floor(vw * 0.34 / 14);
+    for (var r = 0; r < rows; r++) for (var q = 0; q < cols; q++) {
+      var idx = r * cols + q, tIn = 0.02 + (idx / (rows * cols)) * 0.5, w = ease(seg(u, tIn, tIn + 0.12)); if (w <= 0) continue;
+      var x = lerp(-14, 10 + q * 14 + (r % 2) * 6, w), y = 336 - r * 26, mv = w < 1;
+      person(G, x, y, 0.5, idx, { walk: mv ? G.L / 70 + idx : 0, still: !mv, arm: 'none' });
+    }
+    rr(c, 8, 52, 176, 26, 13); c.fillStyle = P.surface; c.fill(); txt(c, '👥 miles de usuarios a la vez', 18, 65.5, { s: 12.5, c: P.ink, w: 700 });
+    /* billetera casi vacía */
+    var wx = vw * 0.44, wy = 250; rr(c, wx, wy, 56, 42, 8); c.fillStyle = '#8A5A2B'; c.fill(); coin(G, wx + 28, wy - 4, 8); txt(c, 'poco dinero', wx + 28, wy + 58, { s: 12, c: P.muted, a: 'center', w: 600 });
+    /* impresora → propuesta */
+    var px = vw * 0.62, py = 190; rr(c, px, py, 100, 60, 8); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.teal; c.lineWidth = 2.2; c.stroke(); txt(c, 'Simulador', px + 50, py + 12, { s: 12, c: P.teal, a: 'center', w: 800 }); circ(c, px + 86, py + 46, 3.5, G.anim && Math.floor(G.L / 220) % 2 ? P.ok : P.line);
+    var out = ease(seg(u, 0.42, 0.9)), docH = 118 * out;
+    if (out > 0) { c.save(); c.beginPath(); c.rect(px + 8, py + 52, 84, 130); c.clip(); rr(c, px + 12, py + 56 - 118 + docH, 76, 118, 4); c.fillStyle = '#fff'; c.fill(); c.strokeStyle = P.ink; c.lineWidth = 1.5; c.stroke(); var oy = py + 56 - 118 + docH; txt(c, 'Propuesta', px + 50, oy + 14, { s: 12, c: '#12263F', a: 'center', w: 800 }); for (var l = 0; l < 4; l++) { var chk = seg(u, 0.62 + l * 0.06, 0.7 + l * 0.06); c.fillStyle = '#9AA9BA'; c.fillRect(px + 34, oy + 30 + l * 20, 44, 4); if (chk > 0) { c.strokeStyle = P.ok; c.lineWidth = 2.4; c.beginPath(); c.moveTo(px + 19, oy + 31 + l * 20); c.lineTo(px + 23, oy + 36 + l * 20); c.lineTo(px + 29, oy + 25 + l * 20); c.stroke(); } } c.restore(); }
+    person(G, vw * 0.9, 340, 1.5, 2, { arm: 'point', face: -1, still: !G.anim });
+    txt(c, 'incluso en el peor caso, entrega una propuesta útil', vw * 0.5, 392, { s: 13, c: P.muted, a: 'center', w: 600 });
+  }
+
+  /* ================= P7 · datos mal escritos se rechazan ================= */
+  function sceneP7(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 350);
+    var fx = vw * 0.06, fw = vw * 0.62, fy = 36;
+    rr(c, fx, fy, fw, 304, 12); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.muted; c.lineWidth = 2; c.stroke(); txt(c, 'Escenario nuevo', fx + 16, fy + 22, { s: 14.5, c: P.navy || P.ink, w: 800 });
+    var fields = [['Usuarios', '−5', 'debe ser ≥ 1'], ['Aciertos de caché', '150 %', 'máximo 100 %'], ['Red del celular', 'abc', 'no es un número'], ['Lugares', '20', null]];
+    var scan = seg(u, 0.08, 0.82) * fields.length;
+    fields.forEach(function (f, i) {
+      var y = fy + 44 + i * 62, active = scan >= i && scan < i + 1, done = scan >= i + 1 || (G.static && true), bad = f[2];
+      txt(c, f[0], fx + 18, y + 6, { s: 12.5, c: P.muted, w: 600 });
+      rr(c, fx + 16, y + 14, fw - 150, 30, 7); c.fillStyle = P.surface2; c.fill(); c.strokeStyle = done && bad ? P.bad : active ? P.teal : P.line; c.lineWidth = active || (done && bad) ? 2.4 : 1.2; c.stroke();
+      var shake = done && bad && G.anim && scan < i + 1.4 ? Math.sin(G.L / 30) * 2 : 0;
+      txt(c, f[1], fx + 28 + shake, y + 29.5, { s: 15, c: P.ink, w: 700 });
+      if (active) { alpha(c, 0.18, function () { rr(c, fx + 16, y + 14, fw - 150, 30, 7); c.fillStyle = P.teal; c.fill(); }); txt(c, 'revisando…', fx + fw - 126, y + 29.5, { s: 12, c: P.teal, w: 700 }); }
+      if (done) { if (bad) { txt(c, '✕ ' + bad, fx + fw - 126, y + 29.5, { s: 12, c: P.bad, w: 800 }); } else txt(c, '✓ válido', fx + fw - 126, y + 29.5, { s: 12.5, c: P.ok, w: 800 }); }
+    });
+    /* botón bloqueado */
+    var by = fy + 44 + 4 * 62 - 6; rr(c, fx + 16, by - 6, 150, 32, 8); c.fillStyle = P.line; c.fill(); txt(c, 'Calcular', fx + 52, by + 10, { s: 13.5, c: P.muted, w: 700 }); if (scan > 3.2 || G.static) lock(G, fx + 34, by + 10, 1.1, P.bad);
+    if (scan > 3.2 || G.static) txt(c, 'no se calcula con datos inválidos', fx + 178, by + 10, { s: 12, c: P.bad, w: 700 });
+    /* personaje con lista de control */
+    var px = vw * 0.84; person(G, px, 350, 1.8, 0, { arm: 'point', face: -1, still: !G.anim });
+    rr(c, px - 36, 70, 86, 96, 8); c.fillStyle = '#fff'; c.fill(); c.strokeStyle = P.ink; c.lineWidth = 1.5; c.stroke();
+    for (var k = 0; k < 4; k++) { c.fillStyle = '#9AA9BA'; c.fillRect(px - 8, 90 + k * 20, 40, 4); var done2 = scan >= k + 1 || G.static; c.strokeStyle = done2 ? (fields[k][2] ? P.bad : P.ok) : P.line; c.lineWidth = 2.2; rr(c, px - 28, 84 + k * 20, 14, 14, 3); c.stroke(); if (done2) { c.beginPath(); if (fields[k][2]) { c.moveTo(px - 25, 87 + k * 20); c.lineTo(px - 17, 95 + k * 20); c.moveTo(px - 17, 87 + k * 20); c.lineTo(px - 25, 95 + k * 20); } else { c.moveTo(px - 26, 91 + k * 20); c.lineTo(px - 22, 96 + k * 20); c.lineTo(px - 15, 85 + k * 20); } c.stroke(); } }
+  }
+
+  /* ================= P9 · los pesos del equipo cambian la recomendación ================= */
+  function sceneP9(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 350);
+    var sx = vw * 0.06, sw = vw * 0.42, phase = u < 0.5 ? 0 : 1, t1 = ease(seg(u, 0.08, 0.34)), t2 = ease(seg(u, 0.54, 0.8));
+    var vals = [lerp(0.2, 0.85, t1) * (1 - t2) + 0.2 * t2 * 0 + (1 - t2) * 0, lerp(0.2, 0.2, 0) + t2 * 0.65];
+    var cost = lerp(0.2, 0.85, t1) * (1 - t2) + lerp(0.85, 0.15, t2) * t2, avail = lerp(0.2, 0.2, 0) * (1 - t2) + lerp(0.2, 0.85, t2) * t2;
+    [['Costo', cost, P.A], ['Disponibilidad', avail, P.B]].forEach(function (s, i) {
+      var y = 100 + i * 100; txt(c, s[0], sx, y - 22, { s: 14, c: P.ink, w: 800 }); rr(c, sx, y - 4, sw, 8, 4); c.fillStyle = P.line; c.fill(); rr(c, sx, y - 4, sw * s[1], 8, 4); c.fillStyle = s[2]; c.fill();
+      var kx = sx + sw * s[1]; circ(c, kx, y, 13, P.surface, s[2], 3); circ(c, kx, y, 4, s[2]);
+      if ((i === 0 && u < 0.45 && u > 0.05) || (i === 1 && u > 0.5 && u < 0.85)) person(G, kx + 6, y + 70 - 0, 1.2, i + 4, { arm: 'point', still: !G.anim, face: 1 });
+    });
+    /* podio */
+    var bx = vw * 0.6, bw = vw * 0.1, base = 330, aH = lerp(150, 90, ease(seg(u, 0.54, 0.8))) , bH = lerp(90, 150, ease(seg(u, 0.54, 0.8)));
+    rr(c, bx, base - aH, bw, aH, 6); c.fillStyle = P.A; c.fill(); rr(c, bx + bw + 14, base - bH, bw, bH, 6); c.fillStyle = P.B; c.fill();
+    txt(c, 'A', bx + bw / 2, base - 16, { s: 20, c: '#fff', a: 'center', w: 800 }); txt(c, 'B', bx + bw * 1.5 + 14, base - 16, { s: 20, c: '#fff', a: 'center', w: 800 });
+    var win = u < 0.52 ? 0 : 1, wx = bx + win * (bw + 14) + bw / 2, wy = base - (win ? bH : aH) - 24 - (G.anim ? Math.abs(Math.sin(G.L / 260)) * 6 : 0);
+    var move = ease(seg(u, 0.52, 0.62)), arrowX = lerp(bx + bw / 2, bx + bw * 1.5 + 14, move);
+    txt(c, '★', arrowX, wy - (win ? 0 : 0), { s: 28, c: '#D4A017', a: 'center', w: 800 }); txt(c, 'recomendada', arrowX, wy - 26, { s: 12, c: P.ink, a: 'center', w: 800 });
+    txt(c, 'lo que más le importa al equipo cambia el resultado', vw * 0.5, 392, { s: 13, c: P.muted, a: 'center', w: 600 });
+  }
+
+  /* ================= P11 · un requisito imposible descarta todo ================= */
+  function sceneP11(G, p) {
+    var c = G.c, P = G.pal, vw = G.vw, u = G.u; ground(G, 350);
+    var gx = vw * 0.58; rr(c, gx, 70, 16, 280, 4); c.fillStyle = P.ink; c.fill(); rr(c, gx - 70, 76, 140, 42, 8); c.fillStyle = P.surface; c.fill(); c.strokeStyle = P.bad; c.lineWidth = 2.4; c.stroke(); txt(c, 'Latencia ≤ 1 ms', gx, 97, { s: 14, c: P.bad, a: 'center', w: 800 });
+    var cards = [['A', P.A], ['B', P.B], ['C', P.C]], rejected = 0;
+    cards.forEach(function (cd, i) {
+      var t0 = 0.08 + i * 0.22, a = seg(u, t0, t0 + 0.16), back = seg(u, t0 + 0.16, t0 + 0.3), x = lerp(vw * 0.04, gx - 70, ease(a)) - ease(back) * 60, y = 150 + i * 62;
+      if (back > 0.99 || G.static) rejected++;
+      rr(c, x, y, 66, 46, 8); c.fillStyle = cd[1]; c.fill(); txt(c, cd[0], x + 33, y + 24, { s: 22, c: '#fff', a: 'center', w: 800 });
+      if (a >= 1 && back < 1 || G.static) { c.save(); c.translate(gx - 76, y + 23); c.rotate(G.anim ? Math.sin(G.L / 50) * 0.1 : 0); txt(c, '✕', 0, 0, { s: 28, c: P.bad, a: 'center', w: 800 }); c.restore(); }
+    });
+    person(G, gx + 54, 350, 1.8, 3, { arm: 'point', face: -1, shirt: '#12263F', still: !G.anim });
+    rr(c, gx + 28, 150, 58, 40, 6); c.fillStyle = P.bad; c.fill(); txt(c, 'NO', gx + 57, 170, { s: 18, c: '#fff', a: 'center', w: 800 });
+    /* libreta de motivos */
+    var nx = vw * 0.74, ny = 200; rr(c, nx, ny, vw * 0.22, 130, 8); c.fillStyle = '#fff'; c.fill(); c.strokeStyle = P.ink; c.lineWidth = 1.5; c.stroke(); txt(c, 'Motivos', nx + 12, ny + 16, { s: 12.5, c: '#12263F', w: 800 });
+    ['A', 'B', 'C'].forEach(function (n, i) { var sh = seg(u, 0.3 + i * 0.22, 0.42 + i * 0.22) > 0.5 || G.static; if (sh) txt(c, n + ' ✕ latencia', nx + 12, ny + 42 + i * 26, { s: 12.5, c: '#B42331', w: 700 }); else { c.fillStyle = '#C5CFDA'; c.fillRect(nx + 12, ny + 40 + i * 26, vw * 0.1, 4); } });
+    txt(c, 'ninguna cumple → el motivo queda registrado', vw * 0.5, 392, { s: 13, c: P.muted, a: 'center', w: 600 });
+  }
+
+  var SCENES = { users: sceneUsers, P1: sceneP1, P2: sceneP2, P3: sceneP3, P4: sceneP4, P5: sceneP5, P6: sceneP6, P7: sceneP7, P8: sceneP8, P9: sceneP9, P10: sceneP10, P11: sceneP11, P12: sceneP12 };
+  var CAPTION = {
+    P1: 'El simulador y una persona calculan la misma fórmula; una balanza compara los dos resultados.',
+    P8: 'Dos ejecuciones idénticas pasan por la misma máquina; el dado tachado indica que no hay azar.',
+    P2: 'Una persona se aleja de la antena: la señal baja y cada viaje de la solicitud tarda más.',
+    P3: 'El estante de caché se va llenando: las solicitudes respondidas ahí evitan el viaje largo al mapa.',
+    P10: 'Entra el doble de personas a la API pública y se observa cuánto margen queda.',
+    P12: 'Las consultas viajan a la API pública; llega un servidor propio y las respuestas se acortan.',
+    P4: 'El presupuesto se gasta en servidores hasta que no alcanza para pagar el siguiente.',
+    P5: 'Tres alternativas compiten por puntaje; la que no cumple queda descartada y la mejor entre las que cumplen recibe la corona.',
+    P6: 'Una multitud enorme llega con poco dinero: el simulador igual entrega una propuesta.',
+    P7: 'Un formulario con datos mal escritos: cada campo se revisa y el botón se bloquea si hay errores.',
+    P9: 'Se mueven los deslizadores de costo y disponibilidad y la recomendación cambia de alternativa.',
+    P11: 'Las tres alternativas se enfrentan a un requisito imposible y ninguna pasa.'
+  };
+
+  function heightFor(W) { var vw = W >= 640 ? 800 : 520; return Math.round(W * VH / vw); }
+  function draw(kind, ctx, W, H, p, pal) {
+    p = p || {}; var vw = W >= 640 ? 800 : 520, s = W / vw, ck = clock(p), fn = SCENES[kind] || SCENES.P1;
+    var G = { c: ctx, pal: pal, vw: vw, u: ck.u, L: ck.L, anim: ck.anim, static: !!p.static, p: p };
+    ctx.save(); ctx.clearRect(0, 0, W, H); ctx.scale(s, s);
+    rr(ctx, 0.5, 0.5, vw - 1, VH - 1, 14); ctx.fillStyle = pal.surface2; ctx.fill(); ctx.save(); rr(ctx, 0.5, 0.5, vw - 1, VH - 1, 14); ctx.clip();
+    try { fn(G, p); } catch (e) { txt(ctx, 'No se pudo dibujar la escena', 20, 30, { s: 14, c: pal.bad }); }
+    ctx.restore();
+    if (p.reveal && kind !== 'users') { var ok = p.reveal === 'pass'; badge(G, vw - 84, 26, ok, ok ? 'Pasa' : 'Falla'); }
+    else if (!p.static && p.waiting) { rr(ctx, vw / 2 - 118, 8, 236, 26, 13); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = pal.line; ctx.lineWidth = 1; ctx.stroke(); txt(ctx, 'Esperando el resultado real…', vw / 2, 21.5, { s: 12.5, c: pal.ink, a: 'center', w: 700 }); }
+    ctx.restore();
+  }
+  return { draw: draw, heightFor: heightFor, CAPTION: CAPTION, kinds: Object.keys(SCENES) };
 });
 
 </script>
@@ -1878,7 +2285,7 @@ canvas{border-radius:12px}
   /* ---------- Simulación en vivo: ejecución real + representación visual ---------- */
   var SIMR = LocusRunner.create({ onChange: function (s) { onRunChange('sim', s); }, onFrame: function (s) { onRunFrame('sim', s); } });
   var TESTR = LocusRunner.create({ onChange: function (s) { onRunChange('test', s); }, onFrame: function (s) { onRunFrame('test', s); } });
-  state.sel = {}; state.animOn = true; state.simSel = null; state.stage = { sim: null, test: null }; state.tests = null; state.testsStart = 0;
+  state.sel = {}; state.animOn = true; state.preview = null; state.stageOpen = false; state.simSel = null; state.stage = { sim: null, test: null }; state.tests = null; state.testsStart = 0;
   var STAGE_LABEL = { pending: 'Pendiente', current: 'En curso', done: 'Completada', warn: 'Con advertencias', error: 'Con errores', skipped: 'Omitida' };
   var STAGE_ICON = { pending: '○', current: '●', done: '✓', warn: '!', error: '✕', skipped: '–' };
   var ST_LABEL = { pending: 'Pendiente', queued: 'En cola', running: 'En ejecución', done: 'Completada', warn: 'Con observaciones', error: 'Fallida', skipped: 'Omitida', stale: 'Desactualizada' };
@@ -1891,13 +2298,12 @@ canvas{border-radius:12px}
   function palette() {
     var t = Date.now(); if (palCache && t - palAt < 400) return palCache;
     var cs = getComputedStyle(document.documentElement), g = function (n) { return cs.getPropertyValue(n).trim() || '#888'; };
-    palAt = t; palCache = { surface: g('--surface'), surface2: g('--surface2'), ink: g('--ink'), muted: g('--muted'), line: g('--line'), A: g('--cA'), B: g('--cB'), C: g('--cC'), ok: g('--ok'), bad: g('--bad'), teal: g('--teal') };
+    palAt = t; palCache = { surface: g('--surface'), surface2: g('--surface2'), ink: g('--ink'), muted: g('--muted'), line: g('--line'), A: g('--cA'), B: g('--cB'), C: g('--cC'), ok: g('--ok'), bad: g('--bad'), teal: g('--teal'), navy: g('--navy') };
     return palCache;
   }
   function paint(id, draw) {
     var cv = $('#' + id); if (!cv) return;
-    var w = Math.max(280, Math.round(cv.clientWidth || (cv.parentNode && cv.parentNode.clientWidth) || 600)), isTest = cv.getAttribute('data-kind') === 'test';
-    var h = isTest ? (w < 520 ? 170 : 160) : (w < 520 ? 340 : 300), dpr = Math.min(2, window.devicePixelRatio || 1);
+    var w = Math.max(280, Math.round(cv.clientWidth || (cv.parentNode && cv.parentNode.clientWidth) || 600)), h = window.LocusScenes.heightFor(w), dpr = Math.min(2, window.devicePixelRatio || 1);
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + 'px'; }
     var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); draw(ctx, w, h, palette());
   }
@@ -1939,7 +2345,6 @@ canvas{border-radius:12px}
       if (ok.length) { state.simSel = ok[0]; state.stage.sim = null; SIMR.start(scenItems(ok), { animate: state.animOn, minMs: durMs() }); }
     }
     go('simulacion');
-    var p = $('#execPanel'); if (p && p.scrollIntoView) { try { p.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); } catch (e) { /* sin desplazamiento */ } }
   }
   function scenState(id, snap) {
     var it = snap.items.filter(function (i) { return i.id === id; })[0], e = state.runs[id];
@@ -1978,17 +2383,45 @@ canvas{border-radius:12px}
   /* ----- línea de tiempo (genérica) ----- */
   function timelineHtml(stages, selId, kind) {
     var cur = stages.filter(function (s) { return s.id === selId; })[0] || stages[0];
-    var list = '<ol class="tl" aria-label="Recorrido del proceso">' + stages.map(function (s, i) {
+    var list = '<ol class="tl compact" aria-label="Recorrido del proceso">' + stages.map(function (s, i) {
       return '<li class="tl-s ' + s.status + '"><button type="button" class="tl-b" data-stage="' + s.id + '" data-kind="' + kind + '" data-keep="tl-' + kind + '-' + s.id + '" aria-pressed="' + (s.id === cur.id) + '"' + (s.status === 'current' ? ' aria-current="step"' : '') + '>' +
-        '<span class="tl-ic" aria-hidden="true">' + STAGE_ICON[s.status] + '</span><span class="tl-n"><small>Etapa ' + (i + 1) + '</small>' + esc(s.name) + '</span><span class="tl-t">' + STAGE_LABEL[s.status] + '</span></button></li>';
+        '<span class="tl-ic" aria-hidden="true">' + STAGE_ICON[s.status] + '</span><span class="tl-n">' + esc(s.name) + '<small class="tl-t">' + STAGE_LABEL[s.status] + '</small></span></button></li>';
     }).join('') + '</ol>';
     var d = cur.detail || {};
-    var det = '<div class="tl-detail" aria-live="polite"><div class="tl-dh"><b>' + esc(cur.name) + '</b><span class="pill ' + (ST_PILL[cur.status] || '') + '">' + STAGE_ICON[cur.status] + ' ' + STAGE_LABEL[cur.status] + '</span></div>' +
+    var det = '<details class="tl-more" id="tlMore-' + kind + '"' + (state.stageOpen ? ' open' : '') + '><summary>Etapa «' + esc(cur.name) + '»: qué significa y qué falta</summary><div class="tl-detail" aria-live="polite"><div class="tl-dh"><b>' + esc(cur.name) + '</b><span class="pill ' + (ST_PILL[cur.status] || '') + '">' + STAGE_ICON[cur.status] + ' ' + STAGE_LABEL[cur.status] + '</span></div>' +
       '<p>' + d.means + '</p>' +
       '<div class="tl-grid"><div><span>Condiciones</span><p>' + d.cond + '</p></div><div><span>' + (d.listLabel || 'Pruebas de esta etapa') + '</span><p>' + (d.tests || '—') + '</p></div>' +
       '<div><span>Resultado actual</span><p>' + (d.result || '—') + '</p></div><div><span>Qué falta para continuar</span><p>' + (d.missing || 'Nada: esta etapa está lista.') + '</p></div></div>' +
-      (d.action ? '<div class="row"><button class="btn" type="button" data-go="' + d.action.view + '" data-keep="tl-go">' + d.action.label + '</button></div>' : '') + '</div>';
-    return '<div class="card tlcard"><h3>Mapa del recorrido</h3><p class="small">El estado de cada etapa se calcula con lo que realmente ocurre en esta sesión: no avanza por tiempo ni por una animación.</p>' + list + det + '</div>';
+      (d.action ? '<div class="row"><button class="btn" type="button" data-go="' + d.action.view + '" data-keep="tl-go">' + d.action.label + '</button></div>' : '') + '</div></details>';
+    return '<section class="steps" aria-label="Mapa del proceso">' + list + det + '</section>';
+  }
+  /* ----- cabecera de vista y vista previa de escenas ----- */
+  function vheadHtml(title, lead, chip, actions) {
+    return '<header class="vhead"><div class="vhead-t"><h2>' + title + '</h2><p class="lead">' + lead + '</p></div><div class="vhead-a">' + chip + actions + '</div></header>';
+  }
+  function chipHtml(kind, text) { return '<span class="pill chip ' + (kind || '') + '" role="status">' + text + '</span>'; }
+  function sceneProps(id, it, snap, reveal) {
+    var pv = state.preview && state.preview.id === id ? state.preview : null, running = !!it && it.state === 'running';
+    var p = { durMs: (snap && snap.minMs) || durMs(), reduced: reduced() };
+    if (running) { p.ms = Date.now() - it.startedAt; p.waiting = !!it.waiting; }
+    else if (pv) { p.ms = Date.now() - pv.t0; }
+    else if (reveal) { p.static = true; p.reveal = reveal; }
+    else p.reduced = true;
+    return p;
+  }
+  function startPreview(id, kind) {
+    if (SIMR.isRunning() || TESTR.isRunning() || reduced()) return;
+    if (state.preview && state.preview.raf) cancelAnimationFrame(state.preview.raf);
+    state.preview = { id: id, kind: kind, t0: Date.now(), raf: 0 };
+    previewTick();
+  }
+  function stopPreview() { if (state.preview && state.preview.raf) cancelAnimationFrame(state.preview.raf); state.preview = null; }
+  function previewTick() {
+    var pv = state.preview; if (!pv) return;
+    var off = SIMR.isRunning() || TESTR.isRunning() || (pv.kind === 'sim' && state.view !== 'simulacion') || (pv.kind === 'test' && state.view !== 'pruebas') || Date.now() - pv.t0 > 16000 || !document.getElementById(pv.kind === 'sim' ? 'stage' : 'tstage');
+    if (off) { var k = pv.kind; stopPreview(); if (k === 'sim' && state.view === 'simulacion') keepFocus(renderSim); else if (k === 'test' && state.view === 'pruebas') keepFocus(renderPruebas); return; }
+    if (pv.kind === 'sim') paintSim(); else paintTestStage();
+    pv.raf = requestAnimationFrame(previewTick);
   }
   function simStages(snap) {
     var sel = selectedIds(), projErr = M.validate(null, state.proj), bad = sel.filter(function (id) { return M.validate(scen(id).vars, state.proj).length; });
@@ -2041,14 +2474,13 @@ canvas{border-radius:12px}
     if (!it || it.state === 'pending') return '';
     var run = it.state === 'running', pct = run ? Math.round(it.t01 * 100) : 100, secs = (it.t01 * snap.minMs / 1000);
     var txt = run ? (it.waiting ? 'La animación terminó; esperando el resultado real del modelo…' : 'Animación: ' + nf(secs, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s') : 'Animación completada';
-    return '<div class="prog" role="progressbar" aria-label="Duración de la animación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" id="progBar"><i id="progFill" style="width:' + pct + '%"></i></div>' +
-      '<p class="small" id="progTxt">' + txt + '</p><p class="small muted-note">La barra mide la duración de la animación, no el avance del cálculo: el modelo ya lo calcula por separado y su resultado se muestra al terminar.</p>';
+    return '<div class="progrow"><div class="prog" role="progressbar" aria-label="Duración de la animación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" id="progBar"><i id="progFill" style="width:' + pct + '%"></i></div><span class="small" id="progTxt">' + txt + '</span></div>';
   }
   function captionFor(it, v) {
-    if (!it || it.state !== 'running') return '';
+    if (!it || it.state !== 'running') return 'Turistas llegan a la página de Locus, buscan destinos y cada solicitud va a las tres arquitecturas: el caché responde una parte y el resto consulta OpenStreetMap.';
     if (it.waiting) return 'Esperando el resultado real del modelo…';
-    if (it.t01 < 0.6) return 'Se incorporan usuarios: ' + nf(Math.min(v.users, Math.round(v.users * Math.min(1, it.t01 / 0.6))), 0) + ' de ' + nf(v.users, 0) + ' conectados a la vez.';
-    return 'Las solicitudes llegan a cada arquitectura: el caché responde parte (verde) y el resto consulta OpenStreetMap.';
+    if (it.t01 < 0.55) return 'Entran los usuarios: ' + nf(Math.min(v.users, Math.round(v.users * Math.min(1, it.t01 / 0.55))), 0) + ' de ' + nf(v.users, 0) + ' conectados a la vez, navegando y buscando destinos.';
+    return 'Las solicitudes llegan a cada arquitectura: el caché responde parte (verde) y el resto consulta OpenStreetMap (gris).';
   }
   function resultBox(id, st) {
     var e = state.runs[id];
@@ -2065,72 +2497,61 @@ canvas{border-radius:12px}
   }
   function simPanelHtml(snap) {
     var id = simShownId(snap), s = id && scen(id);
-    if (!s) return '<div class="card" id="execPanel"><h3>Panel de ejecución</h3><p>No hay escenarios para simular.</p></div>';
-    var st = scenState(id, snap), it = snap.items.filter(function (i) { return i.id === id; })[0], pos = it ? snap.items.indexOf(it) + 1 : 0;
-    return '<div class="card exec" id="execPanel"><div class="row exec-h"><div><span class="eyebrow">' + (st.st === 'running' ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : 'Panel de ejecución') + '</span><h3>' + esc(s.name) + '</h3></div>' +
-      '<span class="pill ' + (ST_PILL[st.st] || (st.st === 'running' ? 'ok live' : '')) + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span></div>' +
+    if (!s) return '<section class="stagecard" id="execPanel"><h3>Escena de la prueba</h3><p>No hay escenarios para simular.</p></section>';
+    var st = scenState(id, snap), it = snap.items.filter(function (i) { return i.id === id; })[0], pos = it ? snap.items.indexOf(it) + 1 : 0, running = st.st === 'running', pv = state.preview && state.preview.id === id;
+    return '<section class="stagecard" id="execPanel"><div class="stage-h"><div><span class="eyebrow">' + (running ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : pv ? 'Vista previa de la escena' : 'Escena de la prueba') + '</span><h3>' + esc(s.name) + '</h3></div>' +
+      '<div class="stage-s"><span class="pill ' + (ST_PILL[st.st] || (running ? 'ok live' : '')) + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span>' + (!running && !reduced() ? '<button type="button" class="btn small-btn" id="prevBtn" data-keep="prevBtn">▶ Ver escena</button>' : '') + '</div></div>' +
       pchips(s.vars) +
-      '<canvas id="stage" class="stage" data-kind="scenario" role="img" aria-label="Representación visual de la prueba «' + esc(s.name) + '»: ' + nf(s.vars.users, 0) + ' usuarios envían solicitudes a las tres arquitecturas, que consultan OpenStreetMap. Es una ilustración, no una medición."></canvas>' +
-      '<p class="caption" id="capt">' + esc(captionFor(it, s.vars)) + '</p>' + progressBlock(snap, id) + resultBox(id, st) +
-      '<p class="small">Qué se representa: los usuarios, el ritmo de solicitudes, el caché, la latencia del celular y el tamaño de la respuesta configurados. Es una <b>simulación visual</b>; las cifras reales las calcula el modelo y se muestran en el resultado.</p></div>';
+      '<canvas id="stage" class="stage" data-kind="scenario" role="img" aria-label="Escena animada de «' + esc(s.name) + '»: ' + nf(s.vars.users, 0) + ' turistas con celular entran a la página de Locus y sus solicitudes llegan a las tres arquitecturas, que consultan OpenStreetMap. Es una ilustración, no una medición."></canvas>' +
+      '<p class="caption" id="capt">' + esc(captionFor(it, s.vars)) + '</p>' + progressBlock(snap, id) + resultBox(id, st) + '</section>';
   }
   function paintSim(snap) {
     snap = snap || SIMR.snapshot(); var id = simShownId(snap); if (!id || !scen(id)) return;
     var it = snap.items.filter(function (i) { return i.id === id; })[0], running = !!it && it.state === 'running';
-    var reveal = running ? null : scenReveal(id), p = scenParams(id);
-    paint('stage', function (ctx, w, h, pal) {
-      window.LocusAnim.drawScenario(ctx, w, h, { t01: running ? it.t01 : 1, durMs: snap.minMs || durMs(), users: p.users, reqPerMin: p.reqPerMin, hit: p.hit, rtt: p.rtt, pois: p.pois, selfHost: p.selfHost,
-        reduced: reduced(), static: !running, reveal: reveal }, pal);
-    });
+    var reveal = running ? null : scenReveal(id), sp = sceneProps(id, it, snap, reveal);
+    sp.params = scenParams(id);
+    paint('stage', function (ctx, w, h, pal) { window.LocusScenes.draw('users', ctx, w, h, sp, pal); });
   }
 
   /* ----- vista Simulación ----- */
-  function summaryBlock(sel, snap) {
-    if (!sel.length) return '<div class="card sumcard empty"><h3>Aún no hay pruebas seleccionadas</h3><p>Marca al menos un escenario de la lista para ejecutarlo. Verás aquí cuántas se completan y cuántas faltan.</p></div>';
-    var c = { done: 0, warn: 0, error: 0, pending: 0, stale: 0, skipped: 0, running: 0 };
-    sel.forEach(function (id) { var s = scenState(id, snap).st; if (s === 'queued') s = 'pending'; c[s] = (c[s] || 0) + 1; });
-    var fin = c.done + c.warn + c.error, pct = Math.round(100 * fin / sel.length);
-    return '<div class="card sumcard"><div class="row sum-h"><h3>Avance de la sesión</h3><b class="sum-pct">' + pct + ' %</b></div>' +
-      '<div class="tbar" role="img" aria-label="' + fin + ' de ' + sel.length + ' pruebas seleccionadas terminadas"><i style="width:' + pct + '%"></i></div>' +
-      '<div class="sumgrid"><div><b>' + sel.length + '</b><span>seleccionadas</span></div><div><b>' + fin + '</b><span>terminadas</span></div><div><b>' + (c.pending + c.running + c.stale + c.skipped) + '</b><span>pendientes</span></div><div><b>' + c.error + '</b><span>fallidas</span></div></div>' +
-      '<p class="small">El porcentaje cuenta pruebas terminadas con la configuración actual entre las seleccionadas. No es una medida de carga ni de rendimiento.</p></div>';
-  }
   function scenCards(snap) {
     var running = snap.status === 'running';
-    return '<div class="scards">' + state.scenarios.map(function (s) {
+    return '<ul class="trows">' + state.scenarios.map(function (s) {
       var st = scenState(s.id, snap), errs = M.validate(s.vars, state.proj), on = state.sel[s.id] !== false, shown = simShownId(snap) === s.id, v = s.vars;
-      return '<div class="scard' + (shown ? ' shown' : '') + (errs.length ? ' invalid' : '') + '"><label class="sc-check"><input type="checkbox" data-sel="' + s.id + '"' + (on ? ' checked' : '') + (running ? ' disabled' : '') + '><span class="sr">Incluir «' + esc(s.name) + '» en la ejecución</span></label>' +
-        '<button type="button" class="sc-main" data-view="' + s.id + '" data-keep="sc-' + s.id + '" aria-pressed="' + shown + '"><span class="sc-top"><b>' + esc(s.name) + '</b><span class="pill ' + (ST_PILL[st.st] || (st.st === 'running' ? 'ok live' : '')) + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span></span>' +
-        '<span class="sc-par">' + nf(v.users, 0) + ' usuarios · ' + nf(v.reqPerMin, 1) + ' sol./min · caché ' + nf(v.hit * 100, 0) + ' % · ' + nf(v.rtt, 0) + ' ms · ' + nf(v.pois, 0) + ' lugares' + (v.selfHost ? ' · Overpass propio' : '') + '</span>' +
-        (errs.length ? '<span class="sc-note bad">' + esc(errs[0]) + '</span>' : st.note ? '<span class="sc-note">' + esc(st.note) + '</span>' : '') + '</button></div>';
-    }).join('') + '</div>';
+      return '<li class="trow' + (shown ? ' shown' : '') + (errs.length ? ' invalid' : '') + ' ' + st.st + '"><label class="trow-check"><input type="checkbox" data-sel="' + s.id + '"' + (on ? ' checked' : '') + (running ? ' disabled' : '') + '><span class="sr">Incluir «' + esc(s.name) + '» en la ejecución</span></label>' +
+        '<button type="button" class="trow-main sc-main" data-view="' + s.id + '" data-keep="sc-' + s.id + '" aria-pressed="' + shown + '"><span class="trow-top"><b>' + esc(s.name) + '</b><span class="pill ' + (ST_PILL[st.st] || (st.st === 'running' ? 'ok live' : '')) + '">' + ST_ICON[st.st] + ' ' + ST_LABEL[st.st] + '</span></span>' +
+        '<span class="trow-par">' + nf(v.users, 0) + ' usuarios · ' + nf(v.reqPerMin, 1) + ' sol./min · caché ' + nf(v.hit * 100, 0) + ' %</span>' +
+        (errs.length ? '<span class="trow-note bad">' + esc(errs[0]) + '</span>' : st.st === 'stale' ? '<span class="trow-note">Cambiaste valores: vuelve a ejecutar.</span>' : '') + '</button></li>';
+    }).join('') + '</ul>';
   }
   function renderSim() {
     var snap = SIMR.snapshot(), sel = selectedIds(), good = validIds(sel), running = snap.status === 'running', stages = simStages(snap);
     if (!state.stage.sim || !stages.some(function (s) { return s.id === state.stage.sim; })) state.stage.sim = autoStage(stages);
-    var fin = snap.status === 'finished', allFresh = sel.length > 0 && sel.every(function (id) { return state.runs[id] && !isStale(id); });
-    var ctl = '<div class="card ctlcard"><h3>Pruebas a ejecutar</h3><p class="small">Cada escenario es una prueba: se ejecuta una a la vez y su resultado real queda guardado.</p>' + scenCards(snap) +
-      '<div class="row"><button class="btn primary" id="simRun" type="button" data-keep="simRun"' + (running || !good.length || good.length < sel.length ? ' disabled' : '') + '>' + (sel.length ? 'Ejecutar ' + sel.length + (sel.length === 1 ? ' prueba seleccionada' : ' pruebas seleccionadas') : 'Ejecutar pruebas seleccionadas') + '</button>' +
-      (running ? '<button class="btn" id="simSkip" type="button" data-keep="simSkip">Saltar animación</button><button class="btn" id="simStop" type="button" data-keep="simStop"' + (snap.stopping ? ' disabled' : '') + '>' + (snap.stopping ? 'Se detendrá tras esta prueba' : 'Detener tras esta prueba') + '</button>' : '') +
-      '<button class="btn" id="simClear" type="button" data-keep="simClear"' + (running ? ' disabled' : '') + '>Limpiar resultados</button></div>' +
-      '<label class="switch"><input type="checkbox" id="animOn"' + (state.animOn ? ' checked' : '') + (running ? ' disabled' : '') + '><span>Mostrar animación (≈ ' + (reduced() ? '1,5' : '5') + ' s por prueba)</span></label>' +
-      (reduced() ? '<p class="small">Tu sistema pide menos movimiento: la animación es más breve y discreta.</p>' : '') +
-      (!sel.length ? '<p class="small bad-note">Selecciona al menos una prueba para poder ejecutar.</p>' : good.length < sel.length ? '<p class="small bad-note">Hay pruebas con valores inválidos. Corrígelas en Escenarios para poder ejecutar.</p>' : '') + '</div>';
-    var done = fin && snap.counts.running === 0 ? '<div class="banner ' + (snap.counts.error || snap.counts.skipped ? 'none' : 'ok') + '" role="status"><h3>Ejecución terminada</h3><p>' + snap.counts.done + ' correctas, ' + snap.counts.warn + ' con observaciones, ' + snap.counts.error + ' fallidas' + (snap.counts.skipped ? ', ' + snap.counts.skipped + ' omitidas' : '') + '.' + (allFresh ? ' Los resultados corresponden a la configuración actual.' : '') + '</p>' + (allFresh ? '<div class="row"><button class="btn primary" type="button" id="goRes" data-keep="goRes">Ver resultados</button></div>' : '') + '</div>' : '';
-    $('#v-simulacion').innerHTML = '<div><h2>Simulación en vivo</h2><p class="lead">Elige las pruebas, ejecútalas y observa qué representa cada una. La animación ilustra los parámetros; el resultado siempre viene del modelo.</p></div>' +
-      timelineHtml(stages, state.stage.sim, 'sim') + '<div class="sim-grid"><div class="sim-left">' + ctl + summaryBlock(sel, snap) + done + '</div><div class="sim-right">' + simPanelHtml(snap) + '</div></div>';
+    var c = snap.counts, fin = c.done + c.warn + c.error, tot = c.total - c.skipped;
+    var chip = running ? chipHtml('ok live', '● En ejecución · ' + fin + ' de ' + tot) : snap.status === 'finished' ? chipHtml(c.error ? 'bad' : c.warn ? 'warn' : 'ok', (c.error ? '✕ ' : '✓ ') + 'Terminó · ' + c.done + ' correctas' + (c.warn ? ', ' + c.warn + ' con observaciones' : '') + (c.error ? ', ' + c.error + ' fallidas' : '')) : chipHtml('', '○ Sin ejecutar');
+    var canRun = !running && sel.length && good.length === sel.length;
+    var act = '<button class="btn primary" id="simRun" type="button" data-keep="simRun"' + (canRun ? '' : ' disabled') + '>' + (running ? 'Ejecutando…' : sel.length ? '▶ Ejecutar ' + sel.length + (sel.length === 1 ? ' prueba' : ' pruebas') : 'Selecciona pruebas') + '</button>' +
+      (running ? '<button class="btn" id="simSkip" type="button" data-keep="simSkip">Saltar animación</button><button class="btn" id="simStop" type="button" data-keep="simStop"' + (snap.stopping ? ' disabled' : '') + '>' + (snap.stopping ? 'Se detendrá tras esta' : 'Detener tras esta') + '</button>' : '<button class="btn ghost" id="simClear" type="button" data-keep="simClear">Limpiar resultados</button>');
+    var list = '<section class="wb-list" aria-label="Pruebas a ejecutar"><div class="wb-lh"><h3>Pruebas</h3><span class="small">' + sel.length + ' de ' + state.scenarios.length + ' seleccionadas</span></div>' + scenCards(snap) +
+      '<label class="switch"><input type="checkbox" id="animOn"' + (state.animOn ? ' checked' : '') + (running ? ' disabled' : '') + '><span>Animación de ≈ ' + (reduced() ? '1,5' : '5') + ' s por prueba</span></label>' +
+      (reduced() ? '<p class="small">Tu sistema pide menos movimiento: la escena es más breve y se muestra quieta.</p>' : '') +
+      (!sel.length ? '<p class="small bad-note">Selecciona al menos una prueba para poder ejecutar.</p>' : good.length < sel.length ? '<p class="small bad-note">Hay pruebas con valores inválidos. Corrígelas en Escenarios.</p>' : '') + '</section>';
+    $('#v-simulacion').innerHTML = vheadHtml('Simulación en vivo', 'Cada escenario se ejecuta de verdad en el modelo mientras ves la escena que lo representa.', chip, act) +
+      timelineHtml(stages, state.stage.sim, 'sim') + '<div class="wb">' + list + '<div class="wb-main">' + simPanelHtml(snap) + '</div></div>';
     wireSim(); paintSim(snap);
   }
   function wireSim() {
     var root = $('#v-simulacion');
-    root.querySelectorAll('.tl-b').forEach(function (b) { b.onclick = function () { state.stage.sim = b.getAttribute('data-stage'); keepFocus(renderSim); }; });
+    root.querySelectorAll('.tl-b').forEach(function (b) { b.onclick = function () { state.stage.sim = b.getAttribute('data-stage'); state.stageOpen = true; keepFocus(renderSim); }; });
+    var tm = $('#tlMore-sim'); if (tm) tm.ontoggle = function () { state.stageOpen = tm.open; };
     root.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     root.querySelectorAll('input[data-sel]').forEach(function (c) { c.onchange = function () { state.sel[c.getAttribute('data-sel')] = c.checked; state.stage.sim = null; keepFocus(renderSim); updateNav(); }; });
-    root.querySelectorAll('.sc-main').forEach(function (b) { b.onclick = function () { state.simSel = b.getAttribute('data-view'); keepFocus(renderSim); }; });
-    var run = $('#simRun'); if (run) run.onclick = function () { startSim(selectedIds()); };
+    root.querySelectorAll('.sc-main').forEach(function (b) { b.onclick = function () { state.simSel = b.getAttribute('data-view'); stopPreview(); keepFocus(renderSim); startPreview(state.simSel, 'sim'); }; });
+    var pb = $('#prevBtn'); if (pb) pb.onclick = function () { startPreview(simShownId(SIMR.snapshot()), 'sim'); };
+    var run = $('#simRun'); if (run) run.onclick = function () { stopPreview(); startSim(selectedIds()); };
     var sk = $('#simSkip'); if (sk) sk.onclick = function () { SIMR.skip(); };
     var sp = $('#simStop'); if (sp) sp.onclick = function () { SIMR.stopAfterCurrent(); };
-    var cl = $('#simClear'); if (cl) cl.onclick = function () { SIMR.reset(); state.runs = {}; state.simSel = null; state.stage.sim = null; save(); renderSim(); updateNav(); announce('Resultados de la sesión limpiados.'); };
+    var cl = $('#simClear'); if (cl) cl.onclick = function () { stopPreview(); SIMR.reset(); state.runs = {}; state.simSel = null; state.stage.sim = null; save(); renderSim(); updateNav(); announce('Resultados de la sesión limpiados.'); };
     var an = $('#animOn'); if (an) an.onchange = function () { state.animOn = an.checked; };
     var sr = $('#seeRes'); if (sr) sr.onclick = function () { state.runView = simShownId(SIMR.snapshot()); go('resultados'); };
     var gr = $('#goRes'); if (gr) gr.onclick = function () { state.runView = selectedIds()[0]; go('resultados'); };
@@ -2235,36 +2656,34 @@ canvas{border-radius:12px}
   function testPanelHtml(snap) {
     var id = testShownId(snap), meta = testMeta().filter(function (m) { return m.id === id; })[0], it = snap.items.filter(function (i) { return i.id === id; })[0], st = it ? it.state : 'pending';
     var label = { pending: 'Pendiente', running: 'En ejecución', done: 'Pasa', error: 'Falla', skipped: 'Omitida' }[st], icon = { pending: '○', running: '●', done: '✓', error: '✕', skipped: '–' }[st];
-    var pos = it ? snap.items.indexOf(it) + 1 : 0, run = st === 'running', pct = it ? (run ? Math.round(it.t01 * 100) : 100) : 0;
-    var prog = it && st !== 'pending' ? '<div class="prog" role="progressbar" aria-label="Duración de la animación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" id="tProgBar"><i id="tProgFill" style="width:' + pct + '%"></i></div><p class="small" id="tProgTxt">' + (run ? (it.waiting ? 'La animación terminó; esperando el resultado real…' : 'Animación: ' + nf(it.t01 * snap.minMs / 1000, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s') : 'Animación completada') + '</p><p class="small muted-note">La barra mide la duración de la animación, no el cálculo de la prueba.</p>' : '';
+    var pos = it ? snap.items.indexOf(it) + 1 : 0, run = st === 'running', pct = it ? (run ? Math.round(it.t01 * 100) : 100) : 0, pv = state.preview && state.preview.id === id;
+    var prog = it && st !== 'pending' ? '<div class="progrow"><div class="prog" role="progressbar" aria-label="Duración de la animación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" id="tProgBar"><i id="tProgFill" style="width:' + pct + '%"></i></div><span class="small" id="tProgTxt">' + (run ? (it.waiting ? 'La animación terminó; esperando el resultado real…' : 'Animación: ' + nf(it.t01 * snap.minMs / 1000, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s') : 'Animación completada') + '</span></div>' : '';
     var res = '';
     if (st === 'done' || st === 'error') { var r = it.result; res = '<div class="resbox ' + (st === 'done' ? 'done' : 'error') + '"><div class="row"><span class="pill ' + (st === 'done' ? 'ok' : 'bad') + '">' + icon + ' ' + label + '</span><b>' + (st === 'done' ? 'Lo obtenido coincide con lo esperado' : 'Lo obtenido NO coincide con lo esperado') + '</b></div><div class="tcmp"><div><span>Esperado</span><p>' + esc(r.expected) + '</p></div><div><span>Obtenido</span><p>' + esc(r.obtained) + '</p></div></div></div>'; }
-    else if (st === 'running') res = '<div class="resbox wait"><b>El resultado aparecerá aquí cuando termine la animación.</b></div>';
-    else res = '<div class="resbox idle"><p>' + (st === 'skipped' ? 'Omitida: la secuencia se detuvo antes de esta prueba.' : 'Esta prueba todavía no se ha ejecutado.') + '</p></div>';
-    return '<div class="card exec" id="execPanel"><div class="row exec-h"><div><span class="eyebrow">' + (run ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : 'Panel de ejecución') + '</span><h3>' + esc(id) + ' · ' + esc(meta.name) + '</h3></div><span class="pill ' + (st === 'done' ? 'ok' : st === 'error' ? 'bad' : run ? 'ok live' : '') + '">' + icon + ' ' + label + '</span></div>' +
-      '<p>' + esc(TMEAN[id] || meta.desc) + '</p>' +
-      '<canvas id="tstage" class="stage" data-kind="test" role="img" aria-label="Ilustración de la prueba ' + esc(id) + ': ' + esc(meta.name) + '. No muestra resultados."></canvas>' + prog + res + '</div>';
+    else if (run) res = '<div class="resbox wait"><b>El resultado aparecerá aquí cuando el modelo termine y la escena concluya.</b></div>';
+    else res = '<div class="resbox idle"><p>' + (st === 'skipped' ? 'Omitida: la secuencia se detuvo antes de esta prueba.' : 'Todavía no se ha ejecutado. Pulsa «▶ Ver escena» para ver qué comprueba, o «Ejecutar las pruebas ahora».') + '</p></div>';
+    return '<section class="stagecard" id="execPanel"><div class="stage-h"><div><span class="eyebrow">' + (run ? 'Prueba ' + pos + ' de ' + snap.items.length + ' en ejecución' : pv ? 'Vista previa de la escena' : 'Escena de la prueba') + '</span><h3>' + esc(id) + ' · ' + esc(meta.name) + '</h3></div>' +
+      '<div class="stage-s"><span class="pill ' + (st === 'done' ? 'ok' : st === 'error' ? 'bad' : run ? 'ok live' : '') + '">' + icon + ' ' + label + '</span>' + (!run && !reduced() ? '<button type="button" class="btn small-btn" id="tPrev" data-keep="tPrev">▶ Ver escena</button>' : '') + '</div></div>' +
+      '<p class="stage-d">' + esc(TMEAN[id] || meta.desc) + '</p>' +
+      '<canvas id="tstage" class="stage" data-kind="test" role="img" aria-label="Escena animada de la prueba ' + esc(id) + ': ' + esc(meta.name) + '. ' + esc(window.LocusScenes.CAPTION[id] || '') + ' Es una ilustración: el resultado lo da el modelo."></canvas>' +
+      '<p class="caption">' + esc(window.LocusScenes.CAPTION[id] || '') + ' <span class="muted-note">Escena ilustrativa: no muestra cifras del modelo.</span></p>' + prog + res + '</section>';
   }
   function paintTestStage(snap) {
-    snap = snap || TESTR.snapshot(); var id = testShownId(snap), meta = testMeta().filter(function (m) { return m.id === id; })[0], it = snap.items.filter(function (i) { return i.id === id; })[0];
+    snap = snap || TESTR.snapshot(); var id = testShownId(snap), it = snap.items.filter(function (i) { return i.id === id; })[0];
     var running = !!it && it.state === 'running', rv = it && (it.state === 'done' || it.state === 'error') ? (it.result && it.result.pass ? 'pass' : 'fail') : null;
-    paint('tstage', function (ctx, w, h, pal) { window.LocusAnim.drawTest(ctx, w, h, { group: groupOf(id), t01: running ? it.t01 : 1, durMs: snap.minMs || durMs(), name: id + ' · ' + meta.name, reveal: rv, reduced: reduced(), static: !running }, pal); });
+    var sp = sceneProps(id, it, snap, rv);
+    paint('tstage', function (ctx, w, h, pal) { window.LocusScenes.draw(id, ctx, w, h, sp, pal); });
     var f = $('#tProgFill'), b = $('#tProgBar'), t = $('#tProgTxt');
     if (running && f) { var pct = Math.round(it.t01 * 100); f.style.width = pct + '%'; if (b) b.setAttribute('aria-valuenow', pct); if (t) t.textContent = it.waiting ? 'La animación terminó; esperando el resultado real…' : 'Animación: ' + nf(it.t01 * snap.minMs / 1000, 1) + ' s de ' + nf(snap.minMs / 1000, 1) + ' s'; }
   }
   function renderPruebas() {
     var snap = TESTR.snapshot(), t = state.tests, running = snap.status === 'running', meta = testMeta(), stages = testStages(snap);
     if (!state.stage.test || !stages.some(function (s) { return s.id === state.stage.test; })) state.stage.test = autoStage(stages);
-    var head = '<div><h2>Validación y pruebas</h2><p class="lead">Estas pruebas comprueban que el modelo calcula bien y se comporta con sentido común. Corren sobre el mismo modelo que genera los resultados; el archivo <code>tests.js</code> corre las mismas con Node.</p></div>';
-    var started = running || !!t;
-    var ctl = '<div class="card ctlcard"><div class="row"><button class="btn primary" id="runTests" type="button" data-keep="runTests"' + (running ? ' disabled' : '') + '>' + (running ? 'Ejecutando…' : t ? 'Volver a ejecutar las pruebas' : 'Ejecutar las pruebas ahora') + '</button>' +
-      (running ? '<button class="btn" id="tSkip" type="button" data-keep="tSkip">Saltar animación</button><button class="btn" id="tStop" type="button" data-keep="tStop"' + (snap.stopping ? ' disabled' : '') + '>' + (snap.stopping ? 'Se detendrá tras esta prueba' : 'Detener tras esta prueba') + '</button>' : '') +
-      (t ? '<span class="small" role="status">Última ejecución: ' + esc(t.at) + ' · ' + nf(t.ms / 1000, 1) + ' s</span>' : '') + '</div>' +
-      '<label class="switch"><input type="checkbox" id="tAnim"' + (state.animOn ? ' checked' : '') + (running ? ' disabled' : '') + '><span>Mostrar animación (≈ ' + (reduced() ? '1,5' : '5') + ' s por prueba; ' + meta.length + ' pruebas)</span></label></div>';
-    var fin = snap.counts.done + snap.counts.error, tot = snap.counts.total - snap.counts.skipped, pct = tot ? Math.round(100 * fin / tot) : 0;
-    var prog = started ? '<div class="card sumcard"><div class="row sum-h"><h3>Avance de la ejecución</h3><b class="sum-pct">' + pct + ' %</b></div><div class="tbar" role="img" aria-label="' + fin + ' de ' + tot + ' pruebas terminadas"><i style="width:' + pct + '%"></i></div>' +
-      '<div class="sumgrid"><div><b>' + snap.counts.total + '</b><span>seleccionadas</span></div><div><b>' + snap.counts.done + '</b><span>pasan</span></div><div><b>' + (snap.counts.pending + snap.counts.running + snap.counts.skipped) + '</b><span>pendientes</span></div><div><b>' + snap.counts.error + '</b><span>fallan</span></div></div></div>' : '';
-    var panel = started ? testPanelHtml(snap) : '<div class="card tests-empty"><div class="te-ic" aria-hidden="true">✓</div><div><h3>Aún no se han ejecutado las pruebas</h3><p>Pulsa «Ejecutar las pruebas ahora». Verás qué comprueba cada una mientras corre, cuántas pasan y qué significa el resultado.</p></div></div>';
+    var started = running || !!t || snap.items.length > 0;
+    var c = snap.counts, fin = c.done + c.error, tot = c.total - c.skipped;
+    var chip = running ? chipHtml('ok live', '● En ejecución · ' + fin + ' de ' + tot) : t ? chipHtml(c.error ? 'bad' : 'ok', (c.error ? '✕ ' : '✓ ') + (fin - c.error) + ' de ' + (c.total) + ' pasan' + (c.skipped ? ' · ' + c.skipped + ' omitidas' : '')) : chipHtml('', '○ Sin ejecutar');
+    var act = '<button class="btn primary" id="runTests" type="button" data-keep="runTests"' + (running ? ' disabled' : '') + '>' + (running ? 'Ejecutando…' : t ? '↻ Volver a ejecutar' : '▶ Ejecutar las pruebas ahora') + '</button>' +
+      (running ? '<button class="btn" id="tSkip" type="button" data-keep="tSkip">Saltar animación</button><button class="btn" id="tStop" type="button" data-keep="tStop"' + (snap.stopping ? ' disabled' : '') + '>' + (snap.stopping ? 'Se detendrá tras esta' : 'Detener tras esta') + '</button>' : '');
     var hero = '';
     if (t && !running) {
       var byId = {}; t.res.forEach(function (r) { byId[r.id] = r; });
@@ -2293,16 +2712,30 @@ canvas{border-radius:12px}
         var r = it.result;
         return '<details class="titem ' + (st === 'done' ? 'good' : 'bad') + '"' + (st === 'error' ? ' open' : '') + '><summary>' + inner + '</summary><div class="tbody"><p><b>Qué se comparó.</b> ' + esc(r.desc) + '</p><div class="tcmp"><div><span>Esperado</span><p>' + esc(r.expected) + '</p></div><div><span>Obtenido</span><p>' + esc(r.obtained) + '</p></div></div></div></details>';
       }).join('') + '</div></div>';
-    $('#v-pruebas').innerHTML = head + timelineHtml(stages, state.stage.test, 'test') + ctl + (started ? '<div class="sim-grid"><div class="sim-left">' + prog + '</div><div class="sim-right">' + panel + '</div></div>' : panel) + hero + list +
-      '<div class="card"><h3>Controles de entradas inválidas</h3><p>Cada campo valida tipo, rango y entero cuando corresponde. Mientras haya un error el botón de ejecutar queda desactivado y el mensaje dice qué corregir. Los pesos no pueden ser negativos ni sumar cero.</p></div>';
+    var shown = testShownId(snap);
+    var rows = TGROUPS.map(function (g) {
+      return '<li class="tgh"><span>' + esc(g.name) + '</span></li>' + g.ids.map(function (id) {
+        var m = meta.filter(function (x) { return x.id === id; })[0] || { name: id }, it = snap.items.filter(function (i) { return i.id === id; })[0], st = it ? it.state : 'pending';
+        var ic = { pending: '○', running: '●', done: '✓', error: '✕', skipped: '–' }[st], lab = { pending: 'Pendiente', running: 'En ejecución', done: 'Pasa', error: 'Falla', skipped: 'Omitida' }[st];
+        return '<li class="trow t-' + st + (shown === id ? ' shown' : '') + '"><button type="button" class="trow-main" data-test="' + id + '" data-keep="tr-' + id + '" aria-pressed="' + (shown === id) + '"' + (running ? ' disabled' : '') + '><span class="tmark" aria-hidden="true">' + ic + '</span><span class="trow-top"><span class="trow-name"><b>' + id + '</b> ' + esc(m.name) + '</span><span class="pill ' + (st === 'done' ? 'ok' : st === 'error' ? 'bad' : st === 'running' ? 'ok live' : '') + '"><span class="sr">' + lab + '</span><span aria-hidden="true">' + ic + '</span> ' + lab + '</span></span></button></li>';
+      }).join('');
+    }).join('');
+    var tlist = '<section class="wb-list" aria-label="Lista de pruebas"><div class="wb-lh"><h3>Pruebas del modelo</h3><span class="small">' + meta.length + ' en total</span></div><ul class="trows tt">' + rows + '</ul>' +
+      '<label class="switch"><input type="checkbox" id="tAnim"' + (state.animOn ? ' checked' : '') + (running ? ' disabled' : '') + '><span>Animación de ≈ ' + (reduced() ? '1,5' : '5') + ' s por prueba</span></label>' + (t ? '<p class="small" role="status">Última ejecución: ' + esc(t.at) + ' · ' + nf(t.ms / 1000, 1) + ' s</p>' : '') + '</section>';
+    $('#v-pruebas').innerHTML = vheadHtml('Validación y pruebas', 'Doce pruebas comprueban que el modelo calcula bien y se comporta con sentido común. Cada una tiene su propia escena.', chip, act) +
+      timelineHtml(stages, state.stage.test, 'test') + '<div class="wb">' + tlist + '<div class="wb-main">' + testPanelHtml(snap) + '</div></div>' + hero + (t ? list : '') +
+      '<details class="card note-d"><summary>Sobre los controles de entradas inválidas</summary><p>Cada campo valida tipo, rango y entero cuando corresponde. Mientras haya un error el botón de ejecutar queda desactivado y el mensaje dice qué corregir. Los pesos no pueden ser negativos ni sumar cero.</p></details>';
     var root = $('#v-pruebas');
-    root.querySelectorAll('.tl-b').forEach(function (b) { b.onclick = function () { state.stage.test = b.getAttribute('data-stage'); keepFocus(renderPruebas); }; });
+    root.querySelectorAll('.tl-b').forEach(function (b) { b.onclick = function () { state.stage.test = b.getAttribute('data-stage'); state.stageOpen = true; keepFocus(renderPruebas); }; });
+    var tm = $('#tlMore-test'); if (tm) tm.ontoggle = function () { state.stageOpen = tm.open; };
     root.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
-    $('#runTests').onclick = function () { startTests(); if (state.view === 'pruebas') { var p = $('#execPanel'); if (p && p.scrollIntoView) { try { p.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); } catch (e) { /* sin desplazamiento */ } } } };
+    root.querySelectorAll('[data-test]').forEach(function (b) { b.onclick = function () { state.testSel = b.getAttribute('data-test'); stopPreview(); keepFocus(renderPruebas); startPreview(state.testSel, 'test'); }; });
+    var tp = $('#tPrev'); if (tp) tp.onclick = function () { startPreview(testShownId(TESTR.snapshot()), 'test'); };
+    $('#runTests').onclick = function () { stopPreview(); startTests(); };
     var sk = $('#tSkip'); if (sk) sk.onclick = function () { TESTR.skip(); };
     var sp = $('#tStop'); if (sp) sp.onclick = function () { TESTR.stopAfterCurrent(); };
     var an = $('#tAnim'); if (an) an.onchange = function () { state.animOn = an.checked; };
-    if (started) paintTestStage(snap);
+    paintTestStage(snap);
   }
 
   /* ---------- 6. Documentación ---------- */
@@ -2339,7 +2772,7 @@ canvas{border-radius:12px}
       '<div class="card"><h2>4. Parámetros y supuestos</h2><div class="tablewrap"><table><thead><tr><th>Parámetro</th><th class="num">Valor</th><th>Unidad</th><th>Qué representa</th></tr></thead><tbody>' + parRows + '</tbody></table></div>' +
       '<ul class="plain"><li>Todos los valores son supuestos del equipo basados en el comportamiento típico de las APIs públicas y de los artículos del curso. No son mediciones.</li><li>Las solicitudes llegan de forma uniforme durante las horas simuladas.</li><li>Cada instancia de servidor tiene su propia IP de salida.</li><li>Los esfuerzos de desarrollo (6, 10 y 24 persona-semanas) son estimaciones del equipo.</li></ul></div>' +
       '<div class="card"><h2>5. Criterios de decisión</h2><ol class="plain"><li><b>Requisitos obligatorios.</b> Se descarta toda alternativa que incumpla: latencia p95 máxima, disponibilidad mínima, capacidad para la demanda pico (margen ≥ 1), costo dentro del presupuesto y esfuerzo dentro de la capacidad del equipo.</li><li><b>Puntaje 0 a 1 por criterio.</b> Latencia: 1 − p95/límite. Disponibilidad: log₁₀(indisponibilidad permitida / indisponibilidad calculada)/1.5. Costo: 1 − costo/presupuesto. Escalabilidad: log₂(techo/demanda)/4. Simplicidad: 1 − esfuerzo/capacidad del equipo. Todos limitados a [0, 1].</li><li><b>Suma ponderada</b> con los pesos normalizados del equipo. Gana el mayor puntaje entre las que cumplen. Si ninguna cumple, el simulador busca la propuesta que menos cambia el plan, probando en este orden de esfuerzo: servidor propio de OpenStreetMap (Overpass autoalojado), precalentar el caché (+0.20 o +0.35 de aciertos), subir el presupuesto (×1.25 a ×5) y ampliar el plazo (×1.5 a ×3). Cada combinación se vuelve a simular y se elige la primera donde alguna alternativa cumple los 5 requisitos. Si ni con todos los ajustes al máximo alcanza, propone limitar los usuarios simultáneos con una sala de espera y calcula el límite. Solo si el requisito es imposible incluso con un usuario (por ejemplo, 200 ms de latencia) se indica cuál se acerca más y qué requisito falla.</li></ol></div>' +
-      '<div class="card"><h2>6. Instrucciones de uso</h2><ol class="plain"><li>En Proyecto, revisa los requisitos, el presupuesto, el equipo y los pesos.</li><li>En Escenarios, ajusta el escenario de referencia y los demás, o crea uno nuevo.</li><li>Pulsa «Ejecutar todos los escenarios».</li><li>En Resultados, lee la recomendación, la tabla de requisitos, los indicadores y los gráficos. Usa el barrido para ver el punto donde cambia la decisión.</li><li>Abre la trazabilidad para verificar cualquier número con su fórmula.</li><li>En Pruebas, pulsa «Ejecutar las pruebas ahora» y comprueba que el modelo se comporta de forma coherente.</li></ol></div>' +
+      '<div class="card"><h2>6. Instrucciones de uso</h2><ol class="plain"><li>En Proyecto, revisa los requisitos, el presupuesto, el equipo y los pesos.</li><li>En Escenarios, ajusta el escenario de referencia y los demás, o crea uno nuevo.</li><li>En Simulación, marca los escenarios y pulsa «Ejecutar»: cada uno corre en el modelo mientras ves una escena animada con turistas, la página de Locus y las tres arquitecturas. En Pruebas, cada una de las 12 pruebas del modelo tiene su propia escena.</li><li>También puedes pulsar «Ejecutar todos los escenarios» desde Resultados.</li><li>En Resultados, lee la recomendación, la tabla de requisitos, los indicadores y los gráficos. Usa el barrido para ver el punto donde cambia la decisión.</li><li>Abre la trazabilidad para verificar cualquier número con su fórmula.</li><li>En Pruebas, pulsa «Ejecutar las pruebas ahora» y comprueba que el modelo se comporta de forma coherente.</li></ol></div>' +
       '<div class="card"><h2>7. Limitaciones</h2><ul class="plain"><li>Los resultados son estimaciones del modelo, no mediciones de rendimiento real.</li><li>No hay picos dentro del minuto, fallas correlacionadas ni diferencias entre proveedores de nube.</li><li>Un monolito en una sola máquina suele superar a los microservicios en rendimiento puro, según los artículos, y el resultado no se generaliza a todos los sistemas.</li><li>El modelo supone que la API pública de OSM se comporta igual en todo el día.</li><li>La seguridad y el cifrado no se modelan como indicador.</li></ul>' +
       '<h3>Información adicional para validar en una aplicación real</h3><ul class="plain"><li>Latencias y tasas de error reales de Overpass, Nominatim y Open-Elevation, medidas desde Colombia.</li><li>Tasa real de aciertos de caché con usuarios reales.</li><li>Precios actuales del proveedor y consumo real de Firestore.</li><li>Pruebas de carga con JMeter o k6 sobre un prototipo de cada alternativa.</li></ul></div>' +
       '<div class="card"><h2>8. Referencias</h2><ul class="plain"><li>From Monolithic Systems to Microservices: A Comparative Study of Performance.</li><li>Monolithic vs. Microservice Architecture: A Performance and Scalability Evaluation.</li><li>A Comparative Review of Microservices and Monolithic Architectures.</li><li>MVC Architecture: A Comparative Study Between Laravel Framework and Slim Framework in Freelancer Project Monitoring System Web Based.</li></ul></div>';

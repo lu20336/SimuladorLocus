@@ -306,6 +306,40 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
   .sumgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (prefers-reduced-motion:reduce){.tl-s.current .tl-ic,.pill.live{animation:none}}
+
+/* ===== Pulido de diseño v2 ===== */
+:root{--sh1:0 1px 2px rgba(18,38,63,.06),0 1px 1px rgba(18,38,63,.04);--sh2:0 6px 20px -8px rgba(18,38,63,.22),0 2px 4px rgba(18,38,63,.05);--r:14px;--grad:linear-gradient(135deg,#003366 0%,#00596F 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sh1:0 1px 2px rgba(0,0,0,.4);--sh2:0 8px 24px -8px rgba(0,0,0,.6);--grad:linear-gradient(135deg,#1B4C7E 0%,#0F6A70 100%)}}
+:root[data-theme="dark"]{--sh1:0 1px 2px rgba(0,0,0,.4);--sh2:0 8px 24px -8px rgba(0,0,0,.6);--grad:linear-gradient(135deg,#1B4C7E 0%,#0F6A70 100%)}
+html{background:var(--bg)}
+body{background-attachment:fixed;background-repeat:no-repeat;background-image:radial-gradient(1100px 420px at 85% -120px,color-mix(in srgb,var(--teal) 10%,transparent),transparent 70%);background-color:var(--bg)}
+.card{border-radius:var(--r);box-shadow:var(--sh1);padding:22px;gap:16px;transition:box-shadow .2s}
+.card:hover{box-shadow:var(--sh2)}
+.card>h2,.card>h3:first-child{display:flex;align-items:center;gap:10px}
+.card>h2::before{content:"";width:4px;height:1.05em;border-radius:3px;background:var(--grad);flex:none}
+.view>header h2,.view>h2{font-size:30px;letter-spacing:-.01em}
+.view>.lead,.view>header .lead,.view>header p{font-size:15.5px}
+.tab{border-radius:12px;transition:background .15s,transform .15s}
+.tab:hover{transform:translateX(2px)}
+.tab[aria-selected="true"]{background:var(--grad);box-shadow:0 6px 16px -6px rgba(0,51,102,.55);color:#fff}
+.tab[aria-selected="true"] .ic{background:#fff;color:#003366;border-color:#fff}
+.brand h1{font-size:23px;letter-spacing:-.01em}
+.brand::after{content:"";display:block;width:42px;height:3px;border-radius:2px;background:var(--cta);margin-top:6px}
+input[type=text],input[type=number],textarea,select{background:var(--surface);border-color:color-mix(in srgb,var(--line) 85%,var(--ink));box-shadow:inset 0 1px 1px rgba(18,38,63,.04);transition:border-color .15s,box-shadow .15s}
+input:hover,textarea:hover,select:hover{border-color:var(--teal)}
+input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px color-mix(in srgb,var(--teal) 25%,transparent);outline:none}
+.btn{border-radius:10px;transition:transform .12s,box-shadow .15s,background .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--sh2)}
+.btn.primary{background:var(--cta);border-color:var(--cta);color:var(--cta-ink);box-shadow:0 6px 14px -6px color-mix(in srgb,var(--cta) 70%,transparent)}
+.scard{border-radius:12px;box-shadow:var(--sh1);transition:border-color .15s,box-shadow .15s,transform .15s}
+.scard:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
+.sim-right>.card,.sim-grid .card:last-child{border-top:3px solid var(--teal)}
+.tl-ic{box-shadow:var(--sh1)}
+.tl-s.current{background:color-mix(in srgb,var(--navy) 7%,var(--surface));border-radius:12px}
+.resbox{border-radius:12px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ok) 25%,transparent)}
+canvas{border-radius:12px}
+.pill{font-weight:600;letter-spacing:.01em}
+@media (prefers-reduced-motion:reduce){.tab:hover,.btn:hover,.scard:hover{transform:none}}
 </style>
 
 <div class="wrap">
@@ -1185,11 +1219,12 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
             acc += all[g].ms;
           }
           if (!px) continue;
-          ctx.beginPath(); ctx.arc(px.x, px.y, 2.6 + p.pois / 18, 0, 6.2832); ctx.fillStyle = color; ctx.fill();
+          ctx.save(); ctx.shadowColor = color; ctx.shadowBlur = 7; ctx.beginPath(); ctx.arc(px.x, px.y, 2.6 + p.pois / 18, 0, 6.2832); ctx.fillStyle = color; ctx.fill(); ctx.restore();
         }
       } else {
         ctx.beginPath(); ctx.moveTo(pts[0].x + 6, cy); ctx.lineTo(L.osm.x - 8, cy); ctx.strokeStyle = pal[lane.k]; ctx.globalAlpha = 0.5; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1;
       }
+      rrect(ctx, 4, L.top + L.laneH * li + 2, W - L.osm.w - 18, L.laneH - 4, 8); ctx.globalAlpha = 0.07; ctx.fillStyle = pal[lane.k]; ctx.fill(); ctx.globalAlpha = 1;
       lane.nodes.forEach(function (nd, ni) {
         var x = pts[ni + 1].x - L.nodeW / 2;
         rrect(ctx, x, cy - L.nodeH / 2, L.nodeW, L.nodeH, 7); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = pal[lane.k]; ctx.lineWidth = nd.cache ? 2 : 1.2; ctx.stroke();
@@ -1200,7 +1235,9 @@ details.svc table{font-size:12.5px} details.svc th,details.svc td{padding:7px 9p
       var rv = p.reveal && p.reveal[lane.k], bx = L.osm.x - 8;
       if (rv) {
         var star = p.reveal.best === lane.k ? '★ ' : '';
-        text(ctx, star + (rv.short || rv.txt), bx, cy - L.laneH * 0.5 + 9, { size: L.small ? 9.5 : 11, weight: 700, color: rv.ok ? pal.ok : pal.bad, align: 'right' });
+        var lbl = star + (rv.short || rv.txt); ctx.font = '700 ' + (L.small ? 9.5 : 11) + 'px Inter, system-ui, sans-serif';
+        var lw = ctx.measureText(lbl).width + 14; rrect(ctx, bx - lw + 4, cy - L.laneH * 0.5 + 1, lw, 18, 9); ctx.globalAlpha = 0.14; ctx.fillStyle = rv.ok ? pal.ok : pal.bad; ctx.fill(); ctx.globalAlpha = 1;
+        text(ctx, lbl, bx - 3, cy - L.laneH * 0.5 + 10, { size: L.small ? 9.5 : 11, weight: 700, color: rv.ok ? pal.ok : pal.bad, align: 'right' });
         if (p.reveal.best === lane.k) { rrect(ctx, 4, L.top + L.laneH * li + 2, W - L.osm.w - 18, L.laneH - 4, 8); ctx.strokeStyle = pal.ok; ctx.lineWidth = 1.5; ctx.stroke(); }
       } else if (!p.static) text(ctx, 'evaluando…', bx, cy - L.laneH * 0.5 + 9, { size: L.small ? 9.5 : 10.5, color: pal.muted, align: 'right' });
     });

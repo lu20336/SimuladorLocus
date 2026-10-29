@@ -106,11 +106,12 @@
             acc += all[g].ms;
           }
           if (!px) continue;
-          ctx.beginPath(); ctx.arc(px.x, px.y, 2.6 + p.pois / 18, 0, 6.2832); ctx.fillStyle = color; ctx.fill();
+          ctx.save(); ctx.shadowColor = color; ctx.shadowBlur = 7; ctx.beginPath(); ctx.arc(px.x, px.y, 2.6 + p.pois / 18, 0, 6.2832); ctx.fillStyle = color; ctx.fill(); ctx.restore();
         }
       } else {
         ctx.beginPath(); ctx.moveTo(pts[0].x + 6, cy); ctx.lineTo(L.osm.x - 8, cy); ctx.strokeStyle = pal[lane.k]; ctx.globalAlpha = 0.5; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1;
       }
+      rrect(ctx, 4, L.top + L.laneH * li + 2, W - L.osm.w - 18, L.laneH - 4, 8); ctx.globalAlpha = 0.07; ctx.fillStyle = pal[lane.k]; ctx.fill(); ctx.globalAlpha = 1;
       lane.nodes.forEach(function (nd, ni) {
         var x = pts[ni + 1].x - L.nodeW / 2;
         rrect(ctx, x, cy - L.nodeH / 2, L.nodeW, L.nodeH, 7); ctx.fillStyle = pal.surface; ctx.fill(); ctx.strokeStyle = pal[lane.k]; ctx.lineWidth = nd.cache ? 2 : 1.2; ctx.stroke();
@@ -121,7 +122,9 @@
       var rv = p.reveal && p.reveal[lane.k], bx = L.osm.x - 8;
       if (rv) {
         var star = p.reveal.best === lane.k ? '★ ' : '';
-        text(ctx, star + (rv.short || rv.txt), bx, cy - L.laneH * 0.5 + 9, { size: L.small ? 9.5 : 11, weight: 700, color: rv.ok ? pal.ok : pal.bad, align: 'right' });
+        var lbl = star + (rv.short || rv.txt); ctx.font = '700 ' + (L.small ? 9.5 : 11) + 'px Inter, system-ui, sans-serif';
+        var lw = ctx.measureText(lbl).width + 14; rrect(ctx, bx - lw + 4, cy - L.laneH * 0.5 + 1, lw, 18, 9); ctx.globalAlpha = 0.14; ctx.fillStyle = rv.ok ? pal.ok : pal.bad; ctx.fill(); ctx.globalAlpha = 1;
+        text(ctx, lbl, bx - 3, cy - L.laneH * 0.5 + 10, { size: L.small ? 9.5 : 11, weight: 700, color: rv.ok ? pal.ok : pal.bad, align: 'right' });
         if (p.reveal.best === lane.k) { rrect(ctx, 4, L.top + L.laneH * li + 2, W - L.osm.w - 18, L.laneH - 4, 8); ctx.strokeStyle = pal.ok; ctx.lineWidth = 1.5; ctx.stroke(); }
       } else if (!p.static) text(ctx, 'evaluando…', bx, cy - L.laneH * 0.5 + 9, { size: L.small ? 9.5 : 10.5, color: pal.muted, align: 'right' });
     });
